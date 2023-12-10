@@ -236,6 +236,8 @@ if(MSVC)
     set_target_properties(OpenMadoola PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
     # set the debugger working directory
     set_target_properties(OpenMadoola PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    # statically link the runtime library in case the user doesn't have msvc redistributable installed
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 	
 # add Test build type (release but with debug code enabled)
