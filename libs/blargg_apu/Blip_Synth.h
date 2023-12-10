@@ -3,6 +3,8 @@
 // waveforms to a Blip_Buffer.
 
 // Blip_Buffer 0.3.3. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
+// 11/9/2023 - Modified by Nathan Misner to fix compiler warnings & 64-bit
+// compatibility
 
 #ifndef BLIP_SYNTH_H
 #define BLIP_SYNTH_H

@@ -2,6 +2,8 @@
 // Private oscillators used by Nes_Apu
 
 // Nes_Snd_Emu 0.1.7. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
+// 11/9/2023 - Modified by Nathan Misner to fix compiler warnings & 64-bit
+// compatibility
 
 #ifndef NES_OSCS_H
 #define NES_OSCS_H

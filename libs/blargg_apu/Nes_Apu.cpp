@@ -14,6 +14,9 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
+// 11/9/2023 - Modified by Nathan Misner to fix compiler warnings & 64-bit
+// compatibility
+
 #include BLARGG_SOURCE_BEGIN
 
 Nes_Apu::Nes_Apu()

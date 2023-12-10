@@ -2,6 +2,8 @@
 // By default, #included at beginning of library source files
 
 // Copyright (C) 2005 Shay Green.
+// 11/9/2023 - Modified by Nathan Misner to fix compiler warnings & 64-bit
+// compatibility
 
 #ifndef BLARGG_SOURCE_H
 #define BLARGG_SOURCE_H

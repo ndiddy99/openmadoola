@@ -5,6 +5,8 @@
 // configuration into "config.h".
 
 // Copyright (C) 2004-2005 Shay Green.
+// 11/9/2023 - Modified by Nathan Misner to fix compiler warnings & 64-bit
+// compatibility
 
 #ifndef BLARGG_COMMON_H
 #define BLARGG_COMMON_H
