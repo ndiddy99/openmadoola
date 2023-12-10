@@ -173,44 +173,26 @@ void Options_Run(void) {
             }
         }
 
-        if (Menu_Item(4, 8, cursor, "NTSC filter - %s - ", Platform_GetNTSC() ? "ON" : "OFF")) {
-            if (joyEdge & (JOY_A | JOY_LEFT | JOY_RIGHT)) {
-                Platform_SetNTSC(!Platform_GetNTSC());
-            }
-        }
-
-        if (Menu_Item(4, 10, cursor, "NTSC noise  - %d -", Platform_GetNTSCNoise())) {
-            if (joyEdge & JOY_LEFT) {
-                Platform_SetNTSCNoise(Platform_GetNTSCNoise() - 1);
-            }
-            else if (joyEdge & JOY_RIGHT) {
-                Platform_SetNTSCNoise(Platform_GetNTSCNoise() + 1);
-            }
-        }
-
-        if (Menu_Item(4, 12, cursor, "NTSC scanlines - %s - ", Platform_GetNTSCScanlines() ? "ON" : "OFF")) {
-            if (joyEdge & (JOY_A | JOY_LEFT | JOY_RIGHT)) {
-                Platform_SetNTSCScanlines(!Platform_GetNTSCScanlines());
-            }
-        }
-
-        if (Menu_Item(4, 14, cursor, "Keyboard controls")) {
+        if (Menu_Item(4, 8, cursor, "Keyboard controls")) {
             if (joyEdge & (JOY_A | JOY_START)) {
                 Options_Controls(KEYBOARD_CONTROLS);
             }
         }
-        if (Menu_Item(4, 16, cursor, "Gamepad controls")) {
+
+        if (Menu_Item(4, 10, cursor, "Gamepad controls")) {
             if (joyEdge & (JOY_A | JOY_START)) {
                 Options_Controls(GAMEPAD_CONTROLS);
             }
         }
-        if (Menu_Item(4, 18, cursor, "Game type - %s -", gameType == GAME_TYPE_PLUS ? "Plus" : "Original")) {
+
+        if (Menu_Item(4, 12, cursor, "Game type - %s -", gameType == GAME_TYPE_PLUS ? "Plus" : "Original")) {
             if (joyEdge & (JOY_A | JOY_LEFT | JOY_RIGHT)) {
                 // make sure to change this to a proper cycle if you add more game types
                 gameType ^= 1;
             }
         }
-        if (Menu_Item(4, 20, cursor, "Back")) {
+
+        if (Menu_Item(4, 14, cursor, "Back")) {
             if (joyEdge & (JOY_A | JOY_START)) {
                 break;
             }

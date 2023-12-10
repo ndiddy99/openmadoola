@@ -95,9 +95,6 @@ set(SOURCE_LIST
     "libs/imgui/imgui_widgets.cpp"
 
     "libs/nanotime/nanotime.c"
-
-    "libs/NTSC-CRT/crt_core.c"
-    "libs/NTSC-CRT/crt_nes.c"
 )
 
 set(HEADER_LIST
@@ -186,9 +183,6 @@ set(HEADER_LIST
     "libs/imgui/imstb_truetype.h"
 
     "libs/nanotime/nanotime.h"
-
-    "libs/NTSC-CRT/crt_core.h"
-    "libs/NTSC-CRT/crt_nes.h"
 )
 
 add_executable(OpenMadoola WIN32 ${SOURCE_LIST} ${HEADER_LIST})

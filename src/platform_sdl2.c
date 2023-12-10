@@ -21,7 +21,6 @@
 #include <stdlib.h>
 
 #include "constants.h"
-#include "crt_core.h"
 #include "input.h"
 #include "nanotime.h"
 
@@ -39,18 +38,8 @@ static SDL_Renderer *renderer;
 static SDL_Texture *drawTexture;
 // texture that gets nearest-neighbor scaled
 static SDL_Texture *scaleTexture;
-// texture for drawing directly on the window with square pixels (used for filters)
-static SDL_Texture  *windowTexture;
 static int vsync;
 static nanotime_step_data stepData;
-
-// ntsc video stuff
-static int ntscEnabled = 0;
-static struct CRT crt;
-static struct NTSC_SETTINGS ntsc;
-static int noise = 0;
-static int scanlines = 1;
-static int hue = 0;
 
 // --- audio stuff ---
 static SDL_AudioDeviceID audioDevice;
@@ -134,17 +123,6 @@ static int Platform_InitVideo(void) {
         ERROR_MSG(SDL_GetError());
         return 0;
     }
-
-    windowTexture = SDL_CreateTexture(renderer,
-                                     SDL_PIXELFORMAT_ARGB8888,
-                                     SDL_TEXTUREACCESS_STREAMING,
-                                     windowWidth, windowHeight);
-    if (!windowTexture) {
-        ERROR_MSG(SDL_GetError());
-        return 0;
-    }
-
-    crt_init(&crt, windowWidth, windowHeight, CRT_PIX_FORMAT_BGRA, NULL);
     return 1;
 }
 
@@ -162,35 +140,16 @@ void Platform_StartFrame(void) {
 void Platform_EndFrame(void) {
     Uint32 *framebuffer;
     int framebufferPitch;
-    // texture to draw to the window
-    SDL_Texture *srcTexture;
-
-    if (ntscEnabled) {
-        SDL_LockTexture(windowTexture, NULL, (void **)&framebuffer, &framebufferPitch);
-        crt.out = (Uint8 *)framebuffer;
-        crt.scanlines = scanlines;
-        ntsc.data = nesBuffer;
-        ntsc.w = SCREEN_WIDTH;
-        ntsc.h = SCREEN_HEIGHT;
-        ntsc.hue = hue;
-        crt_modulate(&crt, &ntsc);
-        crt_demodulate(&crt, noise);
-        SDL_UnlockTexture(windowTexture);
-        srcTexture = windowTexture;
+    SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &framebufferPitch);
+    // nes color indices -> argb
+    for (int i = 0; i < (SCREEN_WIDTH * SCREEN_HEIGHT); i++) {
+        framebuffer[i] = nesPalette[nesBuffer[i]];
     }
-    else {
-        SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &framebufferPitch);
-        // nes color indices -> argb
-        for (int i = 0; i < (SCREEN_WIDTH * SCREEN_HEIGHT); i++) {
-            framebuffer[i] = nesPalette[nesBuffer[i]];
-        }
-        SDL_UnlockTexture(drawTexture);
-        SDL_SetRenderTarget(renderer, scaleTexture);
-        SDL_RenderCopy(renderer, drawTexture, NULL, NULL);
-        // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
-        SDL_SetRenderTarget(renderer, NULL);
-        srcTexture = scaleTexture;
-    }
+    SDL_UnlockTexture(drawTexture);
+    SDL_SetRenderTarget(renderer, scaleTexture);
+    SDL_RenderCopy(renderer, drawTexture, NULL, NULL);
+    // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
+    SDL_SetRenderTarget(renderer, NULL);
 
     // monitor framerate isn't a multiple of 60, so wait in software
     if (!vsync) {
@@ -200,10 +159,10 @@ void Platform_EndFrame(void) {
     for (int i = 0; i < (vsync ? vsync : 1); i++) {
         SDL_RenderClear(renderer);
         if (fullscreen) {
-            SDL_RenderCopy(renderer, srcTexture, NULL, &fullscreenRect);
+            SDL_RenderCopy(renderer, scaleTexture, NULL, &fullscreenRect);
         }
         else {
-            SDL_RenderCopy(renderer, srcTexture, NULL, NULL);
+            SDL_RenderCopy(renderer, scaleTexture, NULL, NULL);
         }
         SDL_RenderPresent(renderer);
     }
@@ -236,15 +195,6 @@ int Platform_SetVideoScale(int requested) {
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_TARGET,
                                          scaledWidth, scaledHeight);
-
-        // resize window framebuffer
-        SDL_DestroyTexture(windowTexture);
-        windowTexture = SDL_CreateTexture(renderer,
-                                          SDL_PIXELFORMAT_ARGB8888,
-                                          SDL_TEXTUREACCESS_STREAMING,
-                                          windowWidth, windowHeight);
-        // resize crt
-        crt_resize(&crt, windowWidth, windowHeight, CRT_PIX_FORMAT_BGRA, NULL);
         return requested;
     }
     return scale;
@@ -276,15 +226,6 @@ void Platform_SetFullscreen(int requested) {
         fullscreenRect.h = scaledHeight;
         fullscreenRect.x = (displayMode.w / 2) - (fullscreenRect.w / 2);
         fullscreenRect.y = (displayMode.h / 2) - (fullscreenRect.h / 2);
-
-        // resize window framebuffer
-        SDL_DestroyTexture(windowTexture);
-        windowTexture = SDL_CreateTexture(renderer,
-                                          SDL_PIXELFORMAT_ARGB8888,
-                                          SDL_TEXTUREACCESS_STREAMING,
-                                          fullscreenRect.w, fullscreenRect.h);
-        // resize crt
-        crt_resize(&crt, fullscreenRect.w, fullscreenRect.h, CRT_PIX_FORMAT_BGRA, NULL);
     }
     else {
         fullscreen = 0;
@@ -297,31 +238,6 @@ void Platform_SetFullscreen(int requested) {
 int Platform_GetFullscreen(void) {
     return fullscreen;
 }
-
-void Platform_SetNTSC(int requested) {
-    ntscEnabled = requested;
-}
-
-int Platform_GetNTSC(void) {
-    return ntscEnabled;
-}
-
-void Platform_SetNTSCNoise(int noiseLevel) {
-    if (noiseLevel >= 0) { noise = noiseLevel; }
-}
-
-int Platform_GetNTSCNoise(void) {
-    return noise;
-}
-
-void Platform_SetNTSCScanlines(int enabled) {
-    scanlines = enabled;
-}
-
-int Platform_GetNTSCScanlines(void) {
-    return scanlines;
-}
-
 
 static int Platform_InitAudio(void) {
     SDL_AudioSpec spec = { 0 };
