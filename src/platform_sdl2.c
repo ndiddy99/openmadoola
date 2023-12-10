@@ -1,0 +1,455 @@
+/* platform_sdl2.c: SDL2 specific code
+*
+*  This file is part of OpenMadoola.
+*
+*  OpenMadoola is free software: you can redistribute it and/or modify it
+*  under the terms of the GNU General Public License as published by the Free
+*  Software Foundation; either version 2 of the License, or (at your option)
+*  any later version.
+*
+*  OpenMadoola is distributed in the hope that it will be useful, but WITHOUT
+*  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+*  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+*  more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include <SDL.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "constants.h"
+#include "crt_core.h"
+#include "input.h"
+#include "nanotime.h"
+
+// --- video stuff ---
+static int scale = 3;
+static int fullscreen = 0;
+#define NES_PALETTE_SIZE (64)
+static Uint32 nesPalette[NES_PALETTE_SIZE];
+static Uint16 nesBuffer[SCREEN_WIDTH * SCREEN_HEIGHT];
+// destination to draw to when drawing in fullscreen
+static SDL_Rect fullscreenRect;
+static SDL_Window *window;
+static SDL_Renderer *renderer;
+// texture that the game engine draws to
+static SDL_Texture *drawTexture;
+// texture that gets nearest-neighbor scaled
+static SDL_Texture *scaleTexture;
+// texture for drawing directly on the window with square pixels (used for filters)
+static SDL_Texture  *windowTexture;
+static int vsync;
+static nanotime_step_data stepData;
+
+// ntsc video stuff
+static int ntscEnabled = 0;
+static struct CRT crt;
+static struct NTSC_SETTINGS ntsc;
+static int noise = 0;
+static int scanlines = 1;
+static int hue = 0;
+
+// --- audio stuff ---
+static SDL_AudioDeviceID audioDevice;
+
+// --- controller stuff ---
+static const int gamepadMap[] = {
+    [SDL_CONTROLLER_BUTTON_A] = INPUT_GAMEPAD_A,
+    [SDL_CONTROLLER_BUTTON_B] = INPUT_GAMEPAD_B,
+    [SDL_CONTROLLER_BUTTON_X] = INPUT_GAMEPAD_X,
+    [SDL_CONTROLLER_BUTTON_Y] = INPUT_GAMEPAD_Y,
+    [SDL_CONTROLLER_BUTTON_BACK] = INPUT_GAMEPAD_SELECT,
+    [SDL_CONTROLLER_BUTTON_GUIDE] = INPUT_GAMEPAD_HOME,
+    [SDL_CONTROLLER_BUTTON_START] = INPUT_GAMEPAD_START,
+    [SDL_CONTROLLER_BUTTON_LEFTSTICK] = INPUT_GAMEPAD_L_STICK_PRESS,
+    [SDL_CONTROLLER_BUTTON_RIGHTSTICK] = INPUT_GAMEPAD_R_STICK_PRESS,
+    [SDL_CONTROLLER_BUTTON_LEFTSHOULDER] = INPUT_GAMEPAD_L_SHOULDER,
+    [SDL_CONTROLLER_BUTTON_RIGHTSHOULDER] = INPUT_GAMEPAD_R_SHOULDER,
+    [SDL_CONTROLLER_BUTTON_DPAD_UP] = INPUT_GAMEPAD_DPAD_UP,
+    [SDL_CONTROLLER_BUTTON_DPAD_DOWN] = INPUT_GAMEPAD_DPAD_DOWN,
+    [SDL_CONTROLLER_BUTTON_DPAD_LEFT] = INPUT_GAMEPAD_DPAD_LEFT,
+    [SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = INPUT_GAMEPAD_DPAD_RIGHT,
+    [SDL_CONTROLLER_BUTTON_MAX] = INPUT_INVALID,
+};
+static SDL_GameController *controller;
+
+// static function declarations
+static void Platform_PumpEvents(void);
+
+static int Platform_InitVideo(void) {
+    // set up window
+    int windowWidth = ((int)(SCREEN_WIDTH * scale * WINDOW_PAR));
+    int windowHeight = SCREEN_HEIGHT * scale;
+    window = SDL_CreateWindow(
+        "OpenMadoola",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        windowWidth, windowHeight,
+        SDL_WINDOW_SHOWN);
+    if (!window) {
+        ERROR_MSG(SDL_GetError());
+        return 0;
+    }
+
+    // set up renderer
+    SDL_DisplayMode displayMode;
+    SDL_GetWindowDisplayMode(window, &displayMode);
+    int refreshRate = displayMode.refresh_rate;
+    // round up if refresh rate is 59 or something
+    if (refreshRate && (((refreshRate + 1) % 60) == 0)) {
+        refreshRate++;
+    }
+    if (refreshRate && ((refreshRate % 60) == 0)) {
+        vsync = refreshRate / 60;
+    }
+    else {
+        vsync = 0;
+    }
+    renderer = SDL_CreateRenderer(window, -1, vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
+    if (!renderer) {
+        ERROR_MSG(SDL_GetError());
+        return 0;
+    }
+    nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
+
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+    drawTexture = SDL_CreateTexture(renderer,
+                                    SDL_PIXELFORMAT_ARGB8888,
+                                    SDL_TEXTUREACCESS_STREAMING,
+                                    SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (!drawTexture) {
+        ERROR_MSG(SDL_GetError());
+        return 0;
+    }
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    int scaledWidth = SCREEN_WIDTH * scale;
+    int scaledHeight = SCREEN_HEIGHT * scale;
+    scaleTexture = SDL_CreateTexture(renderer,
+                                     SDL_PIXELFORMAT_ARGB8888,
+                                     SDL_TEXTUREACCESS_TARGET,
+                                     scaledWidth, scaledHeight);
+    if (!scaleTexture) {
+        ERROR_MSG(SDL_GetError());
+        return 0;
+    }
+
+    windowTexture = SDL_CreateTexture(renderer,
+                                     SDL_PIXELFORMAT_ARGB8888,
+                                     SDL_TEXTUREACCESS_STREAMING,
+                                     windowWidth, windowHeight);
+    if (!windowTexture) {
+        ERROR_MSG(SDL_GetError());
+        return 0;
+    }
+
+    crt_init(&crt, windowWidth, windowHeight, CRT_PIX_FORMAT_BGRA, NULL);
+    return 1;
+}
+
+static void Platform_DestroyVideo(void) {
+    SDL_DestroyTexture(drawTexture);
+    SDL_DestroyTexture(scaleTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+}
+
+void Platform_StartFrame(void) {
+    Platform_PumpEvents();
+}
+
+void Platform_EndFrame(void) {
+    Uint32 *framebuffer;
+    int framebufferPitch;
+    // texture to draw to the window
+    SDL_Texture *srcTexture;
+
+    if (ntscEnabled) {
+        SDL_LockTexture(windowTexture, NULL, (void **)&framebuffer, &framebufferPitch);
+        crt.out = (Uint8 *)framebuffer;
+        crt.scanlines = scanlines;
+        ntsc.data = nesBuffer;
+        ntsc.w = SCREEN_WIDTH;
+        ntsc.h = SCREEN_HEIGHT;
+        ntsc.hue = hue;
+        crt_modulate(&crt, &ntsc);
+        crt_demodulate(&crt, noise);
+        SDL_UnlockTexture(windowTexture);
+        srcTexture = windowTexture;
+    }
+    else {
+        SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &framebufferPitch);
+        // nes color indices -> argb
+        for (int i = 0; i < (SCREEN_WIDTH * SCREEN_HEIGHT); i++) {
+            framebuffer[i] = nesPalette[nesBuffer[i]];
+        }
+        SDL_UnlockTexture(drawTexture);
+        SDL_SetRenderTarget(renderer, scaleTexture);
+        SDL_RenderCopy(renderer, drawTexture, NULL, NULL);
+        // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
+        SDL_SetRenderTarget(renderer, NULL);
+        srcTexture = scaleTexture;
+    }
+
+    // monitor framerate isn't a multiple of 60, so wait in software
+    if (!vsync) {
+        nanotime_step(&stepData);
+    }
+
+    for (int i = 0; i < (vsync ? vsync : 1); i++) {
+        SDL_RenderClear(renderer);
+        if (fullscreen) {
+            SDL_RenderCopy(renderer, srcTexture, NULL, &fullscreenRect);
+        }
+        else {
+            SDL_RenderCopy(renderer, srcTexture, NULL, NULL);
+        }
+        SDL_RenderPresent(renderer);
+    }
+}
+
+Uint16 *Platform_GetNESBuffer(void) {
+    return nesBuffer;
+}
+
+int Platform_GetVideoScale(void) {
+    return scale;
+}
+
+int Platform_SetVideoScale(int requested) {
+    if ((requested > 0) && !fullscreen) {
+        scale = requested;
+        // resize window
+        int windowWidth = ((int)(SCREEN_WIDTH * scale * WINDOW_PAR));
+        int windowHeight = SCREEN_HEIGHT * scale;
+        SDL_SetWindowSize(window, windowWidth, windowHeight);
+        SDL_SetWindowPosition(window,
+                              SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED);
+        // resize scale framebuffer to fit window
+        SDL_DestroyTexture(scaleTexture);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+        int scaledWidth = SCREEN_WIDTH * scale;
+        int scaledHeight = SCREEN_HEIGHT * scale;
+        scaleTexture = SDL_CreateTexture(renderer,
+                                         SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_TARGET,
+                                         scaledWidth, scaledHeight);
+
+        // resize window framebuffer
+        SDL_DestroyTexture(windowTexture);
+        windowTexture = SDL_CreateTexture(renderer,
+                                          SDL_PIXELFORMAT_ARGB8888,
+                                          SDL_TEXTUREACCESS_STREAMING,
+                                          windowWidth, windowHeight);
+        // resize crt
+        crt_resize(&crt, windowWidth, windowHeight, CRT_PIX_FORMAT_BGRA, NULL);
+        return requested;
+    }
+    return scale;
+}
+
+void Platform_SetFullscreen(int requested) {
+    if (requested) {
+        fullscreen = 1;
+        // get desktop display resolution
+        SDL_DisplayMode displayMode;
+        SDL_GetDesktopDisplayMode(SDL_GetWindowDisplayIndex(window), &displayMode);
+        // make window fullscreen at native res
+        SDL_SetWindowSize(window, displayMode.w, displayMode.h);
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        // disable cursor
+        SDL_ShowCursor(SDL_DISABLE);
+        // resize scale framebuffer to fit screen
+        SDL_DestroyTexture(scaleTexture);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+        int fullscreenScale = displayMode.h / SCREEN_HEIGHT;
+        int scaledWidth = SCREEN_WIDTH * fullscreenScale;
+        int scaledHeight = SCREEN_HEIGHT * fullscreenScale;
+        scaleTexture = SDL_CreateTexture(renderer,
+                                         SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_TARGET,
+                                         scaledWidth, scaledHeight);
+        // set up destination area
+        fullscreenRect.w = (int) ((float) scaledWidth * WINDOW_PAR);
+        fullscreenRect.h = scaledHeight;
+        fullscreenRect.x = (displayMode.w / 2) - (fullscreenRect.w / 2);
+        fullscreenRect.y = (displayMode.h / 2) - (fullscreenRect.h / 2);
+
+        // resize window framebuffer
+        SDL_DestroyTexture(windowTexture);
+        windowTexture = SDL_CreateTexture(renderer,
+                                          SDL_PIXELFORMAT_ARGB8888,
+                                          SDL_TEXTUREACCESS_STREAMING,
+                                          fullscreenRect.w, fullscreenRect.h);
+        // resize crt
+        crt_resize(&crt, fullscreenRect.w, fullscreenRect.h, CRT_PIX_FORMAT_BGRA, NULL);
+    }
+    else {
+        fullscreen = 0;
+        // make window windowed at last scale
+        SDL_SetWindowFullscreen(window, 0);
+        Platform_SetVideoScale(scale);
+    }
+}
+
+int Platform_GetFullscreen(void) {
+    return fullscreen;
+}
+
+void Platform_SetNTSC(int requested) {
+    ntscEnabled = requested;
+}
+
+int Platform_GetNTSC(void) {
+    return ntscEnabled;
+}
+
+void Platform_SetNTSCNoise(int noiseLevel) {
+    if (noiseLevel >= 0) { noise = noiseLevel; }
+}
+
+int Platform_GetNTSCNoise(void) {
+    return noise;
+}
+
+void Platform_SetNTSCScanlines(int enabled) {
+    scanlines = enabled;
+}
+
+int Platform_GetNTSCScanlines(void) {
+    return scanlines;
+}
+
+
+static int Platform_InitAudio(void) {
+    SDL_AudioSpec spec = { 0 };
+    spec.freq = 44100;
+    spec.format = AUDIO_S16;
+    spec.channels = 1;
+    audioDevice = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    if (!audioDevice) {
+        ERROR_MSG(SDL_GetError());
+        return 0;
+    }
+    SDL_PauseAudioDevice(audioDevice, 0);
+    return 1;
+}
+
+static void Platform_DestroyAudio(void) {
+    SDL_CloseAudioDevice(audioDevice);
+}
+
+void Platform_QueueSamples(Sint16 *samples, int count) {
+    SDL_QueueAudio(audioDevice, (void *)samples, count * sizeof(Sint16));
+}
+
+int Platform_GetQueuedSamples(void) {
+    return (int)SDL_GetQueuedAudioSize(audioDevice) / sizeof(Sint16);
+}
+
+static SDL_GameController *Platform_FindController(void) {
+    for (int i = 0; i < SDL_NumJoysticks(); i++) {
+        if (SDL_IsGameController(i)) {
+            return SDL_GameControllerOpen(i);
+        }
+    }
+
+    return NULL;
+}
+
+static int Platform_LoadPalette(void) {
+    FILE *fp = fopen("nes.pal", "rb");
+    if (!fp) {
+        ERROR_MSG("Couldn't open nes.pal");
+        return 0;
+    }
+
+    for (int i = 0; i < NES_PALETTE_SIZE; i++) {
+        Uint8 r = fgetc(fp);
+        Uint8 g = fgetc(fp);
+        Uint8 b = fgetc(fp);
+
+        nesPalette[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+    }
+    fclose(fp);
+    return 1;
+}
+
+int Platform_Init(void) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0) {
+        printf("Error initializing SDL: %s\n", SDL_GetError());
+        return 0;
+    }
+    if (!Platform_InitVideo()) { return 0; }
+    if (!Platform_InitAudio()) { return 0; }
+    controller = Platform_FindController();
+    if (!Platform_LoadPalette()) { return 0; }
+
+    return 1;
+}
+
+void Platform_Destroy(void) {
+    Platform_DestroyVideo();
+    Platform_DestroyAudio();
+    SDL_Quit();
+}
+
+static void Platform_PumpEvents(void) {
+    SDL_Event event;
+    int button;
+
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        // keyboard events
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            // alt+enter = toggle fullscreen
+            if ((event.type == SDL_KEYDOWN) &&
+                (event.key.keysym.scancode == SDL_SCANCODE_RETURN) &&
+                (event.key.keysym.mod & KMOD_ALT)) {
+                Platform_SetFullscreen(!Platform_GetFullscreen());
+                break;
+            }
+
+            button = event.key.keysym.scancode;
+            // these are discontiguous with the rest of the scancodes so we make them
+            // match the button enum in input.h
+            if ((button >= SDL_SCANCODE_LCTRL) && (button <= SDL_SCANCODE_RGUI)) {
+                button = (button - SDL_SCANCODE_LCTRL) + INPUT_KEY_LCTRL;
+            }
+            if ((button >= INPUT_KEY_A) && (button <= INPUT_KEY_RGUI)) {
+                Input_SetState(button, event.type == SDL_KEYDOWN);
+            }
+            break;
+
+        // controller events
+        case SDL_CONTROLLERDEVICEADDED:
+            controller = SDL_GameControllerOpen(event.cdevice.which);
+            break;
+
+        case SDL_CONTROLLERDEVICEREMOVED:
+            controller = Platform_FindController();
+            break;
+
+        case SDL_CONTROLLERBUTTONDOWN:
+        case SDL_CONTROLLERBUTTONUP:
+            if (event.cbutton.button < ARRAY_LEN(gamepadMap)) {
+                // match the button to the enum in input.h
+                button = gamepadMap[event.cbutton.button];
+                if (button != INPUT_INVALID) {
+                    Input_SetState(button, event.type == SDL_CONTROLLERBUTTONDOWN);
+                }
+            }
+            break;
+
+        // handle quit
+        case SDL_QUIT:
+            Platform_Destroy();
+            exit(0);
+            break;
+
+        }
+    }
+}
