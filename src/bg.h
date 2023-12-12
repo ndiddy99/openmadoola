@@ -33,6 +33,17 @@
 void BG_Fill(Uint16 tile, Uint8 palnum);
 
 /**
+ * @brief Sets all background tiles to 0x7fc (empty tile)
+ */
+void BG_Clear(void);
+
+/**
+ * @brief Sets all background tiles in the given row to 0x7fc (empty tile)
+ * @param row the rown number to clear
+ */
+void BG_ClearRow(Uint16 row);
+
+/**
  * @brief Sets a tile's value on the tilemap
  * @param x the tile's x position
  * @param y the tile's y position

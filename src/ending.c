@@ -216,7 +216,7 @@ void Ending_Run(void) {
     Sound_Reset();
     flashTimer = 0;
     BG_Scroll(0, 0);
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_SetPalette(0, endingBGPalette);
     Sprite_SetAllPalettes(endingSpritePalette);
     Ending_Animation();

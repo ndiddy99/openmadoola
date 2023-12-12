@@ -19,25 +19,8 @@
 #pragma once
 #include "constants.h"
 
-/**
- * @brief Should be run at the start of a menu
- * @param cursor Pointer to the menu cursor variable
- */
-void Menu_Begin(int *cursor);
-
-/**
- * @brief Displays a menu option
- * @param x menu x tile
- * @param y menu y tile
- * @param cursor cursor variable
- * @param text Text to print (printf formatted)
- * @param ... any additional arguments
- * @returns nonzero if the option is selected, zero otherwise
- */
-int Menu_Item(Uint16 x, Uint16 y, int cursor, char *text, ...);
-
-/**
- * @brief Should be run at the end of a menu
- * @param cursor Pointer to the menu cursor variable
- */
-void Menu_End(int *cursor);
+void Menu_Init(Uint16 x, Uint16 y);
+void Menu_AddLink(char *text, int (*cb)(int num));
+void Menu_AddList(char *text, char **options, int startVal, int (*cb)(int num));
+void Menu_AddNum(char *text, int startVal, int (*cb)(int num));
+void Menu_Run(int spacing);

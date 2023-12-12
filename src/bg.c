@@ -43,8 +43,21 @@ void BG_Fill(Uint16 tile, Uint8 palnum) {
     }
 }
 
+void BG_Clear(void) {
+    BG_Fill(0x7fc, 0);
+}
+
+void BG_ClearRow(Uint16 row) {
+    if (row < BG_HEIGHT) {
+        for (int i = 0; i < BG_WIDTH; i++) {
+            bgTiles[row][i].tile = 0x7fc;
+            bgTiles[row][i].palnum = 0;
+        }
+    }
+}
+
 void BG_SetTile(Uint16 x, Uint16 y, Uint16 tile, Uint8 palnum) {
-    if ((x >= 0) && (x < BG_WIDTH) && (y >= 0) && (y < BG_HEIGHT)) {
+    if ((x < BG_WIDTH) && (y < BG_HEIGHT)) {
         bgTiles[y][x].tile = tile;
         bgTiles[y][x].palnum = palnum;
     }
