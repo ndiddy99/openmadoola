@@ -23,41 +23,136 @@
 #include "constants.h"
 #include "joy.h"
 #include "menu.h"
+#include "sound.h"
 #include "sprite.h"
 
 static int currItem;
 static Sprite cursorSpr;
 
-void Menu_Begin(int *cursor) {
-    currItem = 0;
+typedef enum {
+    MENU_ITEM_NONE,
+    MENU_ITEM_LINK,
+    MENU_ITEM_LIST,
+    MENU_ITEM_NUM,
+} MenuItemType;
+
+typedef struct {
+    MenuItemType type;
+    char *text;
+    int num;
+    // --- for list items ---
+    int numOptions;
+    char **options;
+    int (*cb)(int num);
+} MenuItem;
+
+#define MAX_MENU_ITEMS 8
+static MenuItem items[MAX_MENU_ITEMS];
+static int cursor;
+static int itemCount;
+static Uint16 menuX;
+static Uint16 menuY;
+
+void Menu_Init(Uint16 x, Uint16 y) {
+    for (int i = 0; i < MAX_MENU_ITEMS; i++) {
+        items[i].type = MENU_ITEM_NONE;
+    }
+
+    cursor = 0;
+    itemCount = 0;
+    menuX = x;
+    menuY = y;
+}
+
+void Menu_AddLink(char *text, int (*cb)(int num)) {
+    if (itemCount >= MAX_MENU_ITEMS) { return; }
+    items[itemCount].type = MENU_ITEM_LINK;
+    items[itemCount].text = text;
+    items[itemCount].cb = cb;
+    itemCount++;
+}
+
+void Menu_AddList(char *text, char **options, int startVal, int (*cb)(int num)) {
+    if (itemCount >= MAX_MENU_ITEMS) { return; }
+    items[itemCount].type = MENU_ITEM_LIST;
+    items[itemCount].text = text;
+    items[itemCount].num = startVal;
+    items[itemCount].options = options;
+    items[itemCount].cb = cb;
+    itemCount++;
+}
+
+void Menu_AddNum(char *text, int startVal, int (*cb)(int num)) {
+    if (itemCount >= MAX_MENU_ITEMS) { return; }
+    items[itemCount].type = MENU_ITEM_NUM;
+    items[itemCount].text = text;
+    items[itemCount].num = startVal;
+    items[itemCount].cb = cb;
+    itemCount++;
+}
+
+void Menu_Run(int spacing) {
     if (joyEdge & JOY_UP) {
-        (*cursor)--;
+        Sound_Play(SFX_MENU);
+        cursor--;
+        if (cursor < 0) { cursor = itemCount - 1; }
     }
     if (joyEdge & (JOY_DOWN | JOY_SELECT)) {
-        (*cursor)++;
+        Sound_Play(SFX_MENU);
+        cursor++;
+        if (cursor >= itemCount) { cursor = 0; }
     }
-}
+    cursorSpr.x = (menuX - 1) * TILE_WIDTH;
+    cursorSpr.y = ((cursor * 2 + menuY) * TILE_HEIGHT) - 5;
+    cursorSpr.size = SPRITE_8X16;
+    cursorSpr.tile = 0xee;
+    cursorSpr.palette = 0;
+    cursorSpr.mirror = 0;
+    Sprite_Draw(&cursorSpr, NULL);
 
-int Menu_Item(Uint16 x, Uint16 y, int cursor, char *text, ...) {
-    va_list args;
-    va_start(args, text);
-    BG_VPrint(x, y, 0, text, args);
-    va_end(args);
-    if (currItem++ == cursor) {
-        cursorSpr.x = (x - 1) * TILE_WIDTH;
-        cursorSpr.y = (y * TILE_HEIGHT) - 5;
-        cursorSpr.size = SPRITE_8X16;
-        cursorSpr.tile = 0xee;
-        cursorSpr.palette = 0;
-        cursorSpr.mirror = 0;
-        Sprite_Draw(&cursorSpr, NULL);
-        return 1;
+    int currY = menuY;
+    for (int i = 0; i < itemCount; i++) {
+        switch(items[i].type) {
+        case MENU_ITEM_LINK:
+            if (i == cursor) {
+                if (joyEdge & (JOY_A | JOY_START)) {
+                    items[i].cb(0);
+                }
+            }
+            BG_ClearRow(currY);
+            BG_Print(menuX, currY, 0, items[i].text);
+            break;
+
+        case MENU_ITEM_LIST:
+            if (i == cursor) {
+                if (joyEdge & JOY_LEFT) {
+                    Sound_Play(SFX_MENU);
+                    items[i].num = items[i].cb(--items[i].num);
+                }
+                if (joyEdge & JOY_RIGHT) {
+                    Sound_Play(SFX_MENU);
+                    items[i].num = items[i].cb(++items[i].num);
+                }
+            }
+            BG_ClearRow(currY);
+            BG_Print(menuX, currY, 0, "%s - %s -", items[i].text, items[i].options[items[i].num]);
+            break;
+
+        case MENU_ITEM_NUM:
+            if (i == cursor) {
+                if (joyEdge & JOY_LEFT) {
+                    Sound_Play(SFX_MENU);
+                    items[i].num = items[i].cb(--items[i].num);
+                }
+                if (joyEdge & JOY_RIGHT) {
+                    Sound_Play(SFX_MENU);
+                    items[i].num = items[i].cb(++items[i].num);
+                }
+            }
+            BG_ClearRow(currY);
+            BG_Print(menuX, currY, 0, "%s - %d -", items[i].text, items[i].num);
+            break;
+        }
+        currY += spacing;
     }
-    return 0;
-}
-
-void Menu_End(int *cursor) {
-    int maxItem = currItem - 1;
-    if (*cursor < 0) { *cursor = maxItem; }
-    else if (*cursor > maxItem) { *cursor = 0; }
 }

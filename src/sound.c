@@ -143,7 +143,9 @@ void Sound_Play(int num) {
         // turn off the channel for the previous instrument in this slot
         // Note: The original game didn't do this, which is why sound effects
         // would sometimes stay on, etc.
-        Sound_DisableChannel(instruments[instNum].channel);
+        if (instruments[instNum].channel < 4) {
+            Sound_DisableChannel(instruments[instNum].channel);
+        }
     }
 }
 

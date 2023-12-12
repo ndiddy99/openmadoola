@@ -168,7 +168,7 @@ int Save_Screen(void) {
     Sprite cursorSpr = { 0 };
 
     Sound_Reset();
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetAllPalettes(savePalette);
     Sprite_SetAllPalettes(savePalette + 16);
@@ -225,7 +225,7 @@ int Save_Screen(void) {
         }
         else {
             cursorSpr.x = 64;
-            cursorSpr.y = 187;
+            cursorSpr.y = 187 + ((cursor - NUM_FILES) * 32);
         }
         Sprite_Draw(&cursorSpr, NULL);
 

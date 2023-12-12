@@ -200,7 +200,7 @@ int Platform_SetVideoScale(int requested) {
     return scale;
 }
 
-void Platform_SetFullscreen(int requested) {
+int Platform_SetFullscreen(int requested) {
     if (requested) {
         fullscreen = 1;
         // get desktop display resolution
@@ -233,6 +233,8 @@ void Platform_SetFullscreen(int requested) {
         SDL_SetWindowFullscreen(window, 0);
         Platform_SetVideoScale(scale);
     }
+
+    return fullscreen;
 }
 
 int Platform_GetFullscreen(void) {
@@ -306,10 +308,11 @@ int Platform_Init(void) {
     return 1;
 }
 
-void Platform_Destroy(void) {
+void Platform_Quit(void) {
     Platform_DestroyVideo();
     Platform_DestroyAudio();
     SDL_Quit();
+    exit(0);
 }
 
 static void Platform_PumpEvents(void) {
@@ -362,8 +365,7 @@ static void Platform_PumpEvents(void) {
 
         // handle quit
         case SDL_QUIT:
-            Platform_Destroy();
-            exit(0);
+            Platform_Quit();
             break;
 
         }

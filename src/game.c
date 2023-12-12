@@ -27,7 +27,8 @@
 #include "item.h"
 #include "joy.h"
 #include "lucia.h"
-#include "map.h"  
+#include "map.h"
+#include "mainmenu.h"
 #include "object.h"
 #include "options.h"
 #include "palette.h"
@@ -215,6 +216,9 @@ noreturn void Game_Run(void) {
 startGameCode:
     Options_Run();
     Screen_Title();
+    MainMenu_Run();
+
+showSaveScreen:
     if (Save_Screen()) {
         // stage number got set by the save screen so we don't need to set it here
         health = 1000;
@@ -244,7 +248,7 @@ startGameCode:
     currentWeapon = WEAPON_SWORD;
 
 initStage:
-    if (gameType == GAME_TYPE_PLUS) { Save_SaveFile(); }
+    Save_SaveFile();
 
     magic = maxMagic;
     lastRoom = 0xffff;
@@ -343,9 +347,9 @@ mainGameLoop:
         goto initStage;
     }
     else {
-        if (gameType == GAME_TYPE_PLUS) { Save_SaveFile(); }
+        Save_SaveFile();
         Screen_GameOver();
-        goto startGameCode;
+        goto showSaveScreen;
     }
 
 }
@@ -435,8 +439,6 @@ static void Game_HandlePause(void) {
     }
     else {
         if (joyEdge & JOY_START) {
-            // NOTE: the original game didn't do this, it would restart the music from
-            // the beginning each time you paused/unpaused. TODO make option
             Sound_SaveState();
             Sound_Reset();
             Sound_Play(SFX_PAUSE);

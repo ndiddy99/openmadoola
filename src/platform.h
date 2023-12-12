@@ -26,6 +26,11 @@
 int Platform_Init(void);
 
 /**
+ * @brief Shuts down platform code and exits the program.
+ */
+void Platform_Quit(void);
+
+/**
  * @brief Should be run at the start of each frame.
  */
 void Platform_StartFrame(void);
@@ -56,8 +61,9 @@ int Platform_SetVideoScale(int requested);
 /**
  * @brief Requests setting the video mode
  * @param requested nonzero = fullscreen, zero = windowed
+ * @returns the set video mode
  */
-void Platform_SetFullscreen(int requested);
+int Platform_SetFullscreen(int requested);
 
 /**
  * @brief Gets the video mode

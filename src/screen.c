@@ -72,8 +72,10 @@ static void Screen_TitleDraw(void) {
     else {
         BG_Print(6, 6, 0, "THE WING OF");
     }
-    BG_Print(6, 19, 0, "@ 1986 SUNSOFT");
-    BG_Print(6, 21, 0, "SUN ELECTRONICS CORP.");
+    BG_Print(6, 19, 0, "OpenMadoola " OPENMADOOLA_VERSION);
+    BG_Print(6, 21, 0, "infochunk.com/madoola");
+    BG_Print(6, 23, 0, "Assets @ 1986 SUNSOFT");
+
 
     // draw "Madoola" graphic
     for (int y = 0; y < 6; y++) {
@@ -114,7 +116,7 @@ void Screen_Title(void) {
     int musicPlaying = 0;
 
     flashTimer = 0;
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_SetAllPalettes(titlePalette);
     Sprite_ClearList();
     Sound_Reset();
@@ -168,7 +170,7 @@ void Screen_Title(void) {
                 }
                 else {
                     // display intro text
-                    BG_Fill(0x7fc, 0);
+                    BG_Clear();
                     BG_SetPalette(0, introTextPalette);
                     TextScroll_Init(1);
                     // break out of title screen if the user skipped the intro text
@@ -236,7 +238,7 @@ static void Screen_StatusIcon(Uint16 x, Uint16 y, Uint16 tile, Uint8 palette, Ui
 }
 
 void Screen_Status(void) {
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetAllPalettes(statusPalette);
     Sprite_SetAllPalettes(spritePalettes);
@@ -282,7 +284,7 @@ static Uint8 stagePalette[] = {
 };
 
 void Screen_Stage(void) {
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, stagePalette);
     BG_Print(12, 15, 0, "STAGE %2u", stage + 1);
@@ -299,7 +301,7 @@ void Screen_Stage(void) {
 }
 
 void Screen_GameOver(void) {
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, stagePalette);
     BG_Print(12, 15, 0, "GAME OVER");
@@ -325,7 +327,7 @@ static Uint16 keywordTiles[] = {
 };
 
 void Screen_Keyword(void) {
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, keywordPalette);
     Sound_Reset();
@@ -338,7 +340,7 @@ void Screen_Keyword(void) {
         System_EndFrame();
     }
     // --- show the keyword (neko dayo~) for 1 second ---
-    BG_Fill(0x7fc, 0);
+    BG_Clear();
     BG_SetTile(12, 10, 0x29, 0);
     // draw each word of the keyword graphics
     Uint16 *row = keywordTiles;
