@@ -18,7 +18,6 @@ set(SOURCE_LIST
     "src/bg.c"
     "src/camera.c"
     "src/collision.c"
-#    "src/debug.cpp"
     "src/ending.c"
     "src/enemy.c"
     "src/file.c"
@@ -87,14 +86,6 @@ set(SOURCE_LIST
     "libs/blargg_apu/Nes_Oscs.cpp"
     "libs/blargg_apu/blargg_apu.cpp"
 
-    "libs/imgui/backends/imgui_impl_sdl2.cpp"
-    "libs/imgui/backends/imgui_impl_sdlrenderer2.cpp"
-    "libs/imgui/imgui.cpp"
-    "libs/imgui/imgui_demo.cpp"
-    "libs/imgui/imgui_draw.cpp"
-    "libs/imgui/imgui_tables.cpp"
-    "libs/imgui/imgui_widgets.cpp"
-
     "libs/nanotime/nanotime.c"
 )
 
@@ -104,7 +95,6 @@ set(HEADER_LIST
     "src/camera.h"
     "src/collision.h"
     "src/constants.h"
-#    "src/debug.h"
     "src/ending.h"
     "src/enemy.h"
     "src/file.h"
@@ -174,15 +164,6 @@ set(HEADER_LIST
     "libs/blargg_apu/Blip_Synth.h"
     "libs/blargg_apu/Nes_Apu.h"
     "libs/blargg_apu/Nes_Oscs.h"
-    
-    "libs/imgui/backends/imgui_impl_sdl2.h"
-    "libs/imgui/backends/imgui_impl_sdlrenderer2.h"
-    "libs/imgui/imconfig.h"
-    "libs/imgui/imgui.h"
-    "libs/imgui/imgui_internal.h"
-    "libs/imgui/imstb_rectpack.h"
-    "libs/imgui/imstb_textedit.h"
-    "libs/imgui/imstb_truetype.h"
 
     "libs/nanotime/nanotime.h"
 )
