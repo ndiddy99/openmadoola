@@ -37,41 +37,48 @@ static Uint8 palette[] = {
     0x0F, 0x13, 0x23, 0x33,
 };
 
+static int exitMenu = 0;
+static int redraw = 0;
+
+static int startCB(int num) {
+    exitMenu = 1;
+    return 0;
+}
+
+static int optionsCB(int num) {
+    Options_Run();
+    redraw = 1;
+    return 0;
+}
+
 void MainMenu_Run(void) {
-//    int cursor = 0;
-//
-//    Sound_Reset();
-//    BG_Scroll(BG_CENTERED_X, 0);
-//    BG_SetAllPalettes(palette);
-//    Sprite_SetAllPalettes(palette + 16);
-//
-//    while (1) {
-//        System_StartFrame();
-//        Sprite_ClearList();
-//        BG_Clear();
-//        Menu_Begin(&cursor);
-//
-//        if (Menu_Item(11, 8, cursor, "Start Game")) {
-//            if (joyEdge & (JOY_A | JOY_START)) {
-//                return;
-//            }
-//        }
-//
-//        if (Menu_Item(11, 12, cursor, "Options")) {
-//            if (joyEdge & (JOY_A | JOY_START)) {
-//                Options_Run();
-//            }
-//        }
-//
-//        if (Menu_Item(11, 16, cursor, "About")) {
-//            if (joy & (JOY_A | JOY_START)) {
-//                Platform_Quit();
-//            }
-//        }
-//
-//        Menu_End(&cursor);
-//        BG_Draw();
-//        Sprite_EndFrame();
-//        System_EndFrame();
-//    }
+    int cursor = 0;
+
+    Sound_Reset();
+    BG_Scroll(BG_CENTERED_X, 0);
+    BG_SetAllPalettes(palette);
+    Sprite_SetAllPalettes(palette + 16);
+
+start:
+    Menu_Init(11, 10);
+    Menu_AddLink("Start Game", 0, startCB);
+    Menu_AddLink("Options", 0, optionsCB);
+
+    while (!exitMenu) {
+        System_StartFrame();
+        Sprite_ClearList();
+        BG_Clear();
+
+        Menu_Run(4);
+
+        BG_Draw();
+        Sprite_EndFrame();
+        System_EndFrame();
+
+        if (redraw) {
+            redraw = 0;
+            goto start;
+        }
+    }
+    exitMenu = 0;
 }

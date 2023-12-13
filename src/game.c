@@ -214,7 +214,6 @@ noreturn void Game_Run(void) {
     Uint16 lastRoom;
 
 startGameCode:
-    Options_Run();
     Screen_Title();
     MainMenu_Run();
 

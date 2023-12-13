@@ -20,7 +20,7 @@
 #include "constants.h"
 
 void Menu_Init(Uint16 x, Uint16 y);
-void Menu_AddLink(char *text, int (*cb)(int num));
+void Menu_AddLink(char *text, int num, int (*cb)(int num));
 void Menu_AddList(char *text, char **options, int startVal, int (*cb)(int num));
 void Menu_AddNum(char *text, int startVal, int (*cb)(int num));
 void Menu_Run(int spacing);

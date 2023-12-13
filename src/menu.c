@@ -64,10 +64,11 @@ void Menu_Init(Uint16 x, Uint16 y) {
     menuY = y;
 }
 
-void Menu_AddLink(char *text, int (*cb)(int num)) {
+void Menu_AddLink(char *text, int num, int (*cb)(int num)) {
     if (itemCount >= MAX_MENU_ITEMS) { return; }
     items[itemCount].type = MENU_ITEM_LINK;
     items[itemCount].text = text;
+    items[itemCount].num = num;
     items[itemCount].cb = cb;
     itemCount++;
 }
@@ -103,7 +104,7 @@ void Menu_Run(int spacing) {
         if (cursor >= itemCount) { cursor = 0; }
     }
     cursorSpr.x = (menuX - 1) * TILE_WIDTH;
-    cursorSpr.y = ((cursor * 2 + menuY) * TILE_HEIGHT) - 5;
+    cursorSpr.y = ((cursor * spacing + menuY) * TILE_HEIGHT) - 5;
     cursorSpr.size = SPRITE_8X16;
     cursorSpr.tile = 0xee;
     cursorSpr.palette = 0;
@@ -116,10 +117,9 @@ void Menu_Run(int spacing) {
         case MENU_ITEM_LINK:
             if (i == cursor) {
                 if (joyEdge & (JOY_A | JOY_START)) {
-                    items[i].cb(0);
+                    items[i].cb(items[i].num);
                 }
             }
-            BG_ClearRow(currY);
             BG_Print(menuX, currY, 0, items[i].text);
             break;
 
@@ -134,7 +134,6 @@ void Menu_Run(int spacing) {
                     items[i].num = items[i].cb(++items[i].num);
                 }
             }
-            BG_ClearRow(currY);
             BG_Print(menuX, currY, 0, "%s - %s -", items[i].text, items[i].options[items[i].num]);
             break;
 
@@ -149,7 +148,6 @@ void Menu_Run(int spacing) {
                     items[i].num = items[i].cb(++items[i].num);
                 }
             }
-            BG_ClearRow(currY);
             BG_Print(menuX, currY, 0, "%s - %d -", items[i].text, items[i].num);
             break;
         }
