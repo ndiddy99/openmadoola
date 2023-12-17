@@ -43,7 +43,9 @@ cmake --build build --config Release
 
 ### Windows
 
-Install Visual Studio (https://visualstudio.microsoft.com/downloads/) and cmake (https://cmake.org/download/).
+Install [Visual Studio](https://visualstudio.microsoft.com/downloads/) and [cmake](https://cmake.org/download/).
+
+Download the latest SDL2 VC development version from [here](https://github.com/libsdl-org/SDL/releases). Unzip the file into libs\\SDL2, making sure that you go down a level so the top-level directories in the folder are docs\\ include\\ libs\\ etc.
 
 Run cmake on the checked out source directory, then open the generated solution in Visual Studio.
 
