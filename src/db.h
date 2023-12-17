@@ -25,7 +25,27 @@ typedef struct {
     Uint8 *data;
 } DBEntry;
 
+/**
+ * @brief Should be run on startup
+ */
 void DB_Init(void);
+
+/**
+ * @brief Finds the given db item
+ * @param name item name to look for
+ * @returns either a DBEntry pointer or NULL if it couldn't be found
+ */
 DBEntry *DB_Find(char *name);
+
+/**
+ * @brief Saves the db to disk
+ */
 void DB_Save(void);
+
+/**
+ * @brief Sets the given db item to the given data, creating it if necessary
+ * @param name item name
+ * @param data data to write
+ * @param dataLen size of data in bytes
+ */
 void DB_Set(char *name, Uint8 *data, Uint32 dataLen);

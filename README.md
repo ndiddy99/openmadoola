@@ -1,7 +1,58 @@
-Used software:
+# OpenMadoola
 
-sdl2 http://libsdl.org/
------------------------
+Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
+
+![OpenMadoola screenshot](screenshot.png)
+
+## Usage
+
+OpenMadoola will look for a Wing of Madoola ROM image named "madoola.nes" in the current working directory (its directory if you're not running it from the command line). It gets all the graphics and level data from the ROM image, and will refuse to start if it is not present.
+
+OpenMadoola will also save data to the current working directory. There's currently no way to change that, so sorry to everyone who likes to install stuff to /usr/local/bin.
+
+### Default controls
+Keyboard | Gamepad (xbox layout) | Equivalent NES button
+-------- | --------------------- | ---------------------
+W | D-Pad Up | D-Pad Up
+S | D-Pad Down | D-Pad Down
+A | D-Pad Left | D-Pad Left
+D | D-Pad Right | D-Pad Right
+J | X | B
+K | A | A
+Right Shift | Back | Select
+Enter | Start | Start
+
+You can change the controls in the options menu.
+
+
+## Build Instructions
+
+### GNU/Linux or Mac OS X
+
+Install GCC or Clang, make, cmake, and the SDL2 development libraries from your package manager.
+
+Generate the build files with
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+```
+
+Next, compile the executable with this command:
+```
+cmake --build build --config Release
+```
+
+### Windows
+
+Install Visual Studio (https://visualstudio.microsoft.com/downloads/) and cmake (https://cmake.org/download/).
+
+Run cmake on the checked out source directory, then open the generated solution in Visual Studio.
+
+Note that I don't check if the project builds with Visual Studio in between releases, so if you check out from master it's possible that the project won't build without changes. If you make a PR with the required changes, that would be appreciated.
+
+
+## Used Software
+### sdl2 http://libsdl.org/
+```
 Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
   
 This software is provided 'as-is', without any express or implied
@@ -19,10 +70,10 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
+```
 
-
-Nes_Snd_Emu 0.1.7. http://www.slack.net/~ant/libs/
---------------------------------------------------
+### Nes_Snd_Emu http://www.slack.net/~ant/libs/
+```
 Copyright (C) 2003-2005 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
 General Public License as published by the Free Software Foundation; either
@@ -33,10 +84,11 @@ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
 more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+```
 
 
-nanotime https://github.com/nightmareci/nanotime
-------------------------------------------------
+### nanotime https://github.com/nightmareci/nanotime
+```
 This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or distribute
@@ -58,3 +110,4 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org/>
+```
