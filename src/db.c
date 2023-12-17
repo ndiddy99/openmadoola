@@ -32,7 +32,7 @@
 #include "db.h"
 #include "file.h"
 
-#define DB_FILENAME "savedata.db"
+#define DB_FILENAME "config.db"
 
 static int numEntries;
 static int allocedEntries;

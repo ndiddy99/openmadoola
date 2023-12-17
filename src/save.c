@@ -20,7 +20,6 @@
 
 #include "bg.h"
 #include "constants.h"
-#include "db.h"
 #include "file.h"
 #include "game.h"
 #include "item.h"
@@ -61,69 +60,42 @@ typedef struct {
 static SaveFile files[NUM_FILES];
 static int currFile;
 
-static Uint16 Save_Read16BE(Uint8 *buff, int *cursor) {
-    Uint16 val = (buff[*cursor] << 8) | buff[*cursor + 1];
-    *cursor += 2;
-    return val;
-}
-
-static Uint32 Save_Read32BE(Uint8 *buff, int *cursor) {
-    Uint32 val;
-    val  = buff[*cursor + 0] << 24;
-    val |= buff[*cursor + 1] << 16;
-    val |= buff[*cursor + 2] << 8;
-    val |= buff[*cursor + 3];
-    *cursor += 4;
-    return val;
-}
-
-static void Save_Write16BE(Uint16 val, Uint8 *buff, int *cursor) {
-    buff[(*cursor)++] = (val >> 8) & 0xff;
-    buff[(*cursor)++] = (val >> 0) & 0xff;
-}
-
-static void Save_Write32BE(Uint32 val, Uint8 *buff, int *cursor) {
-    buff[(*cursor)++] = (val >> 24) & 0xff;
-    buff[(*cursor)++] = (val >> 16) & 0xff;
-    buff[(*cursor)++] = (val >>  8) & 0xff;
-    buff[(*cursor)++] = (val >>  0) & 0xff;
-}
-
 void Save_SaveFile(void) {
-    char name[20];
-    snprintf(name, sizeof(name), "file%d", currFile + 1);
-    // we save without padding so this will always be >= the size we save
-    Uint8 buff[sizeof(SaveFile)];
-    int cursor = 0;
+    char filename[20];
+    snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
+    FILE *fp = fopen(filename, "wb");
+    if (!fp) {
+        ERROR_MSG("Error opening save file for writing");
+        return;
+    }
 
     files[currFile].maxHealth = maxHealth;
-    Save_Write16BE(maxHealth, buff, &cursor);
+    File_WriteUint16BE(maxHealth, fp);
     files[currFile].maxMagic = maxMagic;
-    Save_Write16BE(maxMagic, buff, &cursor);
+    File_WriteUint16BE(maxMagic, fp);
     files[currFile].highestStage = highestReachedStage;
-    buff[cursor++] = highestReachedStage;
+    fputc(highestReachedStage, fp);
     files[currFile].keywordDisplay = keywordDisplay;
-    buff[cursor++] = keywordDisplay;
+    fputc(keywordDisplay, fp);
     files[currFile].orbCollected = orbCollected;
-    buff[cursor++] = orbCollected;
+    fputc(orbCollected, fp);
     for (int i = 0; i < NUM_WEAPONS; i++) {
         files[currFile].levels[i] = weaponLevels[i];
-        buff[cursor++] = weaponLevels[i];
+        fputc(weaponLevels[i], fp);
     }
     files[currFile].levels[NUM_WEAPONS] = bootsLevel;
-    buff[cursor++] = bootsLevel;
+    fputc(bootsLevel, fp);
     for (int i = 0; i < ARRAY_LEN(itemsCollected); i++) {
         files[currFile].items[i] = itemsCollected[i];
-        buff[cursor++] = itemsCollected[i];
+        fputc(itemsCollected[i], fp);
     }
     for (int i = 0; i < ARRAY_LEN(bossDefeated); i++) {
         files[currFile].bossDefeated[i] = bossDefeated[i];
-        buff[cursor++] = bossDefeated[i];
+        fputc(bossDefeated[i], fp);
     }
     files[currFile].signature = VALID_SIGNATURE;
-    Save_Write32BE(VALID_SIGNATURE, buff, &cursor);
-    DB_Set(name, buff, (Uint32)cursor);
-    DB_Save();
+    File_WriteUint32BE(VALID_SIGNATURE, fp);
+    fclose(fp);
 }
 
 void Save_LoadFile(void) {
@@ -140,37 +112,33 @@ void Save_LoadFile(void) {
 
 void Save_EraseFile(int num) {
     memset(&files[num], 0, sizeof(SaveFile));
-    char name[20];
-    snprintf(name, sizeof(name), "file%d", num + 1);
-    DBEntry *entry = DB_Find(name);
-    if (entry) {
-        memset(entry->data, 0, entry->dataLen);
+    char filename[20];
+    snprintf(filename, sizeof(filename), "file%d.sav", num + 1);
+    FILE *fp = fopen(filename, "wb");
+    if (fp) {
+        for (int i = 0; i < sizeof(SaveFile); i++) {
+            fputc(0, fp);
+        }
+        fclose(fp);
     }
-    DB_Save();
-}
-
-static void Save_ReadRange(Uint8 *dest, Uint8 *src, int len, int *cursor) {
-    memcpy(dest, &src[*cursor], len);
-    *cursor += len;
 }
 
 void Save_Init(void) {
-    char name[20];
-    DBEntry *entry;
+    char filename[20];
     for (int i = 0; i < NUM_FILES; i++) {
-        snprintf(name, sizeof(name), "file%d", i + 1);
-        entry = DB_Find(name);
-        if (entry) {
-            int cursor = 0;
-            files[i].maxHealth = Save_Read16BE(entry->data, &cursor);
-            files[i].maxMagic = Save_Read16BE(entry->data, &cursor);
-            files[i].highestStage = entry->data[cursor++];
-            files[i].keywordDisplay = entry->data[cursor++];
-            files[i].orbCollected = entry->data[cursor++];
-            Save_ReadRange(&files[i].levels[0], entry->data, ARRAY_LEN(files[0].levels), &cursor);
-            Save_ReadRange(&files[i].items[0], entry->data, ARRAY_LEN(files[0].items), &cursor);
-            Save_ReadRange(&files[i].bossDefeated[0], entry->data, ARRAY_LEN(files[0].bossDefeated), &cursor);
-            files[i].signature = Save_Read32BE(entry->data, &cursor);
+        snprintf(filename, sizeof(filename), "file%d.sav", i + 1);
+        FILE *fp = fopen(filename, "rb");
+        if (fp) {
+            files[i].maxHealth = File_ReadUint16BE(fp);
+            files[i].maxMagic = File_ReadUint16BE(fp);
+            files[i].highestStage = fgetc(fp);
+            files[i].keywordDisplay = fgetc(fp);
+            files[i].orbCollected = fgetc(fp);
+            fread(&files[i].levels[0], 1, ARRAY_LEN(files[0].levels), fp);
+            fread(&files[i].items[0], 1, ARRAY_LEN(files[0].items), fp);
+            fread(&files[i].bossDefeated[0], 1, ARRAY_LEN(files[0].bossDefeated), fp);
+            files[i].signature = File_ReadUint32BE(fp);
+            fclose(fp);
         }
     }
 }
@@ -293,13 +261,13 @@ int Save_Screen(void) {
                 erase ^= 1;
                 cursor = 0;
             }
-            // selected a file to erase
+                // selected a file to erase
             else if (erase) {
                 Save_EraseFile(cursor);
                 erase = 0;
                 cursor = 0;
             }
-            // selected a file to play
+                // selected a file to play
             else { break; }
         }
     }

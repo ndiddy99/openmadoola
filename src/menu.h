@@ -19,8 +19,55 @@
 #pragma once
 #include "constants.h"
 
-void Menu_Init(Uint16 x, Uint16 y);
-void Menu_AddLink(char *text, int num, int (*cb)(int num));
-void Menu_AddList(char *text, char **options, int startVal, int (*cb)(int num));
-void Menu_AddNum(char *text, int startVal, int (*cb)(int num));
-void Menu_Run(int spacing);
+typedef enum {
+    ITEM_TYPE_NONE,
+    ITEM_TYPE_BACK,
+    ITEM_TYPE_LINK,
+    ITEM_TYPE_LIST,
+    ITEM_TYPE_NUM,
+} MenuItemType;
+
+typedef struct Menu Menu;
+
+typedef struct MenuItem {
+    MenuItemType type;
+    char *text;
+    int num;
+    char **options;
+    int (*init)(void);
+    int (*change)(int);
+    void (*link)(void);
+} MenuItem;
+
+#define MENU_BACK(textParam) \
+    {.type = ITEM_TYPE_BACK, \
+    .text =  textParam}
+
+#define MENU_LINK(textParam, linkParam) \
+    {.type = ITEM_TYPE_LINK, \
+    .text = textParam, \
+    .link = linkParam}
+
+#define MENU_LIST(textParam, optionsParam, initParam, changeParam) \
+    {.type = ITEM_TYPE_LIST, \
+    .text = textParam, \
+    .options = optionsParam, \
+    .init = initParam, \
+    .change = changeParam}
+
+#define MENU_NUM(textParam, initParam, changeParam) \
+    {.type = ITEM_TYPE_NUM, \
+    .text = textParam, \
+    .init = initParam, \
+    .change = changeParam}
+
+/**
+ * @brief Displays a menu screen
+ * @param menuX display x position
+ * @param menuY display y position
+ * @param spacing how many lines to put between each row of text
+ * @param items pointer to MenuItem array (see menu.h for MenuItem struct initialization macros)
+ * @param numItems size of MenuItem array
+ * @param draw optional function that gets run each frame
+ */
+void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing, MenuItem *items, int numItems, void (*draw)(void));

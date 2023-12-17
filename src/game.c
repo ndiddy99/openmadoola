@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "camera.h"
+#include "db.h"
 #include "ending.h"
 #include "enemy.h"
 #include "game.h"
@@ -212,6 +213,12 @@ static void Game_SpawnFountain(SpawnInfo *info) {
 noreturn void Game_Run(void) {
     // the last room number Lucia was in this stage
     Uint16 lastRoom;
+
+    // initialize game type
+    DBEntry *gameTypeEntry = DB_Find("gametype");
+    if (gameTypeEntry) {
+        gameType = gameTypeEntry->data[0];
+    }
 
 startGameCode:
     Screen_Title();

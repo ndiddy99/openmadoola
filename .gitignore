@@ -2,6 +2,7 @@
 *.nes
 *.lvl
 *.db
+*.sav
 imgui.ini
 build/
 .idea/

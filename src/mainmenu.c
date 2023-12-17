@@ -37,48 +37,13 @@ static Uint8 palette[] = {
     0x0F, 0x13, 0x23, 0x33,
 };
 
-static int exitMenu = 0;
-static int redraw = 0;
-
-static int startCB(int num) {
-    exitMenu = 1;
-    return 0;
-}
-
-static int optionsCB(int num) {
-    Options_Run();
-    redraw = 1;
-    return 0;
-}
+static MenuItem items[] = {
+    MENU_BACK("Start Game"),
+    MENU_LINK("Options", Options_Run),
+};
 
 void MainMenu_Run(void) {
-    int cursor = 0;
-
-    Sound_Reset();
-    BG_Scroll(BG_CENTERED_X, 0);
     BG_SetAllPalettes(palette);
     Sprite_SetAllPalettes(palette + 16);
-
-start:
-    Menu_Init(11, 10);
-    Menu_AddLink("Start Game", 0, startCB);
-    Menu_AddLink("Options", 0, optionsCB);
-
-    while (!exitMenu) {
-        System_StartFrame();
-        Sprite_ClearList();
-        BG_Clear();
-
-        Menu_Run(4);
-
-        BG_Draw();
-        Sprite_EndFrame();
-        System_EndFrame();
-
-        if (redraw) {
-            redraw = 0;
-            goto start;
-        }
-    }
-    exitMenu = 0;
+    Menu_Run(11, 10, 4, items, ARRAY_LEN(items), NULL);
 }

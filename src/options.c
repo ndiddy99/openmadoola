@@ -18,6 +18,7 @@
 
 #include "bg.h"
 #include "constants.h"
+#include "db.h"
 #include "game.h"
 #include "graphics.h"
 #include "input.h"
@@ -64,8 +65,9 @@ static void Options_InputCallback(int button) {
 
 #define KEYBOARD_CONTROLS 0
 #define GAMEPAD_CONTROLS 1
+static int mapType;
 
-void Options_Map(int type) {
+void Options_Map(void) {
     BG_Clear();
     Input_SetOnPressFunc(Options_InputCallback);
     for (int i = 0; i < ARRAY_LEN(buttonNames); i++) {
@@ -77,7 +79,7 @@ void Options_Map(int type) {
             System_EndFrame();
             if (last != INPUT_INVALID) {
                 BG_Print(24, (i * 2) + 2, 0, "%s", Input_ButtonName(last));
-                if (type == KEYBOARD_CONTROLS) {
+                if (mapType == KEYBOARD_CONTROLS) {
                     Joy_MapKey(last, buttonNames[i].button);
                 }
                 else {
@@ -99,52 +101,29 @@ void Options_Map(int type) {
     }
 }
 
-static int mapCB(int num) {
-    Options_Map(num);
-    return 0;
-}
-
-
-static int backCB(int num) {
-    exitMenu = 1;
-    redraw = 1;
-    return 0;
-}
-
-void Options_Controls(int type) {
-    Menu_Init(12, 24);
-    Menu_AddLink("Map", type, mapCB);
-    Menu_AddLink("Back", 0, backCB);
-
-    while (!exitMenu) {
-        System_StartFrame();
-        Sprite_ClearList();
-
-        BG_Clear();
-        if (type == KEYBOARD_CONTROLS) {
-            BG_Print(8, 2, 0, "Keyboard Controls");
+void controlsDraw(void) {
+    if (mapType == KEYBOARD_CONTROLS) {
+        BG_Print(8, 2, 0, "Keyboard Controls");
+    }
+    else {
+        BG_Print(8, 2, 0, "Gamepad Controls");
+    }
+    for (int i = 0; i < ARRAY_LEN(buttonNames); i++) {
+        if (mapType == KEYBOARD_CONTROLS) {
+            BG_Print(6, (i * 2) + 6, 0, "%-10s %s", buttonNames[i].name,
+                     Joy_StrKey(buttonNames[i].button));
         }
         else {
-            BG_Print(8, 2, 0, "Gamepad Controls");
+            BG_Print(6, (i * 2) + 6, 0, "%-10s %s", buttonNames[i].name,
+                     Joy_StrGamepad(buttonNames[i].button));
         }
-        for (int i = 0; i < ARRAY_LEN(buttonNames); i++) {
-            if (type == KEYBOARD_CONTROLS) {
-                BG_Print(6, (i * 2) + 6, 0, "%-10s %s", buttonNames[i].name,
-                         Joy_StrKey(buttonNames[i].button));
-            }
-            else {
-                BG_Print(6, (i * 2) + 6, 0, "%-10s %s", buttonNames[i].name,
-                         Joy_StrGamepad(buttonNames[i].button));
-            }
-        }
-        Menu_Run(2);
-
-        BG_Draw();
-        Sprite_EndFrame();
-        System_EndFrame();
     }
-    exitMenu = 0;
 }
+
+static MenuItem controlsItems[] = {
+    MENU_LINK("Map", Options_Map),
+    MENU_BACK("Back"),
+};
 
 static char *fullscreenOptions[] = {"OFF", "ON"};
 
@@ -157,50 +136,43 @@ static int scaleCB(int num) {
     return Platform_SetVideoScale(num);
 }
 
-static int controlsCB(int num) {
-    Options_Controls(num);
-    return 0;
+static void keyboardLink(void) {
+    mapType = KEYBOARD_CONTROLS;
+    Menu_Run(12, 24, 2, controlsItems, ARRAY_LEN(controlsItems), controlsDraw);
+}
+
+static void gamepadLink(void) {
+    mapType = GAMEPAD_CONTROLS;
+    Menu_Run(12, 24, 2, controlsItems, ARRAY_LEN(controlsItems), controlsDraw);
 }
 
 static char *gameTypeOptions[] = {"Original", "Plus"};
 
+static int gameTypeInit(void) { return gameType; }
+
 static int gameTypeCB(int num) {
     num &= 1;
     gameType = num;
+    DB_Set("gametype", &gameType, 1);
+    DB_Save();
     return num;
 }
 
+static MenuItem optionsItems[] = {
+    MENU_LIST("Fullscreen", fullscreenOptions, Platform_GetFullscreen, fullscreenCB),
+    MENU_NUM("Window scale", Platform_GetVideoScale, scaleCB),
+    MENU_LINK("Keyboard controls", keyboardLink),
+    MENU_LINK("Gamepad controls", gamepadLink),
+    MENU_LIST("Game type", gameTypeOptions, gameTypeInit, gameTypeCB),
+    MENU_BACK("Back"),
+};
+
+void Options_Draw(void) {
+    BG_Print(12, 2, 0, "Options");
+}
+
 void Options_Run(void) {
-    Sound_Reset();
-    BG_Scroll(BG_CENTERED_X, 0);
     BG_SetAllPalettes(palette);
     Sprite_SetAllPalettes(palette + 16);
-
-start:
-    Menu_Init(6, 6);
-    Menu_AddList("Fullscreen", fullscreenOptions, Platform_GetFullscreen(), fullscreenCB);
-    Menu_AddNum("Window scale", Platform_GetVideoScale(), scaleCB);
-    Menu_AddLink("Keyboard controls", KEYBOARD_CONTROLS, controlsCB);
-    Menu_AddLink("Gamepad controls", GAMEPAD_CONTROLS, controlsCB);
-    Menu_AddList("Game type", gameTypeOptions, gameType, gameTypeCB);
-    Menu_AddLink("Back", 0, backCB);
-
-    while (!exitMenu) {
-        System_StartFrame();
-        Sprite_ClearList();
-        BG_Clear();
-
-        BG_Print(12, 2, 0, "Options");
-        Menu_Run(2);
-
-        BG_Draw();
-        Sprite_EndFrame();
-        System_EndFrame();
-        // TODO redo menu system so this isn't necessary
-        if (redraw) {
-            redraw = 0;
-            goto start;
-        }
-    }
-    exitMenu = 0;
+    Menu_Run(6, 6, 2, optionsItems, ARRAY_LEN(optionsItems), Options_Draw);
 }
