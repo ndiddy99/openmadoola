@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "constants.h"
+#include "db.h"
 #include "file.h"
 #include "input.h"
 #include "joy.h"
@@ -103,29 +104,31 @@ const char *Joy_StrGamepad(Uint32 joyButton) {
 }
 
 void Joy_SaveMappings(void) {
-    FILE *fp = fopen("joy.cfg", "wb");
-    if (!fp) {
-        ERROR_MSG("Couldn't open joy.cfg for writing!");
-        return;
-    }
+    Uint8 joyBuffer[(ARRAY_LEN(keyMappings) + ARRAY_LEN(gamepadMappings)) * 2];
     for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
-        File_WriteUint16BE((Uint16)keyMappings[i], fp);
-        File_WriteUint16BE((Uint16)gamepadMappings[i], fp);
+        joyBuffer[(i * 4) + 0] = keyMappings[i] >> 8;
+        joyBuffer[(i * 4) + 1] = keyMappings[i] & 0xff;
+        joyBuffer[(i * 4) + 2] = gamepadMappings[i] >> 8;
+        joyBuffer[(i * 4) + 3] = gamepadMappings[i] & 0xff;
     }
-    fclose(fp);
+    DB_Set("joy", joyBuffer, ARRAY_LEN(joyBuffer));
+    DB_Save();
 }
 
 void Joy_Init(void) {
-    FILE *fp = fopen("joy.cfg", "rb");
-    if (!fp) {
-        return;
-    }
+    DBEntry *joyEntry = DB_Find("joy");
+    Uint16 mapping;
+    if (joyEntry) {
+        for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
+            mapping =  joyEntry->data[(i * 4) + 0] << 8;
+            mapping |= joyEntry->data[(i * 4) + 1];
+            keyMappings[i] = mapping;
 
-    for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
-        keyMappings[i] = File_ReadUint16BE(fp);
-        gamepadMappings[i] = File_ReadUint16BE(fp);
+            mapping =  joyEntry->data[(i * 4) + 2] << 8;
+            mapping |= joyEntry->data[(i * 4) + 3];
+            gamepadMappings[i] = mapping;
+        }
     }
-    fclose(fp);
 }
 
 void Joy_Update(void) {

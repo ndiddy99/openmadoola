@@ -16,6 +16,7 @@
 *  along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "db.h"
 #include "joy.h"
 #include "platform.h"
 #include "rom.h"
@@ -24,13 +25,14 @@
 #include "system.h"
 
 int System_Init(void) {
-    // initialize platform code
-    if (!Platform_Init()) { return 0; }
-
     // load assets
     if (!Rom_LoadPrg("madoola.nes", 16, 32768))    { return 0; }
     if (!Rom_LoadChr("madoola.nes", 32784, 32768)) { return 0; }
     if (!Rom_LoadChr("font.bin", 0, 4096))         { return 0; }
+    DB_Init();
+
+    // initialize platform code
+    if (!Platform_Init()) { return 0; }
 
     // initialize engine components
     if (!Graphics_Init()) { return 0; }

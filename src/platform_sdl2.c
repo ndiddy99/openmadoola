@@ -21,12 +21,13 @@
 #include <stdlib.h>
 
 #include "constants.h"
+#include "db.h"
 #include "input.h"
 #include "nanotime.h"
 
 // --- video stuff ---
-static int scale = 3;
-static int fullscreen = 0;
+static Uint8 scale = 3;
+static Uint8 fullscreen = 0;
 #define NES_PALETTE_SIZE (64)
 static Uint32 nesPalette[NES_PALETTE_SIZE];
 static Uint16 nesBuffer[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -195,8 +196,10 @@ int Platform_SetVideoScale(int requested) {
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_TARGET,
                                          scaledWidth, scaledHeight);
-        return requested;
     }
+
+    DB_Set("scale", &scale, 1);
+    DB_Save();
     return scale;
 }
 
@@ -234,6 +237,8 @@ int Platform_SetFullscreen(int requested) {
         Platform_SetVideoScale(scale);
     }
 
+    DB_Set("fullscreen", &fullscreen, 1);
+    DB_Save();
     return fullscreen;
 }
 
@@ -304,6 +309,11 @@ int Platform_Init(void) {
     if (!Platform_InitAudio()) { return 0; }
     controller = Platform_FindController();
     if (!Platform_LoadPalette()) { return 0; }
+
+    DBEntry *entry = DB_Find("scale");
+    if (entry) { Platform_SetVideoScale(entry->data[0]); }
+    entry = DB_Find("fullscreen");
+    if (entry) { Platform_SetFullscreen(entry->data[0]); }
 
     return 1;
 }

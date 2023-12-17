@@ -1,7 +1,7 @@
 .DS_Store
 *.nes
 *.lvl
-*.sav
+*.db
 imgui.ini
 build/
 .idea/
