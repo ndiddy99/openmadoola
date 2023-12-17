@@ -81,7 +81,7 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
                         exitFlag = 1;
                     }
                 }
-                BG_Print(menuX, currY, 0, items[i].text);
+                BG_Print(menuX, currY, 0, "%s", items[i].text);
                 break;
 
             case ITEM_TYPE_LINK:
@@ -90,7 +90,7 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
                         items[i].link();
                     }
                 }
-                BG_Print(menuX, currY, 0, items[i].text);
+                BG_Print(menuX, currY, 0, "%s", items[i].text);
                 break;
 
             case ITEM_TYPE_LIST:

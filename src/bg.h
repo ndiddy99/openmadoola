@@ -75,6 +75,9 @@ int BG_Print(Uint16 x, Uint16 y, Uint8 palnum, char *fmt, ...);
  * @param args arguments
  * @returns The length of the printed message
  */
+#ifdef __GNUC__
+__attribute__((__format__(__printf__, 4, 0)))
+#endif
 int BG_VPrint(Uint16 x, Uint16 y, Uint8 palnum, char *fmt, va_list args);
 
 /**

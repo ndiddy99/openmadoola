@@ -56,9 +56,6 @@ struct {
 };
 
 static int last = INPUT_INVALID;
-static int exitMenu = 0;
-static int redraw = 0;
-
 static void Options_InputCallback(int button) {
     last = button;
 }

@@ -85,7 +85,7 @@ void DB_Init(void) {
     FILE *fp = fopen(DB_FILENAME, "rb");
     if (fp) {
         // name can't be more than 256 bytes because of the length field
-        Uint8 name[256];
+        char name[256];
         Uint32 dataBuffSize = 256;
         Uint8 *dataBuff = malloc(dataBuffSize);
         Uint32 savedEntries = File_ReadUint32BE(fp);
