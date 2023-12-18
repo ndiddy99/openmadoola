@@ -101,6 +101,7 @@ void DB_Init(void) {
             DB_Set(name, dataBuff, dataLen);
         }
         free(dataBuff);
+        fclose(fp);
     }
 }
 

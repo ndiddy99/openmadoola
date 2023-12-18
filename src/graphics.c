@@ -30,8 +30,6 @@
 // NES color palette
 #define PALETTE_FILE "nes.pal"
 #define NES_PALETTE_SIZE 64
-// which RGB colors map to each NES color
-static Uint32 nesPalette[NES_PALETTE_SIZE];
 static Uint8 *dispPalette;
 
 // 8bpp chunky version of chrRom
@@ -69,26 +67,9 @@ int Graphics_Init(void) {
             }
         }
     }
-
-    // load palette file
-    FILE *fp = fopen(PALETTE_FILE, "rb");
-    if (!fp) {
-        ERROR_MSG("Couldn't open " PALETTE_FILE);
-        goto error;
-    }
-
-    for (int i = 0; i < NES_PALETTE_SIZE; i++) {
-        Uint8 r = fgetc(fp);
-        Uint8 g = fgetc(fp);
-        Uint8 b = fgetc(fp);
-
-        nesPalette[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
-    }
-    fclose(fp);
-
     return 1;
 
-    error:
+error:
     if (chr_data) { free(chr_data); }
     return 0;
 }
