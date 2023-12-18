@@ -6,9 +6,9 @@ Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
 
 ## Usage
 
-OpenMadoola will look for a Wing of Madoola ROM image named "madoola.nes" in the current working directory (its directory if you're not running it from the command line). It gets all the graphics and level data from the ROM image, and will refuse to start if it is not present.
+OpenMadoola will look for a Wing of Madoola ROM image named "madoola.nes" in the current working directory (its directory if you're not running it from the command line). It gets all the graphics and level data from the ROM image, and will refuse to start if it is not present. It will also need the font.bin and nes.pal files from this repository.
 
-OpenMadoola will also save data to the current working directory. There's currently no way to change that, so sorry to everyone who likes to install stuff to /usr/local/bin.
+OpenMadoola will save data to the current working directory. There's currently no way to change that, so sorry to everyone who likes to install stuff to /usr/local/bin.
 
 ### Default controls
 Keyboard | Gamepad (xbox layout) | Equivalent NES button
