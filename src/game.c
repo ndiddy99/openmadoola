@@ -246,10 +246,10 @@ showSaveScreen:
             bossDefeated[i] = 0;
         }
         stage = 0;
+        orbCollected = 0;
+        keywordDisplay = 0;
     }
 
-    orbCollected = 0;
-    keywordDisplay = 0;
     paused = 0;
     currentWeapon = WEAPON_SWORD;
 
