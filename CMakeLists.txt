@@ -204,6 +204,13 @@ set_target_properties(OpenMadoola PROPERTIES
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
+
+# endianness
+include(TestBigEndian)
+test_big_endian(endian)
+if(endian)
+    target_compile_definitions(OpenMadoola PRIVATE OM_BIG_ENDIAN)
+endif()
     
 # work around msvc nonsense
 if(MSVC)

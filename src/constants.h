@@ -19,7 +19,7 @@
 #pragma once
 #include <SDL.h>
 
-#define OPENMADOOLA_VERSION "1.0"
+#define OPENMADOOLA_VERSION "1.0.1"
 
 #define SCREEN_WIDTH (256) // original NES aspect ratio
 //#define SCREEN_WIDTH (368) // approx. 16:9 aspect ratio
@@ -39,9 +39,16 @@
 
 // this makes it easier to access the low/high bytes of the value
 typedef union {
+#ifdef OM_BIG_ENDIAN
+    struct {
+        Sint8 h;
+        Uint8 l;
+    };
+#else
     struct {
         Uint8 l;
         Sint8 h;
     } f;
+#endif
     Sint16 v;
 } Fixed16;
