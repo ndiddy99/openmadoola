@@ -60,7 +60,7 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
             cursor++;
             if (cursor >= numItems) { cursor = 0; }
         }
-        cursorSpr.x = (menuX - 1) * TILE_WIDTH;
+        cursorSpr.x = ((menuX - 1) * TILE_WIDTH) - BG_CENTERED_X;
         cursorSpr.y = ((cursor * spacing + menuY) * TILE_HEIGHT) - 5;
         cursorSpr.size = SPRITE_8X16;
         cursorSpr.tile = 0xee;

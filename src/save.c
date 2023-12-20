@@ -145,7 +145,7 @@ void Save_Init(void) {
 
 static void Save_DrawLucia(Sint16 x, Sint16 y, Uint16 tile) {
     Sprite luciaSpr = { 0 };
-    luciaSpr.x = x;
+    luciaSpr.x = x - BG_CENTERED_X;
     luciaSpr.y = y;
     luciaSpr.size = SPRITE_16X16;
     luciaSpr.tile = tile;
@@ -220,11 +220,11 @@ int Save_Screen(void) {
                 }
             }
             // move the cursor over if there's a file
-            cursorSpr.x = saveValid ? 26 : 64;
+            cursorSpr.x = (saveValid ? 26 : 64) - BG_CENTERED_X;
             cursorSpr.y = 59 + (cursor * 48);
         }
         else {
-            cursorSpr.x = 64;
+            cursorSpr.x = 64 - BG_CENTERED_X;
             cursorSpr.y = 187 + ((cursor - NUM_FILES) * 32);
         }
         Sprite_Draw(&cursorSpr, NULL);
