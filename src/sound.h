@@ -57,6 +57,18 @@
 int Sound_Init(void);
 
 /**
+ * @brief Sets the volume.
+ * @param vol Percentage (0-100)
+ * @returns the new volume value
+ */
+int Sound_SetVolume(int vol);
+
+/**
+ * @returns the current volume.
+ */
+int Sound_GetVolume(void);
+
+/**
  * @brief Resets the sound engine (so nothing is playing)
 */
 void Sound_Reset(void);

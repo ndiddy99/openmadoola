@@ -33,6 +33,10 @@ void Blargg_Apu_Init(Uint32 sampleRate) {
     buf.sample_rate(sampleRate);
 }
 
+void Blargg_Apu_Volume(int volume) {
+    apu.volume((double)volume / 100.0);
+}
+
 static blip_time_t clock_tick(void) {
     clock_time += 4;
     return clock_time;

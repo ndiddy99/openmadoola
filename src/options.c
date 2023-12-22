@@ -129,10 +129,6 @@ static int fullscreenCB(int num) {
     return Platform_SetFullscreen(num);
 }
 
-static int scaleCB(int num) {
-    return Platform_SetVideoScale(num);
-}
-
 static void keyboardLink(void) {
     mapType = KEYBOARD_CONTROLS;
     Menu_Run(12, 24, 2, controlsItems, ARRAY_LEN(controlsItems), controlsDraw);
@@ -157,7 +153,8 @@ static int gameTypeCB(int num) {
 
 static MenuItem optionsItems[] = {
     MENU_LIST("Fullscreen", fullscreenOptions, Platform_GetFullscreen, fullscreenCB),
-    MENU_NUM("Window scale", Platform_GetVideoScale, scaleCB),
+    MENU_NUM("Window scale", Platform_GetVideoScale, Platform_SetVideoScale, 1),
+    MENU_NUM("Volume", Sound_GetVolume, Sound_SetVolume, 5),
     MENU_LINK("Keyboard controls", keyboardLink),
     MENU_LINK("Gamepad controls", gamepadLink),
     MENU_LIST("Game type", gameTypeOptions, gameTypeInit, gameTypeCB),

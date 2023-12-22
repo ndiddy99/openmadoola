@@ -111,11 +111,11 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
                 if (i == cursor) {
                     if (joyEdge & JOY_LEFT) {
                         Sound_Play(SFX_MENU);
-                        items[i].num = items[i].change(--items[i].num);
+                        items[i].num = items[i].change(items[i].num - items[i].step);
                     }
                     if (joyEdge & JOY_RIGHT) {
                         Sound_Play(SFX_MENU);
-                        items[i].num = items[i].change(++items[i].num);
+                        items[i].num = items[i].change(items[i].num + items[i].step);
                     }
                 }
                 BG_Print(menuX, currY, 0, "%s - %d -", items[i].text, items[i].num);

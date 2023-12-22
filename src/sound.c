@@ -21,6 +21,7 @@
 
 #include "blargg_apu.h"
 #include "constants.h"
+#include "db.h"
 #include "platform.h"
 #include "rom.h"
 #include "sound.h"
@@ -62,6 +63,8 @@ static Instrument savedInstruments[NUM_INSTRUMENTS];
 #define APU_CHANNELS 4
 static Uint8 channelsInUse[APU_CHANNELS];
 static Uint8 apuStatusCopy;
+// 0-100
+static int volume = 50;
 
 static void Sound_RunInstrument(Instrument *inst);
 static void Sound_DisableChannel(Uint8 channel);
@@ -100,6 +103,11 @@ static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
 
 int Sound_Init(void) {
     Blargg_Apu_Init(SOUND_FREQ);
+    DBEntry *entry = DB_Find("volume");
+    if (entry) {
+        volume = (int)entry->data[0];
+    }
+    Blargg_Apu_Volume(volume);
 
     // load sound data from the ROM
     Uint8 *src = chrRom + CHR_ROM_SOUND;
@@ -120,6 +128,20 @@ int Sound_Init(void) {
 
     Sound_Reset();
     return 1;
+}
+
+int Sound_SetVolume(int vol) {
+    volume = vol;
+    CLAMP(volume, 0, 100);
+    Blargg_Apu_Volume(volume);
+    Uint8 volumeByte = (Uint8)volume;
+    DB_Set("volume", &volumeByte, 1);
+    DB_Save();
+    return volume;
+}
+
+int Sound_GetVolume(void) {
+    return volume;
 }
 
 void Sound_Reset(void) {

@@ -30,6 +30,12 @@ extern "C" {
 void Blargg_Apu_Init(Uint32 sampleRate);
 
 /**
+ * @brief Sets the APU volume
+ * @param volume percentage (0-100)
+ */
+void Blargg_Apu_Volume(int volume);
+
+/**
  * @brief Clears the APU sound buffer
  */
 void Blargg_Apu_ClearBuffer(void);

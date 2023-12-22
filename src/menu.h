@@ -33,6 +33,7 @@ typedef struct MenuItem {
     MenuItemType type;
     char *text;
     int num;
+    int step;
     char **options;
     int (*init)(void);
     int (*change)(int);
@@ -55,11 +56,12 @@ typedef struct MenuItem {
     .init = initParam, \
     .change = changeParam}
 
-#define MENU_NUM(textParam, initParam, changeParam) \
+#define MENU_NUM(textParam, initParam, changeParam, stepParam) \
     {.type = ITEM_TYPE_NUM, \
     .text = textParam, \
     .init = initParam, \
-    .change = changeParam}
+    .change = changeParam, \
+    .step = stepParam}
 
 /**
  * @brief Displays a menu screen
