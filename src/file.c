@@ -60,6 +60,7 @@ Uint32 File_ReadUint32BE(FILE *fp) {
     return i;
 }
 
+#ifdef OM_UNIX
 static void checkBuffSize(int size) {
     if (!filenameBuff) { filenameBuff = malloc(filenameBuffLen); }
     if (size > filenameBuffLen) {
@@ -67,6 +68,7 @@ static void checkBuffSize(int size) {
         filenameBuff = realloc(filenameBuff, filenameBuffLen);
     }
 }
+#endif
 
 FILE *File_Open(char *filename, const char *mode) {
 #ifdef OM_UNIX
