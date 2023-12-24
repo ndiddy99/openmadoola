@@ -60,18 +60,19 @@ Uint32 File_ReadUint32BE(FILE *fp) {
     return i;
 }
 
+static void checkBuffSize(int size) {
+    if (!filenameBuff) { filenameBuff = malloc(filenameBuffLen); }
+    if (size > filenameBuffLen) {
+        filenameBuffLen = size;
+        filenameBuff = realloc(filenameBuff, filenameBuffLen);
+    }
+}
+
 FILE *File_Open(char *filename, const char *mode) {
 #ifdef OM_UNIX
     const char dirname[] = OM_HOMEDIR;
     char *homedir = getenv("HOME");
-
-    if (!filenameBuff) { filenameBuff = malloc(filenameBuffLen); }
-    int neededLen = strlen(homedir) + 1 + strlen(dirname) + 1 + strlen(filename) + 1;
-    if (neededLen > filenameBuffLen) {
-        filenameBuffLen = neededLen;
-        filenameBuff = realloc(filenameBuff, filenameBuffLen);
-    }
-
+    checkBuffSize(strlen(homedir) + 1 + strlen(dirname) + 1 + strlen(filename) + 1);
     strcpy(filenameBuff, homedir);
     strcat(filenameBuff, "/");
     strcat(filenameBuff, dirname);
@@ -98,8 +99,6 @@ static char *resourceDirs[] = {
 FILE *File_OpenResource(char *filename) {
     // set up home data directory name
 #ifdef OM_UNIX
-    if (!filenameBuff) { filenameBuff = malloc(filenameBuffLen); }
-
     if (!resourceDirs[0]) {
         char *homedir = getenv("HOME");
         resourceDirs[0] = malloc(strlen(homedir) + 1 + strlen(OM_HOMEDIR) + 2);
@@ -110,11 +109,7 @@ FILE *File_OpenResource(char *filename) {
     }
 
     for (int i = 0; i < ARRAY_LEN(resourceDirs); i++) {
-        int neededLen = strlen(resourceDirs[i]) + strlen(filename) + 1;
-        if (neededLen > filenameBuffLen) {
-            filenameBuffLen = neededLen;
-            filenameBuff = realloc(filenameBuff, filenameBuffLen);
-        }
+        checkBuffSize(strlen(resourceDirs[i]) + strlen(filename) + 1);
         strcpy(filenameBuff, resourceDirs[i]);
         strcat(filenameBuff, filename);
         FILE *fp = fopen(filenameBuff, "rb");
