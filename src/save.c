@@ -63,7 +63,7 @@ static int currFile;
 void Save_SaveFile(void) {
     char filename[20];
     snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
-    FILE *fp = fopen(filename, "wb");
+    FILE *fp = File_Open(filename, "wb");
     if (!fp) {
         ERROR_MSG("Error opening save file for writing");
         return;
@@ -114,7 +114,7 @@ void Save_EraseFile(int num) {
     memset(&files[num], 0, sizeof(SaveFile));
     char filename[20];
     snprintf(filename, sizeof(filename), "file%d.sav", num + 1);
-    FILE *fp = fopen(filename, "wb");
+    FILE *fp = File_Open(filename, "wb");
     if (fp) {
         for (int i = 0; i < sizeof(SaveFile); i++) {
             fputc(0, fp);
@@ -127,7 +127,7 @@ void Save_Init(void) {
     char filename[20];
     for (int i = 0; i < NUM_FILES; i++) {
         snprintf(filename, sizeof(filename), "file%d.sav", i + 1);
-        FILE *fp = fopen(filename, "rb");
+        FILE *fp = File_Open(filename, "rb");
         if (fp) {
             files[i].maxHealth = File_ReadUint16BE(fp);
             files[i].maxMagic = File_ReadUint16BE(fp);

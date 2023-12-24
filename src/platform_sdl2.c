@@ -22,6 +22,7 @@
 
 #include "constants.h"
 #include "db.h"
+#include "file.h"
 #include "input.h"
 #include "nanotime.h"
 
@@ -283,7 +284,7 @@ static SDL_GameController *Platform_FindController(void) {
 }
 
 static int Platform_LoadPalette(void) {
-    FILE *fp = fopen("nes.pal", "rb");
+    FILE *fp = File_OpenResource("nes.pal");
     if (!fp) {
         ERROR_MSG("Couldn't open nes.pal");
         return 0;

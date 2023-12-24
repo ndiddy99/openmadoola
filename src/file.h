@@ -47,3 +47,20 @@ void File_WriteUint32BE(Uint32 data, FILE *fp);
  * @returns The read number
  */
 Uint32 File_ReadUint32BE(FILE *fp);
+
+/**
+ * @brief Opens the given file from $HOME/.openmadoola/filename on unix-like
+ * systems, current working directory on other systems.
+ * @param filename the name of the file to open
+ * @param mode fopen mode code
+ * @returns the file pointer to the opened file
+ */
+FILE *File_Open(char *filename, const char *mode);
+
+/**
+ * @brief For opening a read-only data file. On unix-like systems, iterates
+ * through a few directories before giving up (see resourceDirs array in file.c)
+ * @param filename the name of the file to open
+ * @returns the file pointer to the opened file
+ */
+FILE *File_OpenResource(char *filename);

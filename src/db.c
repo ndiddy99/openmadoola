@@ -82,7 +82,7 @@ void DB_Init(void) {
     numEntries = 0;
 
     // load db file from disk
-    FILE *fp = fopen(DB_FILENAME, "rb");
+    FILE *fp = File_Open(DB_FILENAME, "rb");
     if (fp) {
         // name can't be more than 256 bytes because of the length field
         char name[256];
@@ -106,7 +106,7 @@ void DB_Init(void) {
 }
 
 void DB_Save(void) {
-    FILE *fp = fopen(DB_FILENAME, "wb");
+    FILE *fp = File_Open(DB_FILENAME, "wb");
     if (!fp) {
         ERROR_MSG("Couldn't open " DB_FILENAME " for writing");
         return;

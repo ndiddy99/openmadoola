@@ -20,6 +20,7 @@
 #include <stdio.h>
 
 #include "constants.h"
+#include "file.h"
 #include "map.h"
 #include "rom.h"
 
@@ -38,7 +39,7 @@ static char errorBuff[80];
 
 static int Rom_Load(char *filename, int offset, int size, Uint8 **romBuff, int romBuffSize) {
     // open file
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp = File_OpenResource(filename);
     if (!fp) {
         snprintf(errorBuff, sizeof(errorBuff), "Couldn't find %s", filename);
         ERROR_MSG(errorBuff);
