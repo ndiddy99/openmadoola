@@ -336,37 +336,18 @@ mainGameLoop:
 
 }
 
-static Uint8 roomSongs[] = {
-    MUS_OVERWORLD,
-    MUS_OVERWORLD,
-    MUS_OVERWORLD,
-    MUS_CAVE,
-    MUS_CAVE,
-    MUS_CAVE,
-    MUS_BOSS,
-    MUS_ITEM,
-    MUS_CASTLE,
-    MUS_CASTLE,
-    MUS_CASTLE,
-    MUS_CASTLE,
-    MUS_CASTLE,
-    MUS_CASTLE,
-    MUS_CASTLE,
-    MUS_ITEM,
-};
-
 void Game_PlayRoomSong(void) {
     Sound_Reset();
-    Uint8 index = currRoom & 0xf;
+    Uint8 song = mapData.rooms[currRoom].song;
     // are we in stage 16's room?
-    if (index == 14) {
+    if (currRoom == 14) {
         // don't play any music if darutos has been killed
         if (orbCollected) {
             return;
         }
         // if lucia collected the wing of madoola, play the castle theme
         if (hasWing) {
-            Sound_Play(roomSongs[index]);
+            Sound_Play(song);
         }
         // otherwise play the boss room theme
         else {
@@ -375,7 +356,7 @@ void Game_PlayRoomSong(void) {
     }
     // if we're in the boss room, play the boss music if the boss hasn't been
     // killed, and the item room music if it has been
-    else if (roomSongs[index] == MUS_BOSS) {
+    else if (song == MUS_BOSS) {
         if (bossActive) {
             Sound_Play(MUS_BOSS);
         }
@@ -384,7 +365,7 @@ void Game_PlayRoomSong(void) {
         }
     }
     else {
-        Sound_Play(roomSongs[index]);
+        Sound_Play(song);
     }
 }
 

@@ -46,6 +46,8 @@ typedef struct {
 typedef struct {
     // which tileset to use
     Uint16 tileset;
+    // which song to play
+    Uint8 song;
     // palette data to use
     Uint8 palette[16];
     // rooms are 8x8 arrays of screens (2048x2048px)

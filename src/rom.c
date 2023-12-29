@@ -138,7 +138,13 @@ void Rom_GetMapData(MapData *data) {
         #define ROOM_BANK_TBL (0x44bf)
         #define BASE_BANK 4
         data->rooms[i].tileset = (Uint16)(prgRom[ROOM_BANK_TBL + i] >> 4) - BASE_BANK;
-    
+
+        // get song
+        #define ROOM_SONG_TBL (0x2b4f)
+        data->rooms[i].song = prgRom[ROOM_SONG_TBL + i];
+        // original game didn't have song index 8 defined, so this fixes that issue
+        if (data->rooms[i].song >= 9) { data->rooms[i].song--; }
+
         #define ROOM_PALETTE_TBL (0x35ff)
         for (int j = 0; j < ARRAY_LEN(data->rooms[0].palette); j++) {
             int palette_offset = ROOM_PALETTE_TBL + (i * 16) + j;
