@@ -27,11 +27,11 @@
 
 MapData mapData;
 Uint16 mapMetatiles[MAP_HEIGHT_METATILES * MAP_WIDTH_METATILES];
-Uint16 currRoom = 0xffff;
+Uint8 currRoom = 0xff;
 static Uint16 scrollX;
 static Uint16 scrollY;
 
-void Map_Init(Uint16 roomNum) {
+void Map_Init(Uint8 roomNum) {
     if (roomNum == currRoom) { return; }
 
     currRoom = roomNum;

@@ -133,9 +133,7 @@ void Rom_GetMapData(MapData *data) {
     }
 
     // there are 16 rooms
-    data->numRooms = 16;
-    data->rooms = malloc(data->numRooms * sizeof(data->rooms[0]));
-    for (int i = 0; i < data->numRooms; i++) {
+    for (int i = 0; i < 16; i++) {
         // get tileset
         #define ROOM_BANK_TBL (0x44bf)
         #define BASE_BANK 4
@@ -183,6 +181,16 @@ void Rom_GetMapData(MapData *data) {
                 data->rooms[i].spawns[j].count = enemy_val >> 4;
             }
         }
+    }
+
+    // load stage init data
+    #define STAGE_INIT_TBL (0x2af6)
+    for (int i = 0; i < 16; i++) {
+        data->stages[i].xPos.f.h = prgRom[STAGE_INIT_TBL + (i * 3) + 0];
+        data->stages[i].xPos.f.l = 0x80;
+        data->stages[i].yPos.f.h = prgRom[STAGE_INIT_TBL + (i * 3) + 1];
+        data->stages[i].yPos.f.l = 0x80;
+        data->stages[i].roomNum  = prgRom[STAGE_INIT_TBL + (i * 3) + 2];
     }
 
     // load warp door data

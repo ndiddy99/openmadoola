@@ -112,7 +112,7 @@ typedef struct {
     Uint8 type;
 } Object;
 
-#define MAX_OBJECTS (100)
+#define MAX_OBJECTS (256)
 // object 0 = Lucia
 // objects 1-8 = Lucia's weapons
 // objects 9-MAX_OBJECTS: anything else

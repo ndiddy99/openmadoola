@@ -63,28 +63,6 @@ Uint8 spritePalettes[16] = {
     0x00, 0x00, 0x27, 0x37,
 };
 
-// start x pos (high), start y pos (high), start room number
-static Uint8 stageInitTable[] = {
-    0x06, 0x0E, 0x00,
-    0x06, 0x0E, 0x01,
-    0x05, 0x0A, 0x03,
-    0x05, 0x0A, 0x05,
-    0x37, 0x3B, 0x0D,
-    0x06, 0x6E, 0x02,
-    0x05, 0x4A, 0x05,
-    0x27, 0x7B, 0x0D,
-    0x06, 0x2E, 0x00,
-    0x17, 0x0B, 0x0A,
-    0x17, 0x7B, 0x0C,
-    0x05, 0x7A, 0x04,
-    //0x07, 0x0b, 0x06, // stage 1 boss room
-    0x67, 0x7B, 0x0B,
-    0x27, 0x0B, 0x09,
-    0x37, 0x1B, 0x08,
-    0x37, 0x7B, 0x0E,
-    //0x32, 0x3f, 0x0E, // last stage, near the wing of madoola powerup
-};
-
 static Uint8 itemSpawnYOffsets[] = {
     0x09, 0x0B, 0x09, 0x0B,
 };
@@ -112,7 +90,7 @@ static void Game_HandleWeaponSwitch(void);
 static void Game_HandlePause(void);
 static void Game_SpawnFountain(SpawnInfo *info);
 static void Game_HandleRoomChange(void);
-static void Game_SetRoom(Uint16 roomNum);
+static void Game_SetRoom(Uint8 roomNum);
 static void Game_HandlePaletteShifting(void);
 
 void Game_InitVars(Object *o) {
@@ -264,12 +242,10 @@ initStage:
     // set up lucia's position and the room number
     Object *lucia = &objects[0];
     memset(lucia, 0, sizeof(Object));
-    lucia->x.f.l = 0x80;
-    lucia->y.f.l = 0x80;
+    lucia->x = mapData.stages[stage].xPos;
+    lucia->y = mapData.stages[stage].yPos;
+    Game_SetRoom(mapData.stages[stage].roomNum);
     hasWing = 0;
-    lucia->x.f.h = stageInitTable[stage * 3];
-    lucia->y.f.h = stageInitTable[stage * 3 + 1]; 
-    Game_SetRoom(stageInitTable[stage * 3 + 2]);
 
 initRoom:
     Game_InitVars(lucia);
@@ -456,7 +432,7 @@ static void Game_HandlePause(void) {
     }
 }
 
-static void Game_SetRoom(Uint16 roomNum) {
+static void Game_SetRoom(Uint8 roomNum) {
     if (roomNum == 15) { scrollMode = SCROLL_MODE_LOCKED; }
     else if ((roomNum == 6) || (roomNum == 7)) { scrollMode = SCROLL_MODE_X; }
     else { scrollMode = SCROLL_MODE_FREE; }

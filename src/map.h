@@ -64,14 +64,23 @@ typedef struct {
 } WarpDoor;
 
 typedef struct {
+    // Lucia spawn x
+    Fixed16 xPos;
+    // Lucia spawn y
+    Fixed16 yPos;
+    // room number
+    Uint8 roomNum;
+} StageInfo;
+
+typedef struct {
     Uint16 numTilesets;
     Tileset *tilesets;
     Uint16 numChunks;
     Uint16 (*chunks)[16]; // chunks are 4x4 arrays of metatiles (64x64px)
     Uint16 numScreens;
     Uint16 (*screens)[16]; // screens are 4x4 arrays of chunks (256x256px)
-    Uint16 numRooms;
-    Room *rooms;
+    Room rooms[16];
+    StageInfo stages[16];
     Uint16 numWarpDoors;
     WarpDoor *warpDoors;
 } MapData;
@@ -80,7 +89,7 @@ typedef struct {
 extern MapData mapData;
 
 // current room number
-extern Uint16 currRoom;
+extern Uint8 currRoom;
 
 #define METATILE_SIZE (16)
 #define MAP_WIDTH_METATILES (128)
@@ -98,7 +107,7 @@ extern Uint16 mapMetatiles[MAP_HEIGHT_METATILES * MAP_WIDTH_METATILES];
  * @brief Loads a room from the map data
  * @param room_num the room number to load
 */
-void Map_Init(Uint16 room_num);
+void Map_Init(Uint8 room_num);
 
 /**
  * @brief Loads the current room's palette into palette memory
