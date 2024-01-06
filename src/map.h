@@ -72,6 +72,12 @@ typedef struct {
     Fixed16 yPos;
     // room number
     Uint8 roomNum;
+    // boss object number
+    Uint8 bossObj;
+    // max number of boss objects to spawn at once
+    Uint8 bossSpawnCount;
+    // number of boss objects Lucia has to kill before the boss is defeated
+    Uint8 bossObjCount;
 } StageInfo;
 
 typedef struct {

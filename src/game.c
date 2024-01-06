@@ -67,25 +67,6 @@ static Uint8 itemSpawnYOffsets[] = {
     0x09, 0x0B, 0x09, 0x0B,
 };
 
-static Uint8 bossObjCounts[16] = {
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    50,
-    5,
-    1,
-    1,
-    30,
-    1,
-    1,
-};
-
 static void Game_HandleWeaponSwitch(void);
 static void Game_HandlePause(void);
 static void Game_SpawnFountain(SpawnInfo *info);
@@ -132,7 +113,7 @@ void Game_InitVars(Object *o) {
     else if (currRoom == 6) {
         if (!bossDefeated[stage]) {
             bossActive = 1;
-            numBossObjs = bossObjCounts[stage];
+            numBossObjs = mapData.stages[stage].bossObjCount;
         }
     }
 

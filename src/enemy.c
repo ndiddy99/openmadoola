@@ -25,26 +25,6 @@
 
 #define ENEMY_SLOT (9)
 
-// TODO read from rom and add to MAP_DATA struct
-Uint8 bossObjTypes[16] = {
-    OBJ_HOPEGG_INIT,
-    OBJ_MANTLE_SKULL_INIT,
-    OBJ_NIGITO_INIT,
-    OBJ_SUNEISA_INIT,
-    OBJ_ZADOFLY_INIT,
-    OBJ_PERASKULL_INIT,
-    OBJ_GAGUZUL_INIT,
-    OBJ_BUNYON_INIT,
-    OBJ_JOYRAIMA_INIT,
-    OBJ_NOMAJI_INIT,
-    OBJ_BUNYON_INIT,
-    OBJ_BIFORCE_INIT,
-    OBJ_BOSPIDO_INIT,
-    OBJ_BUNYON_INIT,
-    OBJ_BIFORCE_INIT,
-    OBJ_DARUTOS_INIT,
-};
-
 static int Enemy_InitLocation(Object *o) {
     o->type = OBJ_NONE;
     o->x.v = cameraX.v + 0x80;
@@ -112,15 +92,8 @@ void Enemy_Spawn(void) {
 
         // limit spawning objects for boss areas
         if (bossActive) {
-            info.enemy = bossObjTypes[stage];
-            // stage 9 has 50 nomajis as the boss
-            if (stage == 9) {
-                info.count = MIN(numBossObjs, 12);
-            }
-            // otherwise limit the max # of randomly spawned boss objects to 1
-            else {
-                info.count = 1;
-            }
+            info.enemy = mapData.stages[stage].bossObj;
+            info.count = MIN(numBossObjs, mapData.stages[stage].bossSpawnCount);
         }
 
         // get the object slot
@@ -141,7 +114,7 @@ void Enemy_Spawn(void) {
             if (!bossActive) {
                 return;
             }
-            o->type = bossObjTypes[stage];
+            o->type = info.enemy;
         }
 
         Object_FaceLucia(o);

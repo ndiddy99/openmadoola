@@ -191,12 +191,17 @@ void Rom_GetMapData(MapData *data) {
 
     // load stage init data
     #define STAGE_INIT_TBL (0x2af6)
+    #define BOSS_TYPE_TBL (0x5bcc)
+    #define BOSS_COUNT_TBL (0x443b)
     for (int i = 0; i < 16; i++) {
         data->stages[i].xPos.f.h = prgRom[STAGE_INIT_TBL + (i * 3) + 0];
         data->stages[i].xPos.f.l = 0x80;
         data->stages[i].yPos.f.h = prgRom[STAGE_INIT_TBL + (i * 3) + 1];
         data->stages[i].yPos.f.l = 0x80;
         data->stages[i].roomNum  = prgRom[STAGE_INIT_TBL + (i * 3) + 2];
+        data->stages[i].bossObj = prgRom[BOSS_TYPE_TBL + i];
+        data->stages[i].bossSpawnCount = (i == 9) ? 12 : 1;
+        data->stages[i].bossObjCount = prgRom[BOSS_COUNT_TBL + i];
     }
 
     // load warp door data
