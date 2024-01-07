@@ -19,7 +19,7 @@
 #pragma once
 #include <SDL.h>
 
-#define OPENMADOOLA_VERSION "1.0.2"
+#define OPENMADOOLA_VERSION "1.0.3"
 
 #define SCREEN_WIDTH (256) // original NES aspect ratio
 //#define SCREEN_WIDTH (368) // approx. 16:9 aspect ratio
