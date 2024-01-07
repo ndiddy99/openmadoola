@@ -6,11 +6,25 @@ Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
 
 ## Usage
 
-OpenMadoola will look for a Wing of Madoola ROM image named "madoola.nes" in the current working directory (its directory if you're not running it from the command line). It gets all the graphics and level data from the ROM image, and will refuse to start if it is not present. It will also need the font.bin and nes.pal files from this repository.
+In order to function, OpenMadoola requires a Wing of Madoola ROM image named "madoola.nes" as well as the font.bin and nes.pal data files from this repository. It reads all the graphics and level data from the ROM image, and will refuse to start if it is not present.
 
-OpenMadoola will save data to the current working directory. There's currently no way to change that, so sorry to everyone who likes to install stuff to /usr/local/bin.
+### UNIX-like platforms (GNU/Linux, Mac OS X, etc)
+
+OpenMadoola will attempt to read the ROM image and data files from these directories:
+
+1. `~/.openmadoola`
+2. `/usr/local/share/openmadoola`
+3. `/usr/share/openmadoola`
+4. Current working directory
+
+It will also write configuration and save data to `~/.openmadoola`.
+
+### Other platforms (Windows, etc)
+
+OpenMadoola will attempt to read the ROM image and data files from the current working directory (typically the directory the executable is in). It will also write configuration and save data to the current working directory.
 
 ### Default controls
+
 Keyboard | Gamepad (xbox layout) | Equivalent NES button
 -------- | --------------------- | ---------------------
 W | D-Pad Up | D-Pad Up
@@ -22,12 +36,12 @@ K | A | A
 Right Shift | Back | Select
 Enter | Start | Start
 
-You can change the controls in the options menu. Pressing A+B+Select+Start in-game will exit to the title screen.
+You can change the controls in the options menu. Pressing A+B+Select+Start while in-game will exit to the title screen.
 
 
 ## Build Instructions
 
-### GNU/Linux or Mac OS X
+### UNIX-like platforms (GNU/Linux, Mac OS X, etc)
 
 Install GCC or Clang, make, cmake, and the SDL2 development libraries from your package manager.
 

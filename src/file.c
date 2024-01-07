@@ -74,16 +74,21 @@ FILE *File_Open(char *filename, const char *mode) {
 #ifdef OM_UNIX
     const char dirname[] = OM_HOMEDIR;
     char *homedir = getenv("HOME");
-    checkBuffSize(strlen(homedir) + 1 + strlen(dirname) + 1 + strlen(filename) + 1);
-    strcpy(filenameBuff, homedir);
-    strcat(filenameBuff, "/");
-    strcat(filenameBuff, dirname);
-    // try to make the directory in case it doesn't exist
-    mkdir(filenameBuff, S_IRWXU);
-    strcat(filenameBuff, "/");
-    // concatenate the directory name with the requested filename
-    strcat(filenameBuff, filename);
-    return fopen(filenameBuff, mode);
+    if (homedir) {
+        checkBuffSize(strlen(homedir) + 1 + strlen(dirname) + 1 + strlen(filename) + 1);
+        strcpy(filenameBuff, homedir);
+        strcat(filenameBuff, "/");
+        strcat(filenameBuff, dirname);
+        // try to make the directory in case it doesn't exist
+        mkdir(filenameBuff, S_IRWXU);
+        strcat(filenameBuff, "/");
+        // concatenate the directory name with the requested filename
+        strcat(filenameBuff, filename);
+        return fopen(filenameBuff, mode);
+    }
+    else {
+        return fopen(filename, mode);
+    }
 #else
     return fopen(filename, mode);
 #endif
@@ -103,19 +108,23 @@ FILE *File_OpenResource(char *filename) {
 #ifdef OM_UNIX
     if (!resourceDirs[0]) {
         char *homedir = getenv("HOME");
-        resourceDirs[0] = malloc(strlen(homedir) + 1 + strlen(OM_HOMEDIR) + 2);
-        strcpy(resourceDirs[0], homedir);
-        strcat(resourceDirs[0], "/");
-        strcat(resourceDirs[0], OM_HOMEDIR);
-        strcat(resourceDirs[0], "/");
+        if (homedir) {
+            resourceDirs[0] = malloc(strlen(homedir) + 1 + strlen(OM_HOMEDIR) + 2);
+            strcpy(resourceDirs[0], homedir);
+            strcat(resourceDirs[0], "/");
+            strcat(resourceDirs[0], OM_HOMEDIR);
+            strcat(resourceDirs[0], "/");
+        }
     }
 
     for (int i = 0; i < ARRAY_LEN(resourceDirs); i++) {
-        checkBuffSize(strlen(resourceDirs[i]) + strlen(filename) + 1);
-        strcpy(filenameBuff, resourceDirs[i]);
-        strcat(filenameBuff, filename);
-        FILE *fp = fopen(filenameBuff, "rb");
-        if (fp) { return fp; }
+        if (resourceDirs[i]) {
+            checkBuffSize(strlen(resourceDirs[i]) + strlen(filename) + 1);
+            strcpy(filenameBuff, resourceDirs[i]);
+            strcat(filenameBuff, filename);
+            FILE *fp = fopen(filenameBuff, "rb");
+            if (fp) { return fp; }
+        }
     }
     return NULL;
 #else
