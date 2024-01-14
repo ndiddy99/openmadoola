@@ -18,6 +18,7 @@ set(SOURCE_LIST
     "src/bg.c"
     "src/camera.c"
     "src/collision.c"
+    "src/db.c"
     "src/ending.c"
     "src/enemy.c"
     "src/file.c"
