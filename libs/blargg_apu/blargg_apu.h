@@ -47,10 +47,11 @@ Sint32 Blargg_Apu_SamplesAvailable(void);
 
 /**
  * @brief Writes to an APU address
+ * @param num APU to write to (0 or 1)
  * @param addr address to write to
  * @param data value to write
  */
-void Blargg_Apu_Write(Uint16 addr, Uint8 data);
+void Blargg_Apu_Write(int num, Uint16 addr, Uint8 data);
 
 /**
  * @brief Should be run at the end of each frame
@@ -59,11 +60,12 @@ void Blargg_Apu_EndFrame(void);
 
 /**
  * @brief Requests to copy a number of APU samples to the given buffer
+ * @param num APU to get samples from (0 or 1)
  * @param buff Pointer to sample buffer (16-bit)
  * @param buffSize Buffer size in Sint16s (not bytes)
  * @returns Number of samples actually written to the buffer
  */
-Sint32 Blargg_Apu_Samples(Sint16 *buff, Sint32 buffSize);
+Sint32 Blargg_Apu_Samples(int num, Sint16 *buff, Sint32 buffSize);
 
 #ifdef __cplusplus
 }

@@ -22,6 +22,7 @@
 #include "blargg_apu.h"
 #include "constants.h"
 #include "db.h"
+#include "game.h"
 #include "platform.h"
 #include "rom.h"
 #include "sound.h"
@@ -46,6 +47,7 @@ typedef struct {
 } Instrument;
 
 typedef struct {
+    Uint8 isMusic;
     Uint8 count;
     Instrument *data;
 } Sound;
@@ -60,23 +62,22 @@ static Sound sounds[NUM_SOUNDS];
 // currently playing instruments
 static Instrument instruments[NUM_INSTRUMENTS];
 static Instrument savedInstruments[NUM_INSTRUMENTS];
+static Instrument musInstruments[NUM_INSTRUMENTS];
+static Instrument savedMusInstruments[NUM_INSTRUMENTS];
 #define APU_CHANNELS 4
-static Uint8 channelsInUse[APU_CHANNELS];
-static Uint8 apuStatusCopy;
+static Uint8 channelsInUse[APU_CHANNELS * 2];
+static Uint8 apuStatusCopy[2];
 // 0-100
 static int volume = 50;
 
-static void Sound_RunInstrument(Instrument *inst);
-static void Sound_DisableChannel(Uint8 channel);
-static void Sound_EnableChannel(Uint8 channel);
+static void Sound_RunInstrument(int apu, Instrument *inst);
+static void Sound_DisableChannel(int apu, Uint8 channel);
+static void Sound_EnableChannel(int apu, Uint8 channel);
 
 static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
     int cursor = 0;
     out->count = romData[cursor++];
     out->data = malloc(out->count * sizeof(Instrument));
-    if (!out->data) {
-        return NULL;
-    }
     for (int i = 0; i < out->count; i++) {
         out->data[i].num = romData[cursor++];
         Uint16 addr = romData[cursor] | (romData[cursor + 1] << 8);
@@ -113,6 +114,8 @@ int Sound_Init(void) {
     Uint8 *src = chrRom + CHR_ROM_SOUND;
     for (int i = 0; i < NUM_SOUNDS; i++) {
         src = Sound_LoadData(src, &sounds[i]);
+        // make sure you change this if you mess with the music order!
+        sounds[i].isMusic = ((i < SFX_PERASKULL) || (i == MUS_CASTLE));
         // sound data stored in CHR ROM is padded for some reason
         if (i == 0) { src = chrRom + CHR_ROM_SOUND + 0x20; }
         // after loading title screen and ending music, switch to PRG ROM
@@ -148,50 +151,68 @@ void Sound_Reset(void) {
     // initialize sound engine state
     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
         instruments[i].cursor = 0xff;
+        musInstruments[i].cursor = 0xff;
     }
-    apuStatusCopy = 0;
-    Blargg_Apu_Write(0x4015, apuStatusCopy);
+    apuStatusCopy[0] = 0;
+    apuStatusCopy[1] = 0;
+    Blargg_Apu_Write(0, 0x4015, apuStatusCopy[0]);
+    Blargg_Apu_Write(1, 0x4015, apuStatusCopy[1]);
     Blargg_Apu_ClearBuffer();
 }
 
 void Sound_Play(int num) {
     // copy all instruments from a sound into their respective slots
+    Instrument *destInsts;
+    int apu;
+    if ((gameType == GAME_TYPE_PLUS) && sounds[num].isMusic) {
+        destInsts = musInstruments;
+        apu = 1;
+    }
+    else {
+        destInsts = instruments;
+        apu = 0;
+    }
     for (int i = 0; i < sounds[num].count; i++) {
         Uint8 instNum = sounds[num].data[i].num;
-        instruments[instNum] = sounds[num].data[i];
-        instruments[instNum].timer = 1;
-        instruments[instNum].loop = 0xff;
-        instruments[instNum].ctrlRegsSet = 0xff;
+        destInsts[instNum] = sounds[num].data[i];
+        destInsts[instNum].timer = 1;
+        destInsts[instNum].loop = 0xff;
+        destInsts[instNum].ctrlRegsSet = 0xff;
         // turn off the channel for the previous instrument in this slot
         // Note: The original game didn't do this, which is why sound effects
         // would sometimes stay on, etc.
-        if (instruments[instNum].channel < 4) {
-            Sound_DisableChannel(instruments[instNum].channel);
+        if (destInsts[instNum].channel < 4) {
+            Sound_DisableChannel(apu, instruments[instNum].channel);
         }
     }
 }
 
 void Sound_SaveState(void) {
     memcpy(savedInstruments, instruments, sizeof(instruments));
+    memcpy(savedMusInstruments, musInstruments, sizeof(musInstruments));
 }
 
 void Sound_LoadState(void) {
     memcpy(instruments, savedInstruments, sizeof(instruments));
+    memcpy(musInstruments, savedMusInstruments, sizeof(musInstruments));
     // make sure each instrument sets its APU registers
     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
         instruments[i].ctrlRegsSet = 0xff;
+        musInstruments[i].ctrlRegsSet = 0xff;
     }
 }
 
 static void Sound_RunEngine(void) {
     memset(channelsInUse, 0, sizeof(channelsInUse));
     for (int i = NUM_INSTRUMENTS - 1; i >= 0; i--) {
-        Sound_RunInstrument(&instruments[i]);
+        Sound_RunInstrument(0, &instruments[i]);
+        Sound_RunInstrument(1, &musInstruments[i]);
     }
 }
 
 void Sound_Run(void) {
-    static Sint16 audioBuffer[SAMPLES_PER_FRAME * BUFFERED_FRAMES];
+    static Sint16 buff0[SAMPLES_PER_FRAME * BUFFERED_FRAMES];
+    static Sint16 buff1[SAMPLES_PER_FRAME * BUFFERED_FRAMES];
 
     // find the number of samples we need to fill up the audio buffer
     Sint32 neededSamples = (SAMPLES_PER_FRAME * BUFFERED_FRAMES) - Platform_GetQueuedSamples();
@@ -200,8 +221,13 @@ void Sound_Run(void) {
         Sound_RunEngine();
         Blargg_Apu_EndFrame();
     }
-    Sint32 outputSamples = Blargg_Apu_Samples(audioBuffer, SAMPLES_PER_FRAME * BUFFERED_FRAMES);
-    Platform_QueueSamples(audioBuffer, outputSamples);
+    Blargg_Apu_Samples(0, buff0, SAMPLES_PER_FRAME * BUFFERED_FRAMES);
+    Sint32 outputSamples = Blargg_Apu_Samples(1, buff1, SAMPLES_PER_FRAME * BUFFERED_FRAMES);
+    // mix output from both APUs together
+    for (int i = 0; i < outputSamples; i++) {
+        buff0[i] += buff1[i];
+    }
+    Platform_QueueSamples(buff0, outputSamples);
 }
 
 static Uint16 noteTbl[] = {
@@ -219,7 +245,7 @@ static Uint16 noteTbl[] = {
     0x714,
 };
 
-static void Sound_RunInstrument(Instrument *inst) {
+static void Sound_RunInstrument(int apu, Instrument *inst) {
     Uint8 reg2, reg3;
 
     // "instrument not playing" flag
@@ -238,8 +264,8 @@ static void Sound_RunInstrument(Instrument *inst) {
         if (*read == 0xff) {
             inst->cursor = 0xff;
             inst->loop = 0xff;
-            channelsInUse[inst->channel] = 0;
-            Sound_DisableChannel(inst->channel);
+            channelsInUse[(apu * APU_CHANNELS) + inst->channel] = 0;
+            Sound_DisableChannel(apu, inst->channel);
             goto lostChannel;
         }
 
@@ -258,7 +284,7 @@ static void Sound_RunInstrument(Instrument *inst) {
             inst->ctrlRegsSet = 0xff;
             goto getCmd;
         }
-            // b0-bf: looping/jumping
+        // b0-bf: looping/jumping
         else if ((cmd >= 0xb0) && (cmd < 0xc0)) {
             if (cmd == 0xbf) {
                 inst->cursor = param;
@@ -274,14 +300,14 @@ static void Sound_RunInstrument(Instrument *inst) {
             if (inst->loop == 0xff) {
                 inst->loop = cmd & 0xf;
             }
-                // loop in progress
+            // loop in progress
             else {
                 inst->loop--;
             }
             inst->cursor = param;
             goto setReadPtr;
         }
-            // >= c0 or < a0: play note
+        // >= c0 or < a0: play note
         else {
             inst->cursor++;
 
@@ -290,9 +316,9 @@ static void Sound_RunInstrument(Instrument *inst) {
                 reg2 = cmd;
                 reg3 = 0;
             }
-                // key off
+            // key off
             else if ((cmd & 0xf) >= 0xc) {
-                Sound_DisableChannel(inst->channel);
+                Sound_DisableChannel(apu, inst->channel);
                 reg2 = 0x6f;
                 reg3 = 0;
             }
@@ -310,21 +336,21 @@ static void Sound_RunInstrument(Instrument *inst) {
         }
     }
     // set up apu regs
-    if (channelsInUse[inst->channel]) {
+    if (channelsInUse[(apu * APU_CHANNELS) + inst->channel]) {
         goto lostChannel;
     }
-    channelsInUse[inst->channel] = 0xff;
+    channelsInUse[(apu * APU_CHANNELS) + inst->channel] = 0xff;
     if (reg2 == 0x6f) {
         return;
     }
-    Sound_EnableChannel(inst->channel);
+    Sound_EnableChannel(apu, inst->channel);
     Uint32 regOffset = inst->channel * 4;
     if (inst->ctrlRegsSet) {
-        Blargg_Apu_Write(0x4001 + regOffset, inst->reg1);
-        Blargg_Apu_Write(0x4000 + regOffset, inst->reg0);
+        Blargg_Apu_Write(apu, 0x4001 + regOffset, inst->reg1);
+        Blargg_Apu_Write(apu, 0x4000 + regOffset, inst->reg0);
     }
-    Blargg_Apu_Write(0x4002 + regOffset, reg2);
-    Blargg_Apu_Write(0x4003 + regOffset, reg3);
+    Blargg_Apu_Write(apu, 0x4002 + regOffset, reg2);
+    Blargg_Apu_Write(apu, 0x4003 + regOffset, reg3);
     inst->ctrlRegsSet = 0;
     return;
 
@@ -334,12 +360,12 @@ static void Sound_RunInstrument(Instrument *inst) {
     inst->ctrlRegsSet = 0xff;
 }
 
-static void Sound_DisableChannel(Uint8 channel) {
-    apuStatusCopy &= ~(1 << channel);
-    Blargg_Apu_Write(0x4015, apuStatusCopy);
+static void Sound_DisableChannel(int apu, Uint8 channel) {
+    apuStatusCopy[apu] &= ~(1 << channel);
+    Blargg_Apu_Write(apu, 0x4015, apuStatusCopy[apu]);
 }
 
-static void Sound_EnableChannel(Uint8 channel) {
-    apuStatusCopy |= (1 << channel);
-    Blargg_Apu_Write(0x4015, apuStatusCopy);
+static void Sound_EnableChannel(int apu, Uint8 channel) {
+    apuStatusCopy[apu] |= (1 << channel);
+    Blargg_Apu_Write(apu, 0x4015, apuStatusCopy[apu]);
 }
