@@ -174,16 +174,17 @@ void Sound_Play(int num) {
     }
     for (int i = 0; i < sounds[num].count; i++) {
         Uint8 instNum = sounds[num].data[i].num;
-        destInsts[instNum] = sounds[num].data[i];
-        destInsts[instNum].timer = 1;
-        destInsts[instNum].loop = 0xff;
-        destInsts[instNum].ctrlRegsSet = 0xff;
         // turn off the channel for the previous instrument in this slot
         // Note: The original game didn't do this, which is why sound effects
         // would sometimes stay on, etc.
         if (destInsts[instNum].channel < 4) {
-            Sound_DisableChannel(apu, instruments[instNum].channel);
+            Sound_DisableChannel(apu, destInsts[instNum].channel);
         }
+        // load sound data into the slot
+        destInsts[instNum] = sounds[num].data[i];
+        destInsts[instNum].timer = 1;
+        destInsts[instNum].loop = 0xff;
+        destInsts[instNum].ctrlRegsSet = 0xff;
     }
 }
 
