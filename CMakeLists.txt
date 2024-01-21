@@ -223,6 +223,9 @@ if(MSVC)
     set_target_properties(OpenMadoola PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
     # set the debugger working directory
     set_target_properties(OpenMadoola PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    # make sure the debugger can find the sdl2 dll file
+    set(OM_PATH "PATH=%PATH%" ${PROJECT_SOURCE_DIR}/libs/SDL2/lib/x64)
+    set_target_properties(OpenMadoola PROPERTIES VS_DEBUGGER_ENVIRONMENT "${OM_PATH}")
     # statically link the runtime library in case the user doesn't have msvc redistributable installed
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
