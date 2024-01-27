@@ -26,11 +26,9 @@ Uint8 RNG_Get(void) {
     return rngVal;
 }
 
-Uint8 RNG_GetWithCarry(Uint8 *carry) {
+Uint16 RNG_GetWithCarry(void) {
     rngVal++;
-    Uint8 oldVal = rngVal;
-    rngVal <<= 2;
-    rngVal += oldVal;
-    *carry = (rngVal < oldVal);
-    return rngVal;
+    Uint16 temp = ((rngVal << 2) & 0xff) + rngVal;
+    rngVal = (Uint8)temp;
+    return temp;
 }

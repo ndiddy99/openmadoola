@@ -51,21 +51,19 @@ static int Enemy_InitLocation(Object *o) {
     }
 }
 
-static void RotateRightCarry(Uint8 *val, Uint8 *carry) {
-    Uint8 oldCarry = *carry;
-    *carry = *val & 1;
-    *val >>= 1;
-    *val |= (oldCarry << 7);
-}
-
 void Enemy_Spawn(void) {
-    Uint8 carry;
-    Uint8 rand = RNG_GetWithCarry(&carry);
-    RotateRightCarry(&rand, &carry);
-    RotateRightCarry(&rand, &carry);
-    RotateRightCarry(&rand, &carry);
-    RotateRightCarry(&rand, &carry);
+    Uint16 rand = RNG_GetWithCarry();
+    // simulate rotating right 4 times (6502 cycles carry bit through rotation)
+    // before: [C]76543210
+    // after:  [3]210C7654
+    Uint16 low5 = (rand & 0x1f0) >> 4;
+    Uint16 high3 = (rand & 0x7) << 5;
+    Uint16 carry = (rand & 0x8) << 5;
+    rand = low5 | high3 | carry;
+    // frame count gets added without clearing the carry flag
     rand += frameCount;
+    if (rand & 0x100) { rand++; }
+    rand &= 0xff;
 
     // SCROLL_MODE_LOCKED happens when we're transitioning to a different
     // room, Lucia dies, or we're in an item room

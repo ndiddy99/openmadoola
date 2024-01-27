@@ -177,10 +177,7 @@ target_include_directories(OpenMadoola PRIVATE
     "src"
     "src/objects"
     "libs/blargg_apu"
-    "libs/imgui"
-    "libs/imgui/backends"
     "libs/nanotime"
-    "libs/NTSC-CRT"
     ${SDL2_INCLUDE_DIRS}
 )
 

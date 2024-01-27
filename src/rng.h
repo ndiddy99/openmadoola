@@ -28,9 +28,8 @@ extern Uint8 rngVal;
 Uint8 RNG_Get(void);
 
 /**
- * @brief Updates the RNG value and provides the code the value that would be
- * in the 6502 carry flag (necessary because some code makes use of that)
- * @param carry pointer to carry flag variable
- * @returns the new rng value, sets carry to the carry flag value
+ * @brief Updates the RNG value. The 9th bit in the return value is set to the
+ * carry flag.
+ * @returns the new rng value (bit 9 = carry)
  */
-Uint8 RNG_GetWithCarry(Uint8 *carry);
+Uint16 RNG_GetWithCarry(void);
