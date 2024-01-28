@@ -57,9 +57,8 @@ void Enemy_Spawn(void) {
     // before: [C]76543210
     // after:  [3]210C7654
     Uint16 low5 = (rand & 0x1f0) >> 4;
-    Uint16 high3 = (rand & 0x7) << 5;
-    Uint16 carry = (rand & 0x8) << 5;
-    rand = low5 | high3 | carry;
+    Uint16 high4 = (rand & 0xf) << 5;
+    rand = low5 | high4;
     // frame count gets added without clearing the carry flag
     rand += frameCount;
     if (rand & 0x100) { rand++; }
