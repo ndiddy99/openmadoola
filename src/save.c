@@ -163,7 +163,7 @@ static Uint16 luciaRunTiles[] = {
 
 int Save_Screen(void) {
     int erase = 0;
-    int cursor = 0;
+    int cursor = currFile;
     int stages[NUM_FILES];
     Sprite cursorSpr = { 0 };
 
