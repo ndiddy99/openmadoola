@@ -16,30 +16,54 @@
 *  along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
+
 #include "constants.h"
+#include "file.h"
 #include "game.h"
 #include "graphics.h"
+#include "palette.h"
+
+// maps each of the 64 NES colors to an ARGB value
+static Uint32 nesRGB[64];
 
 // which NES colors to use
 Uint8 colorPalette[PALETTE_SIZE * 8];
 // palette to use when flashTimer is nonzero
 static Uint8 flashPalette[PALETTE_SIZE * 8];
+// palette used by graphics code
+Uint32 rgbPalette[PALETTE_SIZE * 8];
 Uint8 flashTimer = 0;
+
+int Palette_Init(void) {
+    FILE *fp = File_OpenResource("nes.pal");
+    if (!fp) {
+        ERROR_MSG("Couldn't open nes.pal");
+        return 0;
+    }
+
+    for (int i = 0; i < ARRAY_LEN(nesRGB); i++) {
+        Uint8 r = fgetc(fp);
+        Uint8 g = fgetc(fp);
+        Uint8 b = fgetc(fp);
+
+        nesRGB[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+    }
+    fclose(fp);
+    return 1;
+}
 
 void Palette_Run(void) {
     if (flashTimer) {
         flashTimer--;
         for (int i = 0; i < ARRAY_LEN(colorPalette); i++) {
             flashPalette[i] = (((frameCount << 2) & 0x30) + colorPalette[i]) & 0x3f;
+            rgbPalette[i] = nesRGB[flashPalette[i]];
         }
     }
-}
-
-Uint8 *Palette_Get(void) {
-    if (flashTimer) {
-        return flashPalette;
-    }
     else {
-        return colorPalette;
+        for (int i = 0; i < ARRAY_LEN(colorPalette); i++) {
+            rgbPalette[i] = nesRGB[colorPalette[i]];
+        }
     }
 }

@@ -27,20 +27,15 @@
 #define TILE_PACKED_SIZE (16)
 #define TILE_SIZE (TILE_WIDTH * TILE_HEIGHT)
 
-// NES color palette
-#define PALETTE_FILE "nes.pal"
-#define NES_PALETTE_SIZE 64
-static Uint8 *dispPalette;
-
 // 8bpp chunky version of chrRom
-static Uint8 *chr_data;
-
-static Uint16 *screen;
+static Uint8 *chrData;
+// where we're drawing to
+static Uint32 *screen;
 
 int Graphics_Init(void) {
     // convert planar 2bpp to chunky 8bpp
-    chr_data = malloc(chrRomSize * 4);
-    if (!chr_data) {
+    chrData = malloc(chrRomSize * 4);
+    if (!chrData) {
         ERROR_MSG("Out of memory");
         goto error;
     }
@@ -63,63 +58,90 @@ int Graphics_Init(void) {
                 }
                 highByte <<= 1;
 
-                chr_data[chrCursor++] = pixel;
+                chrData[chrCursor++] = pixel;
             }
         }
     }
     return 1;
 
 error:
-    if (chr_data) { free(chr_data); }
+    if (chrData) { free(chrData); }
     return 0;
 }
 
 void Graphics_StartFrame(void) {
-    screen = Platform_GetNESBuffer();
+    screen = Platform_GetFramebuffer();
     Palette_Run();
-    dispPalette = Palette_Get();
-    for (int i = 0; i < (SCREEN_WIDTH * SCREEN_HEIGHT); i++) {
-        screen[i] = dispPalette[0];
+    for (int i = 0; i < (FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT); i++) {
+        screen[i] = rgbPalette[0];
     }
 }
 
 void Graphics_DrawTile(int x, int y, int tilenum, int palnum, int mirror) {
-    int tileOffset = tilenum * TILE_SIZE;
-    Uint8 *palette = dispPalette + (palnum * PALETTE_SIZE);
-
     // don't draw the tile at all if it's entirely offscreen
     if ((x < -TILE_WIDTH) || (x >= SCREEN_WIDTH) || (y < -TILE_HEIGHT) || (y >= SCREEN_HEIGHT)) {
         return;
     }
 
-    // write tile to screen, making sure we don't go out of bounds
-    for (int yOffset = 0; yOffset < TILE_HEIGHT; yOffset++) {
-        int yLoc = y + yOffset;
-        if ((yLoc >= 0) && (yLoc < SCREEN_HEIGHT)) {
-            for (int xOffset = 0; xOffset < TILE_WIDTH; xOffset++) {
-                int xLoc = x + xOffset;
-                if ((xLoc >= 0) && (xLoc < SCREEN_WIDTH)) {
-                    int xSrc, ySrc;
-                    if (mirror & H_MIRROR) {
-                        xSrc = (TILE_WIDTH - 1) - xOffset;
-                    }
-                    else {
-                        xSrc = xOffset;
-                    }
+    // write tile to screen
+    int tileOffset = tilenum * TILE_SIZE;
+    Uint32 *palette = rgbPalette + (palnum * PALETTE_SIZE);
+    // the nes framebuffer has an extra tile row/column around it to allow for 
+    // drawing to it without checking the tile bounds
+    x += TILE_WIDTH;
+    y += TILE_HEIGHT;
 
-                    if (mirror & V_MIRROR) {
-                        ySrc = (TILE_HEIGHT - 1) - yOffset;
-                    }
-                    else {
-                        ySrc = yOffset;
-                    }
-                    Uint8 palIndex = chr_data[tileOffset + (ySrc * TILE_WIDTH) + xSrc];
-                    if (palIndex) {
-                        Uint8 color = palette[chr_data[tileOffset + (ySrc * TILE_WIDTH) + xSrc]];
-                        screen[yLoc * SCREEN_WIDTH + xLoc] = color;
-                    }
+    switch (mirror) {
+    case 0: // no mirror
+        for (int yOffset = 0; yOffset < TILE_HEIGHT; yOffset++) {
+            int yDst = y + yOffset;
+            for (int xOffset = 0; xOffset < TILE_WIDTH; xOffset++) {
+                Uint8 palIndex = chrData[tileOffset++];
+                if (palIndex) {
+                    int xDst = x + xOffset;
+                    screen[yDst * FRAMEBUFFER_WIDTH + xDst] = palette[palIndex];
                 }
             }
         }
+        break;
+
+    case H_MIRROR:
+        for (int yOffset = 0; yOffset < TILE_HEIGHT; yOffset++) {
+            int yDst = y + yOffset;
+            for (int xOffset = 0; xOffset < TILE_WIDTH; xOffset++) {
+                Uint8 palIndex = chrData[tileOffset++];
+                if (palIndex) {
+                    int xDst = ((TILE_WIDTH - 1) - xOffset) + x;
+                    screen[yDst * FRAMEBUFFER_WIDTH + xDst] = palette[palIndex];
+                }
+            }
+        }
+        break;
+
+    case V_MIRROR:
+        for (int yOffset = 0; yOffset < TILE_HEIGHT; yOffset++) {
+            int yDst = ((TILE_HEIGHT - 1) - yOffset) + y;
+            for (int xOffset = 0; xOffset < TILE_WIDTH; xOffset++) {
+                Uint8 palIndex = chrData[tileOffset++];
+                if (palIndex) {
+                    int xDst = x + xOffset;
+                    screen[yDst * FRAMEBUFFER_WIDTH + xDst] = palette[palIndex];
+                }
+            }
+        }
+        break;
+
+    case (H_MIRROR | V_MIRROR):
+        for (int yOffset = 0; yOffset < TILE_HEIGHT; yOffset++) {
+            int yDst = ((TILE_HEIGHT - 1) - yOffset) + y;
+            for (int xOffset = 0; xOffset < TILE_WIDTH; xOffset++) {
+                Uint8 palIndex = chrData[tileOffset++];
+                if (palIndex) {
+                    int xDst = ((TILE_WIDTH - 1) - xOffset) + x;
+                    screen[yDst * FRAMEBUFFER_WIDTH + xDst] = palette[palIndex];
+                }
+            }
+        }
+        break;
     }
 }

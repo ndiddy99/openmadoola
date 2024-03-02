@@ -23,15 +23,15 @@
 #include "constants.h"
 #include "db.h"
 #include "file.h"
+#include "graphics.h"
 #include "input.h"
 #include "nanotime.h"
+#include "platform.h"
 
 // --- video stuff ---
 static Uint8 scale = 3;
 static Uint8 fullscreen = 0;
-#define NES_PALETTE_SIZE (64)
-static Uint32 nesPalette[NES_PALETTE_SIZE];
-static Uint16 nesBuffer[SCREEN_WIDTH * SCREEN_HEIGHT];
+static Uint32 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
 // destination to draw to when drawing in fullscreen
 static SDL_Rect fullscreenRect;
 static SDL_Window *window;
@@ -140,12 +140,15 @@ void Platform_StartFrame(void) {
 }
 
 void Platform_EndFrame(void) {
-    Uint32 *framebuffer;
-    int framebufferPitch;
-    SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &framebufferPitch);
+    Uint32 *dest;
+    int pitch;
+    SDL_LockTexture(drawTexture, NULL, (void **)&dest, &pitch);
     // nes color indices -> argb
-    for (int i = 0; i < (SCREEN_WIDTH * SCREEN_HEIGHT); i++) {
-        framebuffer[i] = nesPalette[nesBuffer[i]];
+    Uint32 *source = framebuffer + (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        memcpy(dest, source, SCREEN_WIDTH * sizeof(Uint32));
+        source += FRAMEBUFFER_WIDTH;
+        dest += SCREEN_WIDTH;
     }
     SDL_UnlockTexture(drawTexture);
     SDL_SetRenderTarget(renderer, scaleTexture);
@@ -170,8 +173,8 @@ void Platform_EndFrame(void) {
     }
 }
 
-Uint16 *Platform_GetNESBuffer(void) {
-    return nesBuffer;
+Uint32 *Platform_GetFramebuffer(void) {
+    return framebuffer;
 }
 
 int Platform_GetVideoScale(void) {
@@ -283,24 +286,6 @@ static SDL_GameController *Platform_FindController(void) {
     return NULL;
 }
 
-static int Platform_LoadPalette(void) {
-    FILE *fp = File_OpenResource("nes.pal");
-    if (!fp) {
-        ERROR_MSG("Couldn't open nes.pal");
-        return 0;
-    }
-
-    for (int i = 0; i < NES_PALETTE_SIZE; i++) {
-        Uint8 r = fgetc(fp);
-        Uint8 g = fgetc(fp);
-        Uint8 b = fgetc(fp);
-
-        nesPalette[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
-    }
-    fclose(fp);
-    return 1;
-}
-
 int Platform_Init(void) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0) {
         printf("Error initializing SDL: %s\n", SDL_GetError());
@@ -309,7 +294,6 @@ int Platform_Init(void) {
     if (!Platform_InitVideo()) { return 0; }
     if (!Platform_InitAudio()) { return 0; }
     controller = Platform_FindController();
-    if (!Platform_LoadPalette()) { return 0; }
 
     DBEntry *entry = DB_Find("scale");
     if (entry) { Platform_SetVideoScale(entry->data[0]); }

@@ -21,16 +21,17 @@
 #include "graphics.h"
 
 extern Uint8 colorPalette[PALETTE_SIZE * 8];
+// colorPalette but ARGB 32-bit
+extern Uint32 rgbPalette[PALETTE_SIZE * 8];
 extern Uint8 flashTimer;
+
+/**
+ * @brief Loads the NES palette file from disk. Should be run before drawing any graphics.
+ * @returns nonzero on success, zero on failure
+*/
+int Palette_Init(void);
 
 /**
  * @brief Sets up the color palette. Should be run at the start of each frame.
 */
 void Palette_Run(void);
-
-/**
- * @brief Gets the palette that should be used to draw the current frame. Should
- * be used by graphics.c
- * @returns the current palette
-*/
-Uint8 *Palette_Get(void);

@@ -18,6 +18,7 @@
 
 #include "db.h"
 #include "joy.h"
+#include "palette.h"
 #include "platform.h"
 #include "rom.h"
 #include "save.h"
@@ -29,6 +30,7 @@ int System_Init(void) {
     if (!Rom_LoadPrg("madoola.nes", 16, 32768))    { return 0; }
     if (!Rom_LoadChr("madoola.nes", 32784, 32768)) { return 0; }
     if (!Rom_LoadChr("font.bin", 0, 4096))         { return 0; }
+    if (!Palette_Init())                           { return 0; }
     DB_Init();
 
     // initialize platform code
