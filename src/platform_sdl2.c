@@ -31,13 +31,19 @@
 // --- video stuff ---
 static Uint8 scale = 3;
 static Uint8 fullscreen = 0;
-static Uint32 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
+static Uint32 *framebuffer;
 // destination to draw to when drawing in fullscreen
 static SDL_Rect fullscreenRect;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 // texture that the game engine draws to
 static SDL_Texture *drawTexture;
+static SDL_Rect screenRect = {
+    .x = TILE_WIDTH,
+    .y = TILE_HEIGHT,
+    .w = SCREEN_WIDTH,
+    .h = SCREEN_HEIGHT,
+};
 // texture that gets nearest-neighbor scaled
 static SDL_Texture *scaleTexture;
 static int vsync;
@@ -109,7 +115,7 @@ static int Platform_InitVideo(void) {
     drawTexture = SDL_CreateTexture(renderer,
                                     SDL_PIXELFORMAT_ARGB8888,
                                     SDL_TEXTUREACCESS_STREAMING,
-                                    SCREEN_WIDTH, SCREEN_HEIGHT);
+                                    FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
     if (!drawTexture) {
         ERROR_MSG(SDL_GetError());
         return 0;
@@ -137,23 +143,15 @@ static void Platform_DestroyVideo(void) {
 
 void Platform_StartFrame(void) {
     Platform_PumpEvents();
+    int pitch;
+    SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &pitch);
 }
 
 void Platform_EndFrame(void) {
-    Uint32 *dest;
-    int pitch;
-    SDL_LockTexture(drawTexture, NULL, (void **)&dest, &pitch);
-    // nes color indices -> argb
-    Uint32 *source = framebuffer + (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
-    for (int y = 0; y < SCREEN_HEIGHT; y++) {
-        memcpy(dest, source, SCREEN_WIDTH * sizeof(Uint32));
-        source += FRAMEBUFFER_WIDTH;
-        dest += SCREEN_WIDTH;
-    }
     SDL_UnlockTexture(drawTexture);
     SDL_SetRenderTarget(renderer, scaleTexture);
-    SDL_RenderCopy(renderer, drawTexture, NULL, NULL);
     // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
+    SDL_RenderCopy(renderer, drawTexture, &screenRect, NULL);
     SDL_SetRenderTarget(renderer, NULL);
 
     // monitor framerate isn't a multiple of 60, so wait in software
