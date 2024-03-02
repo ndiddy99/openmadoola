@@ -415,8 +415,8 @@ int Object_PutOnGround(Object *o) {
                 if (metatile >= MAP_LADDER) {
                     if (Object_GetMetatileBelow(o) < MAP_LADDER) {
                         o->x.f.l = 0x80;
-                            o->y.f.l = 0x80;
-                            return 1;
+                        o->y.f.l = 0x80;
+                        return 1;
                     }
                 }
 
