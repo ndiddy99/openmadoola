@@ -48,6 +48,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Fixed a bug where collecting the Wing of Madoola and then entering a door would make Darutos not spawn
 - Fixed a bug where killing Darutos and then dying to one of his fireballs would let you skip fighting him after continuing
 - Fixed a bug where sound effects would sometimes get stuck on, glitch out, etc.
+- Fixed a bug where pausing and then unpausing on a castle level would cause the noise channel to drop out of the music
 
 #### Plus-exclusive changes
 - Added the opening/ending text from the arcade version of the game
