@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "camera.h"
+#include "darutos.h"
 #include "db.h"
 #include "ending.h"
 #include "enemy.h"
@@ -127,6 +128,9 @@ void Game_InitVars(Object *o) {
         if (!hasWing) {
             objects[MAX_OBJECTS - 1].type = OBJ_WING_OF_MADOOLA;
         }
+        // NOTE: This wasn't in the original game. This fixes a bug where
+        // collecting the Wing of Madoola and then going into a door would
+        // cause Darutos not to spawn, softlocking the game.
         else {
             objects[MAX_OBJECTS - 1].type = OBJ_DARUTOS_INIT;
         }
@@ -189,6 +193,7 @@ showSaveScreen:
         // stage number got set by the save screen so we don't need to set it here
         health = 1000;
     }
+    // if the player started a new game, initialize the game state
     else {
         health = 1000;
         maxHealth = 1000;
@@ -228,6 +233,7 @@ initStage:
     lucia->y = mapData.stages[stage].yPos;
     Game_SetRoom(mapData.stages[stage].roomNum);
     hasWing = 0;
+    darutosKilled = 0;
 
 initRoom:
     Game_InitVars(lucia);
@@ -282,8 +288,7 @@ mainGameLoop:
     if (objects[0].type == OBJ_LUCIA_WARP_DOOR) {
         int switchRoom = Map_Door(&objects[0]);
         if (switchRoom == DOOR_ENDING) {
-            // orbCollected gets set when Lucia kills Darutos
-            if (orbCollected) {
+            if (darutosKilled) {
                 Ending_Run();
                 goto startGameCode;
             }
@@ -324,7 +329,7 @@ void Game_PlayRoomSong(void) {
     // are we in stage 16's room?
     if (currRoom == 14) {
         // don't play any music if darutos has been killed
-        if (orbCollected) {
+        if (darutosKilled) {
             return;
         }
         // if lucia collected the wing of madoola, play the castle theme

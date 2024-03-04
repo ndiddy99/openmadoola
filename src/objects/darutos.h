@@ -1,5 +1,5 @@
 /* darutos.h: Darutos object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -19,6 +19,8 @@
 
 #pragma once
 #include "object.h"
+
+extern Uint8 darutosKilled;
 
 void Darutos_InitObj(Object *o);
 void Darutos_Obj(Object *o);

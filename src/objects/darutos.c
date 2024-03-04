@@ -1,5 +1,5 @@
 /* darutos.c: Darutos object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -57,6 +57,13 @@ static Uint16 darutos3[] = {
 static Uint16 darutos4[] = {
     0x398, 0x3b8, 0x3ba, 0x00, 0x3da, 0x3d8,
 };
+
+// Keeps track of whether Lucia killed Darutos.
+// NOTE: The original game used orbCollected for this purpose, but that led to
+// a bug where killing Darutos and then dying to his fireball would allow Lucia
+// to skip fighting Darutos since orbCollected doesn't get cleared when
+// continuing.
+Uint8 darutosKilled;
 
 void Darutos_InitObj(Object *o) {
     // darutos's position is hardcoded
@@ -194,7 +201,7 @@ void Darutos_Obj(Object *o) {
     spr.y -= 0x10;
 
     if (!Collision_Handle(o, &spr, COLLISION_SIZE_16X16, 95)) {
-        orbCollected = 1;
+        darutosKilled = 1;
         Game_PlayRoomSong();
         Sound_Play(SFX_BOSS_KILL);
     }
