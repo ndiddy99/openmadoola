@@ -38,6 +38,26 @@ Enter | Start | Start
 
 You can change the controls in the options menu. Pressing A+B+Select+Start while in-game will exit to the title screen.
 
+### Game types
+
+Also in the options menu, you'll find a "game type" setting. The "Original" game type tries to simulate the original NES game but with important bugfixes, while the "Plus" game type (the default) includes additional fixes for more minor bugs as well as tweaks that I think improve the game.
+
+#### Changes for both game types
+- Game runs without NES hardware limitations (no slowdown, no sprite flicker, no garbage on the edge of the screen)
+- Game progress is saved to disk
+- Fixed a bug where collecting the Wing of Madoola and then entering a door would make Darutos not spawn
+- Fixed a bug where killing Darutos and then dying to one of his fireballs would let you skip fighting him after continuing
+- Fixed a bug where sound effects would sometimes get stuck on, glitch out, etc.
+
+#### Plus-exclusive changes
+- Added the opening/ending text from the arcade version of the game
+- Added a second emulated sound chip just for music (meaning that channels won't cut out to play sound effects)
+- Music doesn't restart when warping within the same stage
+- Music doesn't restart when pausing/unpausing the game
+- The selected weapon is visible during gameplay, and you can change weapons without pausing
+- Darutos gets drawn even when he's only partially visible, making him easier to see
+- Fixed a bug where the orb you get at the end of a level wasn't animated correctly
+- Fixed a bug where the mirroring on the fireball that some enemies throw wasn't initialized
 
 ## Build Instructions
 
