@@ -232,7 +232,7 @@ void Sound_Run(void) {
     Platform_QueueSamples(buff0, outputSamples);
 }
 
-static Uint16 noteTbl[] = {
+static Uint16 freqTbl[] = {
     0xd5c,
     0xc9c,
     0xbe8,
@@ -325,11 +325,12 @@ static void Sound_RunInstrument(int apu, Instrument *inst) {
                 reg3 = 0;
             }
             else {
-                Uint16 note = noteTbl[cmd & 0xf];
-                Uint8 shifts = (cmd >> 4) + 1;
-                note >>= shifts;
-                reg2 = note & 0xff;
-                reg3 = note >> 8;
+                Uint8 note = cmd & 0xf;
+                Uint8 octave = cmd >> 4;
+                Uint16 freq = freqTbl[note];
+                freq >>= (octave + 1);
+                reg2 = freq & 0xff;
+                reg3 = freq >> 8;
             }
 
             inst->timer = param;
