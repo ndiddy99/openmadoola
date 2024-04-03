@@ -83,7 +83,7 @@ void Bospido_Obj(Object *o) {
     spr.size = SPRITE_16X16;
     spr.palette = 2;
     Uint16 *frame = (!(o->timer & 8)) ? bospido2 : bospido1;
-    if (Sprite_SetDrawLarge(&spr, o, frame, bospidoOffsets, 0, 0)) {
+    if (!Sprite_SetDrawLarge(&spr, o, frame, bospidoOffsets, 0, 0)) {
         o->type = OBJ_NONE;
         return;
     }

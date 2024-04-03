@@ -95,7 +95,7 @@ void Suneisa_Obj(Object *o) {
         frame = frame2;
     }
     
-    if (Sprite_SetDrawLarge(&spr, o, frame, offsets, 0, 0)) {
+    if (!Sprite_SetDrawLarge(&spr, o, frame, offsets, 0, 0)) {
         o->type = OBJ_NONE;
         return;
     }

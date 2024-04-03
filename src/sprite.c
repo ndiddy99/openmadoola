@@ -161,13 +161,13 @@ int Sprite_SetDraw16x32(Sprite *s, Object *o, Uint16 topTile, Sint16 xOffset, Si
     s->size = SPRITE_16X16;
     if (!Sprite_SetDraw(s, o, xOffset, yOffset)) {
         o->type = OBJ_NONE;
-        return 1;
+        return 0;
     }
 
     s->tile = topTile;
     s->y -= 16;
     Sprite_Draw(s, o);
-    return 0;
+    return 1;
 }
 
 static void Sprite_SetDrawLargeCommon(Sprite *s, Object *o, Uint16 *tiles, Sint8 *offsets) {
@@ -199,11 +199,11 @@ int Sprite_SetDrawLarge(Sprite *s, Object *o, Uint16 *tiles, Sint8 *offsets, Sin
     s->size = SPRITE_16X16;
     s->tile = *tiles;
     if (!Sprite_SetDraw(s, o, xOffset, yOffset)) {
-        return 1;
+        return 0;
     }
 
     Sprite_SetDrawLargeCommon(s, o, tiles, offsets);
-    return 0;
+    return 1;
 }
 
 void Sprite_SetDrawLargeAbs(Sprite *s, Object *o, Uint16 *tiles, Sint8 *offsets) {

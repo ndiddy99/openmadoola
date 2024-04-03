@@ -150,7 +150,7 @@ void Darutos_Obj(Object *o) {
         Sprite_SetDrawLargeAbs(&spr, o, frame, darutosOffsets1);
     }
     else {
-        if (Sprite_SetDrawLarge(&spr, o, frame, darutosOffsets1, dispOffsetX, 0)) {
+        if (!Sprite_SetDrawLarge(&spr, o, frame, darutosOffsets1, dispOffsetX, 0)) {
             return;
         }
     }

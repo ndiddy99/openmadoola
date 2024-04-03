@@ -110,7 +110,7 @@ static void Biforce_StandingObj(Object *o) {
     spr.size = SPRITE_16X16;
     spr.palette = 2;
     Uint16 *frame = (!(o->timer & 8)) ? biforceStanding1 : biforceStanding2;
-    if (Sprite_SetDrawLarge(&spr, o, frame, biforceStandingOffsets, 0, 0)) {
+    if (!Sprite_SetDrawLarge(&spr, o, frame, biforceStandingOffsets, 0, 0)) {
         o->type = OBJ_NONE;
         return;
     }
@@ -194,7 +194,7 @@ static void Biforce_CrawlingObj(Object *o) {
     spr.palette = 2;
     Object_LimitDistance(o);
     Uint16 *frame = (!(o->x.f.h & 1)) ? biforceCrawling1 : biforceCrawling2;
-    if (Sprite_SetDrawLarge(&spr, o, frame, biforceCrawlingOffsets, 0, 0)) {
+    if (!Sprite_SetDrawLarge(&spr, o, frame, biforceCrawlingOffsets, 0, 0)) {
         o->type = OBJ_NONE;
         return;
     }

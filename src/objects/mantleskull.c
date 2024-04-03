@@ -88,7 +88,7 @@ doneMovement:
         spr.tile = 0x86;
     }
     
-    if (Sprite_SetDraw16x32(&spr, o, spr.tile - 2, 0, 0)) {
+    if (!Sprite_SetDraw16x32(&spr, o, spr.tile - 2, 0, 0)) {
         return;
     }
 

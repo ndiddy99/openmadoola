@@ -88,8 +88,7 @@ void Nigito_Obj(Object *o) {
         spr.tile = 0x1E2;
     }
 
-    // this if statement is true when the sprite is offscreen
-    if (Sprite_SetDraw16x32(&spr, o, spr.tile - 2, 0, 0)) {
+    if (!Sprite_SetDraw16x32(&spr, o, spr.tile - 2, 0, 0)) {
         return;
     }
 

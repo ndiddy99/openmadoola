@@ -81,7 +81,7 @@ void Bunyon_Obj(Object *o) {
     }
     Sprite spr = { 0 };
     spr.palette = 2;
-    if (Sprite_SetDrawLarge(&spr, o, bunyonTiles, bunyonOffsets, o->direction ? 0 : -16, 0)) {
+    if (!Sprite_SetDrawLarge(&spr, o, bunyonTiles, bunyonOffsets, o->direction ? 0 : -16, 0)) {
         goto eraseObj;
     }
 
@@ -148,7 +148,7 @@ void Bunyon_SplitObj(Object *o) {
     spr.size = SPRITE_16X16;
     spr.palette = 2;
     spr.tile = 0x2ce;
-    if (Sprite_SetDraw16x32(&spr, o, 0x2cc, 0, 0)) {
+    if (!Sprite_SetDraw16x32(&spr, o, 0x2cc, 0, 0)) {
         o->type = OBJ_NONE;
         return;
     }

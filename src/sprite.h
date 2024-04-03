@@ -105,7 +105,7 @@ int Sprite_SetDraw(Sprite *s, Object *o, Sint16 xOffset, Sint16 yOffset);
  * @param topTile The upper 16x16 tile to draw.
  * @param xOffset pixel value to be added to the x display position
  * @param yOffset pixel value to be added to the y display position
- * @returns zero if the sprite is onscreen, nonzero otherwise TODO fix so the return code is the same as Sprite_SetDraw
+ * @returns zero if the sprite is offscreen, nonzero otherwise
 */
 int Sprite_SetDraw16x32(Sprite *s, Object *o, Uint16 topTile, Sint16 xOffset, Sint16 yOffset);
 
@@ -117,7 +117,7 @@ int Sprite_SetDraw16x32(Sprite *s, Object *o, Uint16 topTile, Sint16 xOffset, Si
  * @param offsets Array of tile offsets, in x, y order
  * @param xOffset pixel value to be added to the x display position
  * @param yOffset pixel value to be added to the y display position
- * @returns zero if the sprite is onscreen, nonzero otherwise TODO fix so the return code is the same as Sprite_SetDraw
+ * @returns zero if the sprite is offscreen, nonzero otherwise
 */
 int Sprite_SetDrawLarge(Sprite *s, Object *o, Uint16 *tiles, Sint8 *offsets, Sint16 xOffset, Sint16 yOffset);
 
