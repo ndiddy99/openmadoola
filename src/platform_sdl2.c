@@ -30,6 +30,7 @@
 #include "platform.h"
 
 // --- video stuff ---
+static Uint8 frameStarted = 0;
 static Uint8 scale = 3;
 static Uint8 fullscreen = 0;
 static Uint32 *framebuffer;
@@ -143,12 +144,20 @@ static void Platform_DestroyVideo(void) {
 }
 
 void Platform_StartFrame(void) {
+    if (frameStarted) {
+        printf("ERROR: Started frame without ending the previous frame!\n");
+    }
+    frameStarted = 1;
     Platform_PumpEvents();
     int pitch;
     SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &pitch);
 }
 
 void Platform_EndFrame(void) {
+    if (!frameStarted) {
+        printf("ERROR: Ended frame without starting it!\n");
+    }
+    frameStarted = 0;
     SDL_UnlockTexture(drawTexture);
     SDL_SetRenderTarget(renderer, scaleTexture);
     // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct

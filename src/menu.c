@@ -88,7 +88,13 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
             case ITEM_TYPE_LINK:
                 if (i == cursor) {
                     if (joyEdge & (JOY_A | JOY_START)) {
+                        BG_Draw();
+                        Sprite_EndFrame();
+                        System_EndFrame();
                         items[i].link();
+                        System_StartFrame();
+                        Sprite_ClearList();
+                        BG_Clear();
                     }
                 }
                 BG_Print(menuX, currY, 0, "%s", items[i].text);

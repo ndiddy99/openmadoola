@@ -115,6 +115,7 @@ void Screen_Title(void) {
     int scroll = 255;
     int state = 0;
     int musicPlaying = 0;
+    int exitFlag = 0;
 
     flashTimer = 0;
     BG_Clear();
@@ -124,7 +125,7 @@ void Screen_Title(void) {
     Screen_TitleDraw();
 
     if (gameType == GAME_TYPE_PLUS) {
-        while (1) {
+        while (!exitFlag) {
             System_StartFrame();
             if (joyEdge & JOY_START) {
                 break;
@@ -175,7 +176,7 @@ void Screen_Title(void) {
                     BG_SetPalette(0, introTextPalette);
                     TextScroll_Init(1);
                     // break out of title screen if the user skipped the intro text
-                    if (TextScroll_DispStr(introText, NULL)) { break; }
+                    if (TextScroll_DispStr(introText, NULL)) { exitFlag = 1; }
                     // set up scrolling in the title screen again
                     frames = 0;
                     scroll = 255;
@@ -187,17 +188,17 @@ void Screen_Title(void) {
             }
             BG_Draw();
             System_EndFrame();
-            if (joyEdge & JOY_START) { break; }
+            if (joyEdge & JOY_START) { exitFlag = 1; }
         }
     }
     else {
         Sound_Play(MUS_TITLE);
         BG_Scroll(BG_CENTERED_X, 0);
-        while (1) {
+        while (!exitFlag) {
             System_StartFrame();
             BG_Draw();
             System_EndFrame();
-            if (joyEdge & JOY_START) { break; }
+            if (joyEdge & JOY_START) { exitFlag = 1; }
         }
     }
 }
