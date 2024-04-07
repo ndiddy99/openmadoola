@@ -185,11 +185,13 @@ found_tile:
 }
 
 Uint16 Map_SolidTileBelow(Uint16 offset) {
+    if (offset >= ARRAY_LEN(mapMetatiles)) { return 1; }
     Uint16 metatile = mapMetatiles[offset];
     // are we on top of a solid tile or a ladder?
     if (metatile < MAP_LADDER) {
         // look down a metatile
         offset += MAP_WIDTH_METATILES;
+        if (offset >= ARRAY_LEN(mapMetatiles)) { return 1; }
         metatile = mapMetatiles[offset];
         // are we on top of a solid tile (not a ladder)?
         if (metatile < MAP_SOLID) {
@@ -198,6 +200,7 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
     }
     else {
         offset += MAP_WIDTH_METATILES;
+        if (offset >= ARRAY_LEN(mapMetatiles)) { return 1; }
         metatile = mapMetatiles[offset];
         // are we on top of a solid block or ladder? ladders are solid from the
         // top
@@ -211,11 +214,13 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
 }
 
   Uint16 Map_SolidTileAbove(Uint16 offset) {
+      if (offset >= ARRAY_LEN(mapMetatiles)) { return 1; }
       Uint16 metatile = mapMetatiles[offset];
       // are we on top of a solid tile or a ladder?
       if (metatile < MAP_LADDER) {
           // look up a metatile
           offset -= MAP_WIDTH_METATILES;
+          if (offset >= ARRAY_LEN(mapMetatiles)) { return 1; }
           metatile = mapMetatiles[offset];
           // are we on top of a solid tile (not a ladder)?
           if (metatile < MAP_SOLID) {
@@ -224,6 +229,7 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
       }
       else {
           offset -= MAP_WIDTH_METATILES;
+          if (offset >= ARRAY_LEN(mapMetatiles)) { return 1; }
           metatile = mapMetatiles[offset];
           // are we on top of a solid block or ladder? ladders are solid from the
           // top
