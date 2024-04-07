@@ -1,5 +1,5 @@
 /* nipata.c: Nipata object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -19,11 +19,12 @@
 
 #include "collision.h"
 #include "constants.h"
+#include "game.h"
 #include "map.h"
 #include "nipata.h"
+#include "object.h"
 #include "rng.h"
 #include "sprite.h"
-#include "object.h"
 
 void Nipata_InitObj(Object *o) {
     // It looks like the original code had something similar to this but they
@@ -46,9 +47,6 @@ void Nipata_InitObj(Object *o) {
     o->ySpeed = 0;
 }
 
-// NOTE: there's a "bug" where nipata will move up half a pixel per frame in the "on the ceiling"
-// state. This is present in the original game as well.
-
 void Nipata_Obj(Object *o) {
     if (o->stunnedTimer) {
         o->stunnedTimer--;
@@ -56,7 +54,17 @@ void Nipata_Obj(Object *o) {
     // flying up
     else if (!(o->timer & 0xc0)) {
         Object_CheckForWall(o);
-        if (Object_UpdateYPos(o)) {
+        int hitCeiling;
+        // NOTE: This fixes a bug where if nipata spawned between two walls, it would
+        // slowly rise up and then snap back down over and over.
+        if (gameType == GAME_TYPE_PLUS) {
+            Object_CalcYPos(o);
+            hitCeiling = Map_SolidTileAbove(o->collision);
+        }
+        else {
+            hitCeiling = Object_UpdateYPos(o);
+        }
+        if (hitCeiling) {
             o->ySpeed = 0;
             o->y.f.l &= 0x80;
             o->timer |= 0x8f;

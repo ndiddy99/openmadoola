@@ -156,6 +156,14 @@ Uint16 Map_CheckY(Object *o);
  */
 Uint16 Map_SolidTileBelow(Uint16 offset);
 
+/**
+ * @brief Checks if the given map offset is below either a solid tile or a
+ * ladder
+ * @param offset Map offset to look at
+ * @returns 1 if there's a solid tile or ladder, 0 if there's not
+ */
+Uint16 Map_SolidTileAbove(Uint16 offset);
+
 #define DOOR_INVALID -1
 #define DOOR_ENDING -2
 /**

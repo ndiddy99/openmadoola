@@ -1,5 +1,5 @@
   /* map.c: handles accessing map data
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -187,12 +187,12 @@ found_tile:
 Uint16 Map_SolidTileBelow(Uint16 offset) {
     Uint16 metatile = mapMetatiles[offset];
     // are we on top of a solid tile or a ladder?
-    if (metatile < 0x24) {
+    if (metatile < MAP_LADDER) {
         // look down a metatile
         offset += MAP_WIDTH_METATILES;
         metatile = mapMetatiles[offset];
         // are we on top of a solid tile (not a ladder)?
-        if (metatile < 0x1f) {
+        if (metatile < MAP_SOLID) {
             return 1;
         }
     }
@@ -201,7 +201,7 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
         metatile = mapMetatiles[offset];
         // are we on top of a solid block or ladder? ladders are solid from the
         // top
-        if (metatile < 0x24) {
+        if (metatile < MAP_LADDER) {
             return 1;
         }
 
@@ -209,6 +209,32 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
 
     return 0;
 }
+
+  Uint16 Map_SolidTileAbove(Uint16 offset) {
+      Uint16 metatile = mapMetatiles[offset];
+      // are we on top of a solid tile or a ladder?
+      if (metatile < MAP_LADDER) {
+          // look up a metatile
+          offset -= MAP_WIDTH_METATILES;
+          metatile = mapMetatiles[offset];
+          // are we on top of a solid tile (not a ladder)?
+          if (metatile < MAP_SOLID) {
+              return 1;
+          }
+      }
+      else {
+          offset -= MAP_WIDTH_METATILES;
+          metatile = mapMetatiles[offset];
+          // are we on top of a solid block or ladder? ladders are solid from the
+          // top
+          if (metatile < MAP_LADDER) {
+              return 1;
+          }
+
+      }
+
+      return 0;
+  }
 
 int Map_Door(Object *o) {
     Uint8 chunkAlignedX = o->x.f.h & 0xfc;
