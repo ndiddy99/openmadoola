@@ -127,10 +127,6 @@ void Screen_Title(void) {
     if (gameType == GAME_TYPE_PLUS) {
         while (!exitFlag) {
             System_StartFrame();
-            if (joyEdge & JOY_START) {
-                break;
-            }
-
             switch (state) {
             // animate in
             case 0:
@@ -173,11 +169,13 @@ void Screen_Title(void) {
                 else {
                     // display intro text
                     BG_Clear();
+                    System_EndFrame();
                     BG_SetPalette(0, introTextPalette);
                     TextScroll_Init(1);
                     // break out of title screen if the user skipped the intro text
                     if (TextScroll_DispStr(introText, NULL)) { exitFlag = 1; }
                     // set up scrolling in the title screen again
+                    System_StartFrame();
                     frames = 0;
                     scroll = 255;
                     BG_SetPalette(0, titlePalette);
@@ -272,12 +270,12 @@ void Screen_Status(void) {
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {
         System_StartFrame();
-        if (joyEdge & JOY_START) {
-            break;
-        }
         BG_Draw();
         Sprite_EndFrame();
         System_EndFrame();
+        if (joyEdge & JOY_START) {
+            break;
+        }
     }
 }
 
@@ -294,11 +292,11 @@ void Screen_Stage(void) {
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {
         System_StartFrame();
+        BG_Draw();
+        System_EndFrame();
         if (joyEdge & JOY_START) {
             break;
         }
-        BG_Draw();
-        System_EndFrame();
     }
 }
 

@@ -207,9 +207,7 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
         if (metatile < MAP_LADDER) {
             return 1;
         }
-
     }
-
     return 0;
 }
 
@@ -236,9 +234,7 @@ Uint16 Map_SolidTileBelow(Uint16 offset) {
           if (metatile < MAP_LADDER) {
               return 1;
           }
-
       }
-
       return 0;
   }
 
