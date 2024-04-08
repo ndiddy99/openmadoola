@@ -45,7 +45,7 @@ Uint8 *DB_Add(char *name, Uint32 dataLen) {
         entries = realloc(entries, allocedEntries * sizeof(DBEntry));
     }
 
-    entries[numEntries].name = malloc(strlen(name));
+    entries[numEntries].name = malloc(strlen(name) + 1);
     strcpy(entries[numEntries].name, name);
     entries[numEntries].dataLen = dataLen;
     entries[numEntries].data = malloc(dataLen);
