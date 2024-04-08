@@ -54,10 +54,10 @@ void File_WriteUint32BE(Uint32 data, FILE *fp) {
 }
 
 Uint32 File_ReadUint32BE(FILE *fp) {
-    Uint32 i = fgetc(fp) << 24;
-    i |= (fgetc(fp) << 16);
-    i |= (fgetc(fp) << 8);
-    i |= fgetc(fp);
+    Uint32 i = (Uint32)fgetc(fp) << 24;
+    i |= ((Uint32)fgetc(fp) << 16);
+    i |= ((Uint32)fgetc(fp) << 8);
+    i |= (Uint32)fgetc(fp);
     return i;
 }
 

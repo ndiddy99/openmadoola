@@ -48,7 +48,7 @@ int Palette_Init(void) {
         Uint8 g = fgetc(fp);
         Uint8 b = fgetc(fp);
 
-        nesRGB[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+        nesRGB[i] = ((Uint32)0xFF << 24) | ((Uint32)r << 16) | ((Uint32)g << 8) | (Uint32)b;
     }
     fclose(fp);
     return 1;
