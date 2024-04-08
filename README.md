@@ -59,6 +59,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Darutos gets drawn even when he's only partially visible, making him easier to see
 - Fixed a bug where the orb you get at the end of a level wasn't animated correctly
 - Fixed a bug where the mirroring on the fireball that some enemies throw wasn't initialized
+- Fixed a bug where Nipata would get stuck if it spawned in a narrow gap
 
 ## Build Instructions
 

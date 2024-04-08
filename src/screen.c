@@ -1,5 +1,5 @@
 /* screen.c: Title, status, stage screens
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -246,7 +246,7 @@ void Screen_Status(void) {
     Sound_Play(MUS_START);
 
     // print the text
-    BG_Print(13, 3, 0, "STATUS");
+    BG_Print(13,  3, 0, "STATUS");
     BG_Print(11,  6, 0, "HITS  %04d/%04d", health, maxHealth);
     BG_Print( 9,  8, 0, "MAGICS  %04d/%04d", magic, maxMagic);
     BG_Print(10, 11, 0, "SWORD");
