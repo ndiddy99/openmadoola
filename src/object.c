@@ -408,22 +408,26 @@ void Object_MoveTowardsLucia(Object *o) {
 }
 
 int Object_PutOnGround(Object *o) {
-    if (o->collision < (MAP_WIDTH_METATILES * MAP_HEIGHT_METATILES)) {
-        for (int i = 0; i < 16; i++) {
-            Uint16 metatile = Object_GetMetatile(o);
-                // if the object is in a scenery metatile and the metatile below the
-                // object is solid, we've successfully put the object on the ground
-                if (metatile >= MAP_LADDER) {
-                    if (Object_GetMetatileBelow(o) < MAP_LADDER) {
-                        o->x.f.l = 0x80;
-                        o->y.f.l = 0x80;
-                        return 1;
-                    }
-                }
-
-            o->y.f.h++;
-            Object_IncCollisionY(o);
+    for (int i = 0; i < 16; i++) {
+        // if we've gone past the bounds of the level array, bail out
+        if (o->collision >= (MAP_WIDTH_METATILES * MAP_HEIGHT_METATILES)) {
+            o->type = OBJ_NONE;
+            return 0;
         }
+
+        Uint16 metatile = Object_GetMetatile(o);
+            // if the object is in a scenery metatile and the metatile below the
+            // object is solid, we've successfully put the object on the ground
+            if (metatile >= MAP_LADDER) {
+                if (Object_GetMetatileBelow(o) < MAP_LADDER) {
+                    o->x.f.l = 0x80;
+                    o->y.f.l = 0x80;
+                    return 1;
+                }
+            }
+
+        o->y.f.h++;
+        Object_IncCollisionY(o);
     }
 
     // the entire column is either all air or all solid, so we can't put the
