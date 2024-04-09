@@ -192,7 +192,6 @@ int Save_Screen(void) {
             if (cursor > NUM_FILES) { cursor = 0; }
             Sound_Play(SFX_MENU);
         }
-        int saveValid = (files[cursor].signature == VALID_SIGNATURE);
 
         if (!erase) {
             cursorSpr.size = SPRITE_8X16;
@@ -208,6 +207,7 @@ int Save_Screen(void) {
         }
         // first 3 positions = save files, last = "erase game" text
         if (cursor < NUM_FILES) {
+            int saveValid = (files[cursor].signature == VALID_SIGNATURE);
             if (saveValid && !erase) {
                 if (joyEdge & JOY_LEFT) {
                     stages[cursor]--;
