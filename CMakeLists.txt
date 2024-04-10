@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(OpenMadoola LANGUAGES C CXX)
+project(openmadoola LANGUAGES C CXX)
 
 # use vendored sdl2 lib on msvc
 if(MSVC)
@@ -171,9 +171,9 @@ set(HEADER_LIST
     "libs/nanotime/nanotime.h"
 )
 
-add_executable(OpenMadoola WIN32 ${SOURCE_LIST} ${HEADER_LIST})
+add_executable(openmadoola WIN32 ${SOURCE_LIST} ${HEADER_LIST})
 
-target_include_directories(OpenMadoola PRIVATE
+target_include_directories(openmadoola PRIVATE
     "src"
     "src/objects"
     "libs/blargg_apu"
@@ -181,20 +181,20 @@ target_include_directories(OpenMadoola PRIVATE
     ${SDL2_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenMadoola PRIVATE ${SDL2_LINK_LIBRARIES})
+target_link_libraries(openmadoola PRIVATE ${SDL2_LINK_LIBRARIES})
 
 # make visual studio folders work correctly
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST} ${HEADER_LIST})
 
 # compiler warnings
 if(MSVC)
-    target_compile_options(OpenMadoola PRIVATE /W3)
+    target_compile_options(openmadoola PRIVATE /W3)
 else()
-    target_compile_options(OpenMadoola PRIVATE -Wall -Wvla -Wformat=2 ${SDL2_CFLAGS_OTHER})
+    target_compile_options(openmadoola PRIVATE -Wall -Wvla -Wformat=2 ${SDL2_CFLAGS_OTHER})
 endif()
 
 # language versions
-set_target_properties(OpenMadoola PROPERTIES
+set_target_properties(openmadoola PROPERTIES
     C_STANDARD 17
     C_STANDARD_REQUIRED ON
     C_EXTENSIONS OFF
@@ -207,22 +207,22 @@ set_target_properties(OpenMadoola PROPERTIES
 include(TestBigEndian)
 test_big_endian(endian)
 if(endian)
-    target_compile_definitions(OpenMadoola PRIVATE OM_BIG_ENDIAN)
+    target_compile_definitions(openmadoola PRIVATE OM_BIG_ENDIAN)
 endif()
     
 # work around msvc nonsense
 if(MSVC)
     # disable warnings when not using "_s" stdlib functions
-    target_compile_definitions(OpenMadoola PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(openmadoola PRIVATE _CRT_SECURE_NO_WARNINGS)
     # read source files as utf-8
-    target_compile_options(OpenMadoola PRIVATE /utf-8)
+    target_compile_options(openmadoola PRIVATE /utf-8)
     # use "main" instead of "WinMain"
-    set_target_properties(OpenMadoola PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
+    set_target_properties(openmadoola PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
     # set the debugger working directory
-    set_target_properties(OpenMadoola PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    set_target_properties(openmadoola PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     # make sure the debugger can find the sdl2 dll file
     set(OM_PATH "PATH=%PATH%" ${PROJECT_SOURCE_DIR}/libs/SDL2/lib/x64)
-    set_target_properties(OpenMadoola PROPERTIES VS_DEBUGGER_ENVIRONMENT "${OM_PATH}")
+    set_target_properties(openmadoola PROPERTIES VS_DEBUGGER_ENVIRONMENT "${OM_PATH}")
     # statically link the runtime library in case the user doesn't have msvc redistributable installed
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
@@ -256,7 +256,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 # when to enable debug code
-target_compile_definitions(OpenMadoola PRIVATE 
+target_compile_definitions(openmadoola PRIVATE 
     $<$<CONFIG:Debug>:DEBUG>
     $<$<CONFIG:Test>:DEBUG>
 )
