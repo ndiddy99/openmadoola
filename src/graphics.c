@@ -30,8 +30,10 @@
 
 // 8bpp chunky version of chrRom
 static Uint8 *chrData;
+// the palette we're using to draw this frame
+static Uint8 *drawPalette;
 // where we're drawing to
-static Uint32 *screen;
+static Uint8 *screen;
 
 int Graphics_Init(void) {
     // convert planar 2bpp to chunky 8bpp
@@ -72,10 +74,8 @@ error:
 
 void Graphics_StartFrame(void) {
     screen = Platform_GetFramebuffer();
-    Palette_Run();
-    for (int i = 0; i < (FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT); i++) {
-        screen[i] = rgbPalette[0];
-    }
+    drawPalette = Palette_Run();
+    memset(screen, colorPalette[0], FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT);
 }
 
 void Graphics_DrawTile(int x, int y, int tilenum, int palnum, int mirror) {
@@ -86,7 +86,7 @@ void Graphics_DrawTile(int x, int y, int tilenum, int palnum, int mirror) {
 
     // write tile to screen
     int tileOffset = tilenum * TILE_SIZE;
-    Uint32 *palette = rgbPalette + (palnum * PALETTE_SIZE);
+    Uint8 *palette = drawPalette + (palnum * PALETTE_SIZE);
     // the nes framebuffer has an extra tile row/column around it to allow for 
     // drawing to it without checking the tile bounds
     x += TILE_WIDTH;

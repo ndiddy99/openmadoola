@@ -44,7 +44,7 @@ void Platform_EndFrame(void);
 
 /**
  * @brief Gets access to the framebuffer.
- * @returns a pointer to the NES framebuffer pixels (ARGB 32-bit). 
+ * @returns a pointer to the NES framebuffer pixels (NES 6-bit).
  * NOTE: If you're implementing your own platform_whatever.c file, the
  * framebuffer should have a 1-tile wide buffer around each edge. This allows
  * for Graphics_DrawTile to skip checking if each pixel it's drawing is within
@@ -52,7 +52,7 @@ void Platform_EndFrame(void);
  */
 #define FRAMEBUFFER_WIDTH (SCREEN_WIDTH + (2 * TILE_WIDTH))
 #define FRAMEBUFFER_HEIGHT (SCREEN_HEIGHT + (2 * TILE_HEIGHT))
-Uint32 *Platform_GetFramebuffer(void);
+Uint8 *Platform_GetFramebuffer(void);
 
 /**
  * @returns the current video scale

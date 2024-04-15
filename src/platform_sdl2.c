@@ -23,29 +23,24 @@
 
 #include "constants.h"
 #include "db.h"
-#include "file.h"
 #include "graphics.h"
 #include "input.h"
 #include "nanotime.h"
+#include "palette.h"
 #include "platform.h"
 
 // --- video stuff ---
 static Uint8 frameStarted = 0;
 static Uint8 scale = 3;
 static Uint8 fullscreen = 0;
-static Uint32 *framebuffer;
+// NES framebuffer
+static Uint8 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
 // destination to draw to when drawing in fullscreen
 static SDL_Rect fullscreenRect;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 // texture that the game engine draws to
 static SDL_Texture *drawTexture;
-static SDL_Rect screenRect = {
-    .x = TILE_WIDTH,
-    .y = TILE_HEIGHT,
-    .w = SCREEN_WIDTH,
-    .h = SCREEN_HEIGHT,
-};
 // texture that gets nearest-neighbor scaled
 static SDL_Texture *scaleTexture;
 static int vsync;
@@ -117,7 +112,7 @@ static int Platform_InitVideo(void) {
     drawTexture = SDL_CreateTexture(renderer,
                                     SDL_PIXELFORMAT_ARGB8888,
                                     SDL_TEXTUREACCESS_STREAMING,
-                                    FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+                                    SCREEN_WIDTH, SCREEN_HEIGHT);
     if (!drawTexture) {
         ERROR_MSG(SDL_GetError());
         return 0;
@@ -149,8 +144,6 @@ void Platform_StartFrame(void) {
     }
     frameStarted = 1;
     Platform_PumpEvents();
-    int pitch;
-    SDL_LockTexture(drawTexture, NULL, (void **)&framebuffer, &pitch);
 }
 
 void Platform_EndFrame(void) {
@@ -158,10 +151,23 @@ void Platform_EndFrame(void) {
         printf("ERROR: Ended frame without starting it!\n");
     }
     frameStarted = 0;
+    // convert framebuffer from nes colors to rgb
+    Uint32 *rgbFramebuffer;
+    int pitch;
+    SDL_LockTexture(drawTexture, NULL, (void **)&rgbFramebuffer, &pitch);
+    // skip past buffer around framebuffer
+    int srcOffset = (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
+    int dstOffset = 0;
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            rgbFramebuffer[dstOffset++] = nesToRGB[framebuffer[srcOffset++]];
+        }
+        srcOffset += (TILE_WIDTH * 2);
+    }
     SDL_UnlockTexture(drawTexture);
     SDL_SetRenderTarget(renderer, scaleTexture);
     // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
-    SDL_RenderCopy(renderer, drawTexture, &screenRect, NULL);
+    SDL_RenderCopy(renderer, drawTexture, NULL, NULL);
     SDL_SetRenderTarget(renderer, NULL);
 
     // monitor framerate isn't a multiple of 60, so wait in software
@@ -181,7 +187,7 @@ void Platform_EndFrame(void) {
     }
 }
 
-Uint32 *Platform_GetFramebuffer(void) {
+Uint8 *Platform_GetFramebuffer(void) {
     return framebuffer;
 }
 

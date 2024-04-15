@@ -26,14 +26,11 @@
 #include "palette.h"
 
 // maps each of the 64 NES colors to an ARGB value
-static Uint32 nesRGB[64];
-
+Uint32 nesToRGB[64];
 // which NES colors to use
 Uint8 colorPalette[PALETTE_SIZE * 8];
 // palette to use when flashTimer is nonzero
 static Uint8 flashPalette[PALETTE_SIZE * 8];
-// palette used by graphics code
-Uint32 rgbPalette[PALETTE_SIZE * 8];
 Uint8 flashTimer = 0;
 
 int Palette_Init(void) {
@@ -43,28 +40,24 @@ int Palette_Init(void) {
         return 0;
     }
 
-    for (int i = 0; i < ARRAY_LEN(nesRGB); i++) {
+    for (int i = 0; i < ARRAY_LEN(nesToRGB); i++) {
         Uint8 r = fgetc(fp);
         Uint8 g = fgetc(fp);
         Uint8 b = fgetc(fp);
 
-        nesRGB[i] = ((Uint32)0xFF << 24) | ((Uint32)r << 16) | ((Uint32)g << 8) | (Uint32)b;
+        nesToRGB[i] = ((Uint32)0xFF << 24) | ((Uint32)r << 16) | ((Uint32)g << 8) | (Uint32)b;
     }
     fclose(fp);
     return 1;
 }
 
-void Palette_Run(void) {
+Uint8 *Palette_Run(void) {
     if (flashTimer) {
         flashTimer--;
         for (int i = 0; i < ARRAY_LEN(colorPalette); i++) {
             flashPalette[i] = (((frameCount << 2) & 0x30) + colorPalette[i]) & 0x3f;
-            rgbPalette[i] = nesRGB[flashPalette[i]];
         }
+        return flashPalette;
     }
-    else {
-        for (int i = 0; i < ARRAY_LEN(colorPalette); i++) {
-            rgbPalette[i] = nesRGB[colorPalette[i]];
-        }
-    }
+    return colorPalette;
 }

@@ -21,9 +21,10 @@
 #include "constants.h"
 #include "graphics.h"
 
+// maps each of the 64 NES colors to an ARGB color
+extern Uint32 nesToRGB[64];
+// first 4: background next 4: sprites
 extern Uint8 colorPalette[PALETTE_SIZE * 8];
-// colorPalette but ARGB 32-bit
-extern Uint32 rgbPalette[PALETTE_SIZE * 8];
 extern Uint8 flashTimer;
 
 /**
@@ -34,5 +35,7 @@ int Palette_Init(void);
 
 /**
  * @brief Sets up the color palette. Should be run at the start of each frame.
+ * @returns the palette that should be used to display this frame (flash palette
+ * if flashTimer is nonzero, otherwise the standard palette)
 */
-void Palette_Run(void);
+Uint8 *Palette_Run(void);
