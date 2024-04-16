@@ -49,6 +49,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Fixed a bug where killing Darutos and then dying to one of his fireballs would let you skip fighting him after continuing
 - Fixed a bug where sound effects would sometimes get stuck on, glitch out, etc.
 - Fixed a bug where pausing and then unpausing on a castle level would cause the noise channel to drop out of the music
+- Fixed a bug where the mirroring on the fireball that some enemies throw wasn't initialized
 
 #### Plus-exclusive changes
 - Added the opening/ending text from the arcade version of the game
@@ -58,7 +59,6 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - The selected weapon is visible during gameplay, and you can change weapons without pausing
 - Darutos gets drawn even when he's only partially visible, making him easier to see
 - Fixed a bug where the orb you get at the end of a level wasn't animated correctly
-- Fixed a bug where the mirroring on the fireball that some enemies throw wasn't initialized
 - Fixed a bug where Nipata would get stuck if it spawned in a narrow gap
 
 ## Build Instructions

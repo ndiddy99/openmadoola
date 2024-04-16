@@ -61,10 +61,7 @@ void Fireball_Spawn(Uint8 mask, Object *parent) {
             o->ySpeed = 0x80;
             o->xSpeed = RNG_Get() & 0x3f;
             o->type = OBJ_FIREBALL;
-            // initialize sprite mirroring (the original game didn't do this)
-            if (gameType == GAME_TYPE_PLUS) {
-                Object_FaceLucia(o);
-            }
+            Object_FaceLucia(o);
             Sound_Play(SFX_FIREBALL);
         }
     }
