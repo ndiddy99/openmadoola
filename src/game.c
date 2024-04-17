@@ -215,6 +215,7 @@ showSaveScreen:
         keywordDisplay = 0;
     }
 
+    Object_ListInit();
     paused = 0;
     currentWeapon = WEAPON_SWORD;
 
