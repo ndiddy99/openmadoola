@@ -88,6 +88,8 @@ set(SOURCE_LIST
     "libs/blargg_apu/blargg_apu.cpp"
 
     "libs/nanotime/nanotime.c"
+
+    "libs/nes_ntsc/nes_ntsc.c"
 )
 
 set(HEADER_LIST
@@ -169,6 +171,10 @@ set(HEADER_LIST
     "libs/blargg_apu/Nes_Oscs.h"
 
     "libs/nanotime/nanotime.h"
+
+    "libs/nes_ntsc/nes_ntsc.h"
+    "libs/nes_ntsc/nes_ntsc_config.h"
+    "libs/nes_ntsc/nes_ntsc_impl.h"
 )
 
 add_executable(openmadoola WIN32 ${SOURCE_LIST} ${HEADER_LIST})
@@ -178,6 +184,7 @@ target_include_directories(openmadoola PRIVATE
     "src/objects"
     "libs/blargg_apu"
     "libs/nanotime"
+    "libs/nes_ntsc"
     ${SDL2_INCLUDE_DIRS}
 )
 

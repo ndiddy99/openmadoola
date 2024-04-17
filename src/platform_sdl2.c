@@ -26,6 +26,7 @@
 #include "graphics.h"
 #include "input.h"
 #include "nanotime.h"
+#include "nes_ntsc.h"
 #include "palette.h"
 #include "platform.h"
 
@@ -45,6 +46,8 @@ static SDL_Texture *drawTexture;
 static SDL_Texture *scaleTexture;
 static int vsync;
 static nanotime_step_data stepData;
+static nes_ntsc_t ntsc;
+static Uint8 ntscEnabled = 0;
 
 // --- audio stuff ---
 static SDL_AudioDeviceID audioDevice;
@@ -107,12 +110,25 @@ static int Platform_InitVideo(void) {
         return 0;
     }
     nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
+    nes_ntsc_setup_t setup = nes_ntsc_composite;
+    setup.saturation = -0.1;
+    // Sony CXA2025AS decoder matrix
+    float matrix[6] = { 1.630, 0.317, -0.378, -0.466, -1.089, 1.677 };
+    setup.decoder_matrix = matrix;
+    nes_ntsc_init(&ntsc, &setup);
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+    int drawWidth;
+    if (ntscEnabled) {
+        drawWidth = NES_NTSC_OUT_WIDTH(SCREEN_WIDTH);
+    }
+    else {
+        drawWidth = SCREEN_WIDTH;
+    }
     drawTexture = SDL_CreateTexture(renderer,
                                     SDL_PIXELFORMAT_ARGB8888,
                                     SDL_TEXTUREACCESS_STREAMING,
-                                    SCREEN_WIDTH, SCREEN_HEIGHT);
+                                    drawWidth, SCREEN_HEIGHT);
     if (!drawTexture) {
         ERROR_MSG(SDL_GetError());
         return 0;
@@ -147,6 +163,8 @@ void Platform_StartFrame(void) {
 }
 
 void Platform_EndFrame(void) {
+    static int burstPhase = 0;
+
     if (!frameStarted) {
         printf("ERROR: Ended frame without starting it!\n");
     }
@@ -155,15 +173,29 @@ void Platform_EndFrame(void) {
     Uint32 *rgbFramebuffer;
     int pitch;
     SDL_LockTexture(drawTexture, NULL, (void **)&rgbFramebuffer, &pitch);
-    // skip past buffer around framebuffer
-    int srcOffset = (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
-    int dstOffset = 0;
-    for (int y = 0; y < SCREEN_HEIGHT; y++) {
-        for (int x = 0; x < SCREEN_WIDTH; x++) {
-            rgbFramebuffer[dstOffset++] = nesToRGB[framebuffer[srcOffset++]];
-        }
-        srcOffset += (TILE_WIDTH * 2);
+    if (ntscEnabled) {
+        nes_ntsc_blit(&ntsc,
+            framebuffer + (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH,
+            FRAMEBUFFER_WIDTH,
+            burstPhase,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            (void *)rgbFramebuffer,
+            pitch);
+        burstPhase ^= 1;
     }
+    else {
+        // skip past buffer around framebuffer
+        int srcOffset = (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
+        int dstOffset = 0;
+        for (int y = 0; y < SCREEN_HEIGHT; y++) {
+            for (int x = 0; x < SCREEN_WIDTH; x++) {
+                rgbFramebuffer[dstOffset++] = nesToRGB[framebuffer[srcOffset++]];
+            }
+            srcOffset += (TILE_WIDTH * 2);
+        }
+    }
+
     SDL_UnlockTexture(drawTexture);
     SDL_SetRenderTarget(renderer, scaleTexture);
     // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
@@ -230,7 +262,6 @@ int Platform_SetFullscreen(int requested) {
         // make window fullscreen at native res
         SDL_SetWindowSize(window, displayMode.w, displayMode.h);
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-        // disable cursor
         SDL_ShowCursor(SDL_DISABLE);
         // resize scale framebuffer to fit screen
         SDL_DestroyTexture(scaleTexture);
@@ -250,6 +281,7 @@ int Platform_SetFullscreen(int requested) {
     }
     else {
         fullscreen = 0;
+        SDL_ShowCursor(SDL_ENABLE);
         // make window windowed at last scale
         SDL_SetWindowFullscreen(window, 0);
         Platform_SetVideoScale(scale);
@@ -262,6 +294,36 @@ int Platform_SetFullscreen(int requested) {
 
 int Platform_GetFullscreen(void) {
     return fullscreen;
+}
+
+int Platform_SetNTSC(int requested) {
+    if (requested != ntscEnabled) {
+        ntscEnabled = requested;
+        SDL_DestroyTexture(drawTexture);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+        int drawWidth;
+        if (ntscEnabled) {
+            drawWidth = NES_NTSC_OUT_WIDTH(SCREEN_WIDTH);
+        }
+        else {
+            drawWidth = SCREEN_WIDTH;
+        }
+        drawTexture = SDL_CreateTexture(renderer,
+            SDL_PIXELFORMAT_ARGB8888,
+            SDL_TEXTUREACCESS_STREAMING,
+            drawWidth, SCREEN_HEIGHT);
+        if (!drawTexture) {
+            ERROR_MSG(SDL_GetError());
+            return requested;
+        }
+        DB_Set("ntsc", &ntscEnabled, 1);
+        DB_Save();
+    }
+    return ntscEnabled;
+}
+
+int Platform_GetNTSC(void) {
+    return ntscEnabled;
 }
 
 static int Platform_InitAudio(void) {
@@ -305,12 +367,13 @@ int Platform_Init(void) {
         printf("Error initializing SDL: %s\n", SDL_GetError());
         return 0;
     }
+    DBEntry *entry = DB_Find("scale");
+    if (entry) { scale = entry->data[0]; }
+    entry = DB_Find("ntsc");
+    if (entry) { ntscEnabled = entry->data[0]; }
     if (!Platform_InitVideo()) { return 0; }
     if (!Platform_InitAudio()) { return 0; }
     controller = Platform_FindController();
-
-    DBEntry *entry = DB_Find("scale");
-    if (entry) { Platform_SetVideoScale(entry->data[0]); }
     entry = DB_Find("fullscreen");
     if (entry) { Platform_SetFullscreen(entry->data[0]); }
 

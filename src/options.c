@@ -123,11 +123,16 @@ static MenuItem controlsItems[] = {
     MENU_BACK("Back"),
 };
 
-static char *fullscreenOptions[] = {"OFF", "ON"};
+static char *boolOptions[] = {"OFF", "ON"};
 
 static int fullscreenCB(int num) {
     num &= 1;
     return Platform_SetFullscreen(num);
+}
+
+static int ntscCB(int num) {
+    num &= 1;
+    return Platform_SetNTSC(num);
 }
 
 static void keyboardLink(void) {
@@ -153,8 +158,9 @@ static int gameTypeCB(int num) {
 }
 
 static MenuItem optionsItems[] = {
-    MENU_LIST("Fullscreen", fullscreenOptions, Platform_GetFullscreen, fullscreenCB),
+    MENU_LIST("Fullscreen", boolOptions, Platform_GetFullscreen, fullscreenCB),
     MENU_NUM("Window scale", Platform_GetVideoScale, Platform_SetVideoScale, 1),
+    MENU_LIST("NTSC filter", boolOptions, Platform_GetNTSC, ntscCB),
     MENU_NUM("Volume", Sound_GetVolume, Sound_SetVolume, 5),
     MENU_LINK("Keyboard controls", keyboardLink),
     MENU_LINK("Gamepad controls", gamepadLink),

@@ -80,6 +80,19 @@ int Platform_SetFullscreen(int requested);
 int Platform_GetFullscreen(void);
 
 /**
+ * @brief Requests enabling or disabling the NTSC filter.
+ * @param requested nonzero = filter enabled, zero = filter disabled
+ * @returns the set filter mode
+ */
+int Platform_SetNTSC(int requested);
+
+/**
+ * @brief Gets the NTSC filter state
+ * @returns nonzero = filter enabled, zero = filter disabled
+ */
+int Platform_GetNTSC(void);
+
+/**
  * @brief Queues the given audio samples to play
  * @param samples The buffer of samples to queue
  * @param count The number of samples in the buffer
