@@ -22,7 +22,7 @@
 #include "map.h"
 
 #define PRG_ROM_SIZE 0x8000
-extern Uint8 *prgRom;
+extern Uint8 prgRom[PRG_ROM_SIZE];
 extern Uint8 *chrRom;
 extern int chrRomSize;
 extern Uint16 tilesetBases[3];

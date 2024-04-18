@@ -26,7 +26,7 @@
 #include "map.h"
 #include "rom.h"
 
-Uint8 *prgRom = NULL;
+Uint8 prgRom[PRG_ROM_SIZE];
 Uint8 *chrRom = NULL;
 int chrRomSize = 0;
 
@@ -55,7 +55,7 @@ static int Rom_LoadFromSteam(FILE *fp) {
             found = 1;
             break;
         }
-        else {
+        else if (ptr) {
             ptr++;
         }
     }
@@ -66,7 +66,6 @@ static int Rom_LoadFromSteam(FILE *fp) {
 
     // read in data
     ptr += 36;
-    prgRom = malloc(PRG_ROM_SIZE);
     memcpy(prgRom, ptr, PRG_ROM_SIZE);
     ptr += PRG_ROM_SIZE;
     chrRomSize = 0x8000;
@@ -88,8 +87,11 @@ static int Rom_LoadFromNesFile(FILE *fp) {
         free(romData);
         return 0;
     }
-    prgRom = romData + 0x10;
-    chrRom = prgRom + 0x8000;
+    memcpy(prgRom, romData + 0x10, PRG_ROM_SIZE);
+    chrRomSize = 0x8000;
+    chrRom = malloc(chrRomSize);
+    memcpy(chrRom, romData + 0x10 + PRG_ROM_SIZE, chrRomSize);
+    free(romData);
     return 1;
 }
 
