@@ -1,5 +1,5 @@
 /* db.c: "database" handler (more like a crappy version of RIFF i guess)
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "alloc.h"
 #include "constants.h"
 #include "db.h"
 #include "file.h"
@@ -42,13 +43,13 @@ static DBEntry *entries;
 Uint8 *DB_Add(char *name, Uint32 dataLen) {
     if (numEntries >= allocedEntries) {
         allocedEntries *= 2;
-        entries = realloc(entries, allocedEntries * sizeof(DBEntry));
+        entries = omrealloc(entries, allocedEntries * sizeof(DBEntry));
     }
 
-    entries[numEntries].name = malloc(strlen(name) + 1);
+    entries[numEntries].name = ommalloc(strlen(name) + 1);
     strcpy(entries[numEntries].name, name);
     entries[numEntries].dataLen = dataLen;
-    entries[numEntries].data = malloc(dataLen);
+    entries[numEntries].data = ommalloc(dataLen);
     return entries[numEntries++].data;
 }
 
@@ -67,7 +68,7 @@ void DB_Set(char *name, Uint8 *data, Uint32 dataLen) {
     if (entry) {
         entry->dataLen = dataLen;
         if (entry->data) { free(entry->data); }
-        entry->data = malloc(dataLen);
+        entry->data = ommalloc(dataLen);
         memcpy(entry->data, data, dataLen);
     }
     else {
@@ -79,7 +80,7 @@ void DB_Set(char *name, Uint8 *data, Uint32 dataLen) {
 void DB_Init(void) {
     // init vars
     allocedEntries = 10;
-    entries = malloc(allocedEntries * sizeof(DBEntry));
+    entries = ommalloc(allocedEntries * sizeof(DBEntry));
     numEntries = 0;
 
     // load db file from disk
@@ -88,7 +89,7 @@ void DB_Init(void) {
         // name can't be more than 256 bytes because of the length field
         char name[256];
         Uint32 dataBuffSize = 256;
-        Uint8 *dataBuff = malloc(dataBuffSize);
+        Uint8 *dataBuff = ommalloc(dataBuffSize);
         Uint32 savedEntries = File_ReadUint32BE(fp);
         for (Uint32 i = 0; i < savedEntries; i++) {
             Uint8 nameLen = fgetc(fp);
@@ -96,7 +97,7 @@ void DB_Init(void) {
             Uint32 dataLen = File_ReadUint32BE(fp);
             if (dataLen > dataBuffSize) {
                 dataBuffSize = dataLen;
-                dataBuff = realloc(dataBuff, dataBuffSize);
+                dataBuff = omrealloc(dataBuff, dataBuffSize);
             }
             fread(dataBuff, 1, dataLen, fp);
             DB_Set(name, dataBuff, dataLen);

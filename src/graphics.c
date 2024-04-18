@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "alloc.h"
 #include "constants.h"
 #include "graphics.h"
 #include "palette.h"
@@ -38,11 +39,7 @@ static Uint8 *screen;
 
 int Graphics_Init(void) {
     // convert planar 2bpp to chunky 8bpp
-    chrData = malloc(chrRomSize * 4);
-    if (!chrData) {
-        ERROR_MSG("Out of memory");
-        goto error;
-    }
+    chrData = ommalloc(chrRomSize * 4);
     int chrCursor = 0;
     for (int i = 0; i < (chrRomSize / TILE_PACKED_SIZE); i++) {
         int tilePos = i * TILE_PACKED_SIZE;
@@ -67,10 +64,6 @@ int Graphics_Init(void) {
         }
     }
     return 1;
-
-error:
-    if (chrData) { free(chrData); }
-    return 0;
 }
 
 void Graphics_StartFrame(void) {

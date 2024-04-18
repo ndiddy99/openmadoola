@@ -25,6 +25,7 @@
 #ifdef OM_UNIX
 #include <sys/stat.h>
 #endif
+#include "alloc.h"
 #include "file.h"
 
 #ifdef OM_UNIX
@@ -135,8 +136,7 @@ Uint8 *File_Load(FILE *fp, int *size) {
     fseek(fp, 0, SEEK_END);
     int fileSize = ftell(fp);
     rewind(fp);
-    Uint8 *data = malloc(fileSize);
-    if (!data) { return NULL; }
+    Uint8 *data = ommalloc(fileSize);
     fread(data, 1, fileSize, fp);
     fclose(fp);
     if (size) { *size = fileSize; }

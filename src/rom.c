@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "alloc.h"
 #include "constants.h"
 #include "file.h"
 #include "map.h"
@@ -69,7 +70,7 @@ static int Rom_LoadFromSteam(FILE *fp) {
     memcpy(prgRom, ptr, PRG_ROM_SIZE);
     ptr += PRG_ROM_SIZE;
     chrRomSize = 0x8000;
-    chrRom = malloc(chrRomSize);
+    chrRom = ommalloc(chrRomSize);
     memcpy(chrRom, ptr, chrRomSize);
     free(steamData);
     return 1;
@@ -89,7 +90,7 @@ static int Rom_LoadFromNesFile(FILE *fp) {
     }
     memcpy(prgRom, romData + 0x10, PRG_ROM_SIZE);
     chrRomSize = 0x8000;
-    chrRom = malloc(chrRomSize);
+    chrRom = ommalloc(chrRomSize);
     memcpy(chrRom, romData + 0x10 + PRG_ROM_SIZE, chrRomSize);
     free(romData);
     return 1;
@@ -120,13 +121,7 @@ int Rom_LoadChr(char *filename, int size) {
         return 0;
     }
 
-    chrRom = realloc(chrRom, chrRomSize + size);
-    if (!chrRom) {
-        ERROR_MSG("Out of memory");
-        fclose(fp);
-        return 0;
-    }
-
+    chrRom = omrealloc(chrRom, chrRomSize + size);
     fread(chrRom + chrRomSize, 1, size, fp);
     fclose(fp);
 
@@ -136,9 +131,9 @@ int Rom_LoadChr(char *filename, int size) {
 
 static int init_tileset(MapData *data, int num, int length, Uint16 base, int pal_offset, int rom_offset) {
     data->tilesets[num].len = length;
-    data->tilesets[num].metatiles = malloc(length * sizeof(Metatile));
+    data->tilesets[num].metatiles = ommalloc(length * sizeof(Metatile));
     for (int i = 0; i < length; i++) {
-        data->tilesets[num].metatiles[i].palnum = (Uint16)prgRom[pal_offset++];
+        data->tilesets[num].metatiles[i].palnum   = (Uint16)prgRom[pal_offset++];
         data->tilesets[num].metatiles[i].tiles[0] = (Uint16)prgRom[rom_offset++] + base;
         data->tilesets[num].metatiles[i].tiles[1] = (Uint16)prgRom[rom_offset++] + base;
         data->tilesets[num].metatiles[i].tiles[2] = (Uint16)prgRom[rom_offset++] + base;
@@ -154,7 +149,7 @@ void Rom_GetMapData(MapData *data) {
 
     // there are 3 tilesets (forest, cave, castle)
     data->numTilesets = 3;
-    data->tilesets = malloc(data->numTilesets * sizeof(Tileset));
+    data->tilesets = ommalloc(data->numTilesets * sizeof(Tileset));
 
     // forest tileset has 164 metatiles
     #define FOREST_PALS (0x2790)
@@ -170,7 +165,7 @@ void Rom_GetMapData(MapData *data) {
 
     // there are 223 chunks
     data->numChunks = 223;
-    data->chunks = malloc(data->numChunks * sizeof(data->chunks[0]));
+    data->chunks = ommalloc(data->numChunks * sizeof(data->chunks[0]));
     for (int i = 0; i < data->numChunks; i++) {
         for (int j = 0; j < ARRAY_LEN(data->chunks[0]); j++) {
             data->chunks[i][j] = (Uint16)prgRom[cursor++];
@@ -179,7 +174,7 @@ void Rom_GetMapData(MapData *data) {
 
     // there are 159 screens
     data->numScreens = 159;
-    data->screens = malloc(data->numScreens * sizeof(data->screens[0]));
+    data->screens = ommalloc(data->numScreens * sizeof(data->screens[0]));
     for (int i = 0; i < data->numScreens; i++) {
         for (int j = 0; j < ARRAY_LEN(data->screens[0]); j++) {
             data->screens[i][j] = (Uint16)prgRom[cursor++];
@@ -264,7 +259,7 @@ void Rom_GetMapData(MapData *data) {
     #define WARP_DOOR_ROOM_TBL (0x423a)
     
     data->numWarpDoors = 272;
-    data->warpDoors = malloc(data->numWarpDoors * sizeof(WarpDoor));
+    data->warpDoors = ommalloc(data->numWarpDoors * sizeof(WarpDoor));
     for (int i = 0; i < data->numWarpDoors; i++) {
         data->warpDoors[i].xPos = prgRom[WARP_DOOR_X_TBL + i];
         data->warpDoors[i].yPos = prgRom[WARP_DOOR_Y_TBL + i];

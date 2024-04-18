@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "alloc.h"
 #include "blargg_apu.h"
 #include "constants.h"
 #include "db.h"
@@ -78,7 +79,7 @@ static void Sound_EnableChannel(int apu, Uint8 channel);
 static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
     int cursor = 0;
     out->count = romData[cursor++];
-    out->data = malloc(out->count * sizeof(Instrument));
+    out->data = ommalloc(out->count * sizeof(Instrument));
     for (int i = 0; i < out->count; i++) {
         out->data[i].num = romData[cursor++];
         Uint16 addr = romData[cursor] | (romData[cursor + 1] << 8);

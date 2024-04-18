@@ -94,6 +94,8 @@ set(SOURCE_LIST
 
 set(HEADER_LIST
     # game code
+    "src/alloc.c"
+    "src/alloc.h"
     "src/bg.h"
     "src/camera.h"
     "src/collision.h"
