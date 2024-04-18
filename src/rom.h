@@ -1,5 +1,5 @@
 /* rom.h: Reads from the game ROM file
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -21,29 +21,26 @@
 #include "constants.h"
 #include "map.h"
 
+#define PRG_ROM_SIZE 0x8000
 extern Uint8 *prgRom;
 extern Uint8 *chrRom;
-extern int prgRomSize;
 extern int chrRomSize;
 extern Uint16 tilesetBases[3];
 
 /**
- * @brief Loads a file to the PRG ROM array, expands it if it already exists
- * @param filename The filename to load
- * @param offset Where in the file to start loading
- * @param size How many bytes to load
- * @returns the new size of the PRG ROM array, or 0 if there's been an error
+ * @brief Loads the ROM file into PRG and CHR ROM
+ * @returns nonzero on successful load, 0 if there's been an error
 */
-int Rom_LoadPrg(char *filename, int offset, int size);
+int Rom_Load(void);
 
 /**
- * @brief Loads a file to the CHR ROM array, expands it if it already exists
+ * @brief Loads a file to the end of the CHR ROM array. Rom_Load must be called
+ * before this function.
  * @param filename The filename to load
- * @param offset Where in the file to start loading
  * @param size How many bytes to load
- * @returns the new size of the CHR ROM array, or 0 if there's been an error
+ * @returns 1 on success, 0 on error
 */
-int Rom_LoadChr(char *filename, int offset, int size);
+int Rom_LoadChr(char *filename, int size);
 
 /**
  * @brief initializes a MapData struct with map data from the ROM image

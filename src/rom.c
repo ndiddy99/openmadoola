@@ -1,4 +1,4 @@
-/* rom.c: Reads from the game ROM file
+﻿/* rom.c: Reads from the game ROM file
  * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
@@ -17,8 +17,9 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "constants.h"
 #include "file.h"
@@ -27,7 +28,6 @@
 
 Uint8 *prgRom = NULL;
 Uint8 *chrRom = NULL;
-int prgRomSize = 0;
 int chrRomSize = 0;
 
 Uint16 tilesetBases[3] = {
@@ -38,8 +38,79 @@ Uint16 tilesetBases[3] = {
 
 static char errorBuff[80];
 
-static int Rom_Load(char *filename, int offset, int size, Uint8 **romBuff, int romBuffSize) {
-    // open file
+static int Rom_LoadFromSteam(FILE *fp) {
+    int size;
+    Uint8 *steamData = File_Load(fp, &size);
+    fclose(fp);
+
+    // look for ROM in data file
+    char searchStr[] = "MadoolaRAGdump";
+    int searchStrLen = sizeof(searchStr) - 1;
+    Uint8 *ptr = steamData;
+    int found = 0;
+    while (ptr) {
+        int sizeLeft = size - (int)(ptr - steamData);
+        ptr = memchr(ptr, searchStr[0], sizeLeft);
+        if (ptr && (sizeLeft >= searchStrLen) && (memcmp(ptr, searchStr, searchStrLen) == 0)) {
+            found = 1;
+            break;
+        }
+        else {
+            ptr++;
+        }
+    }
+    if (!found) {
+        ERROR_MSG("Couldn't find ROM file in Steam data");
+        goto error;
+    }
+
+    // read in data
+    ptr += 36;
+    prgRom = malloc(PRG_ROM_SIZE);
+    memcpy(prgRom, ptr, PRG_ROM_SIZE);
+    ptr += PRG_ROM_SIZE;
+    chrRomSize = 0x8000;
+    chrRom = malloc(chrRomSize);
+    memcpy(chrRom, ptr, chrRomSize);
+    free(steamData);
+    return 1;
+
+error:
+    if (steamData) { free(steamData); }
+    return 0;
+}
+
+static int Rom_LoadFromNesFile(FILE *fp) {
+    int size = 0;
+    Uint8 *romData = File_Load(fp, &size);
+    fclose(fp);
+    if (size != 65552) {
+        free(romData);
+        return 0;
+    }
+    prgRom = romData + 0x10;
+    chrRom = prgRom + 0x8000;
+    return 1;
+}
+
+int Rom_Load(void) {
+    FILE *fp;
+    // try to load from the Sunsoft collection if it's installed
+    // TODO make configuration option, ask user to browse if necessary (nativefiledialog)
+#ifdef OM_WINDOWS
+    fp = _wfopen(L"C:\\Program Files (x86)\\Steam\\steamapps\\common\\SUNSOFT is Back! レトロゲームセレクション\\SUNSOFT is Back! Retro Game Selection_Data\\sharedassets1.assets", L"rb");
+    if (fp && Rom_LoadFromSteam(fp)) {
+        return 1;
+    }
+#endif
+    fp = File_OpenResource("madoola.nes");
+    if (fp && Rom_LoadFromNesFile(fp)) {
+        return 1;
+    }
+    return 0;
+}
+
+int Rom_LoadChr(char *filename, int size) {
     FILE *fp = File_OpenResource(filename);
     if (!fp) {
         snprintf(errorBuff, sizeof(errorBuff), "Couldn't find %s", filename);
@@ -47,38 +118,18 @@ static int Rom_Load(char *filename, int offset, int size, Uint8 **romBuff, int r
         return 0;
     }
 
-    // reallocate rom buffer
-    if (*romBuff) {
-        *romBuff = realloc(*romBuff, romBuffSize + size);
-        if (!(*romBuff)) {
-            ERROR_MSG("Out of memory");
-            return 0;
-        }
-    }
-    else {
-        *romBuff = malloc(size);
-        if (!(*romBuff)) {
-            ERROR_MSG("Out of memory");
-            return 0;
-        }
+    chrRom = realloc(chrRom, chrRomSize + size);
+    if (!chrRom) {
+        ERROR_MSG("Out of memory");
+        fclose(fp);
+        return 0;
     }
 
-    // load data into buffer
-    fseek(fp, offset, SEEK_SET);
-    fread(*romBuff + romBuffSize, 1, size, fp);
+    fread(chrRom + chrRomSize, 1, size, fp);
     fclose(fp);
 
-    return romBuffSize + size;
-}
-
-int Rom_LoadPrg(char *filename, int offset, int size) {
-    prgRomSize = Rom_Load(filename, offset, size, &prgRom, prgRomSize);
-    return prgRomSize;
-}
-
-int Rom_LoadChr(char *filename, int offset, int size) {
-    chrRomSize = Rom_Load(filename, offset, size, &chrRom, chrRomSize);
-    return chrRomSize;
+    chrRomSize += size;
+    return 1;
 }
 
 static int init_tileset(MapData *data, int num, int length, Uint16 base, int pal_offset, int rom_offset) {

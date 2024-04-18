@@ -1,5 +1,5 @@
 /* file.h: File management utility functions
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -65,3 +65,11 @@ FILE *File_Open(char *filename, const char *mode);
  * @returns the file pointer to the opened file
  */
 FILE *File_OpenResource(char *filename);
+
+/**
+ * @brief Loads the contents of the given file to memory
+ * @param fp The file to read 
+ * @param size (out, optional) Tells the size of the provided file
+ * @returns A pointer to the loaded data (malloced, user code must free it)
+ */
+Uint8 *File_Load(FILE *fp, int *size);

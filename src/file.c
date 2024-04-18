@@ -17,16 +17,14 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if (defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)))
-#define OM_UNIX
-#endif
+// first because it contains the OM_UNIX define
+#include "constants.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef OM_UNIX
 #include <sys/stat.h>
 #endif
-#include "constants.h"
 #include "file.h"
 
 #ifdef OM_UNIX
@@ -131,4 +129,16 @@ FILE *File_OpenResource(char *filename) {
 #else
     return fopen(filename, "rb");
 #endif
+}
+
+Uint8 *File_Load(FILE *fp, int *size) {
+    fseek(fp, 0, SEEK_END);
+    int fileSize = ftell(fp);
+    rewind(fp);
+    Uint8 *data = malloc(fileSize);
+    if (!data) { return NULL; }
+    fread(data, 1, fileSize, fp);
+    fclose(fp);
+    if (size) { *size = fileSize; }
+    return data;
 }

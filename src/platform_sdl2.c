@@ -113,7 +113,7 @@ static int Platform_InitVideo(void) {
     nes_ntsc_setup_t setup = nes_ntsc_composite;
     setup.saturation = -0.1;
     // Sony CXA2025AS decoder matrix
-    float matrix[6] = { 1.630, 0.317, -0.378, -0.466, -1.089, 1.677 };
+    float matrix[6] = { 1.630f, 0.317f, -0.378f, -0.466f, -1.089f, 1.677f };
     setup.decoder_matrix = matrix;
     nes_ntsc_init(&ntsc, &setup);
 

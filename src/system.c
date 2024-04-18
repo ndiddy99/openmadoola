@@ -28,10 +28,9 @@
 
 int System_Init(void) {
     // load assets
-    if (!Rom_LoadPrg("madoola.nes", 16, 32768))    { return 0; }
-    if (!Rom_LoadChr("madoola.nes", 32784, 32768)) { return 0; }
-    if (!Rom_LoadChr("font.bin", 0, 4096))         { return 0; }
-    if (!Palette_Init())                           { return 0; }
+    if (!Rom_Load())                    { return 0; }
+    if (!Rom_LoadChr("font.bin", 4096)) { return 0; }
+    if (!Palette_Init())                { return 0; }
     DB_Init();
 
     // initialize platform code
