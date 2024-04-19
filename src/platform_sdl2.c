@@ -86,7 +86,7 @@ static int Platform_InitVideo(void) {
         windowWidth, windowHeight,
         SDL_WINDOW_SHOWN);
     if (!window) {
-        ERROR_MSG(SDL_GetError());
+        Platform_ShowError("Error creating window: %s", SDL_GetError());
         return 0;
     }
 
@@ -106,7 +106,7 @@ static int Platform_InitVideo(void) {
     }
     renderer = SDL_CreateRenderer(window, -1, vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
     if (!renderer) {
-        ERROR_MSG(SDL_GetError());
+        Platform_ShowError("Error creating renderer: %s", SDL_GetError());
         return 0;
     }
     nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
@@ -130,7 +130,7 @@ static int Platform_InitVideo(void) {
                                     SDL_TEXTUREACCESS_STREAMING,
                                     drawWidth, SCREEN_HEIGHT);
     if (!drawTexture) {
-        ERROR_MSG(SDL_GetError());
+        Platform_ShowError("Error creating drawTexture: %s", SDL_GetError());
         return 0;
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -141,7 +141,7 @@ static int Platform_InitVideo(void) {
                                      SDL_TEXTUREACCESS_TARGET,
                                      scaledWidth, scaledHeight);
     if (!scaleTexture) {
-        ERROR_MSG(SDL_GetError());
+        Platform_ShowError("Error creating scaleTexture: %s", SDL_GetError());
         return 0;
     }
     return 1;
@@ -217,6 +217,15 @@ void Platform_EndFrame(void) {
         }
         SDL_RenderPresent(renderer);
     }
+}
+
+void Platform_ShowError(char *fmt, ...) {
+    char buff[256];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buff, sizeof(buff), fmt, args);
+    va_end(args);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", buff, window);
 }
 
 Uint8 *Platform_GetFramebuffer(void) {
@@ -313,7 +322,8 @@ int Platform_SetNTSC(int requested) {
             SDL_TEXTUREACCESS_STREAMING,
             drawWidth, SCREEN_HEIGHT);
         if (!drawTexture) {
-            ERROR_MSG(SDL_GetError());
+            Platform_ShowError("Error recreating drawTexture: %s", SDL_GetError());
+            abort();
             return requested;
         }
         DB_Set("ntsc", &ntscEnabled, 1);
@@ -333,7 +343,7 @@ static int Platform_InitAudio(void) {
     spec.channels = 1;
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
     if (!audioDevice) {
-        ERROR_MSG(SDL_GetError());
+        Platform_ShowError("Error creating audioDevice: %s", SDL_GetError());
         return 0;
     }
     SDL_PauseAudioDevice(audioDevice, 0);

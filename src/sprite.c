@@ -25,6 +25,7 @@
 #include "graphics.h"
 #include "object.h"
 #include "palette.h"
+#include "platform.h"
 #include "sprite.h"
 
 #define MAX_SPRITES (200)
@@ -84,7 +85,7 @@ Sprite *Sprite_Get(void) {
         }
     }
 
-    ERROR_MSG("Not enough sprites, increase MAX_SPRITES define in sprite.c");
+    Platform_ShowError("Not enough sprites, increase MAX_SPRITES define in sprite.c");
     return NULL;
 }
 
@@ -138,7 +139,7 @@ void Sprite_Draw(Sprite *s, Object *o) {
         }
     }
 
-    ERROR_MSG("Not enough sprites, increase MAX_SPRITES define in sprite.c");
+    Platform_ShowError("Not enough sprites, increase MAX_SPRITES define in sprite.c");
 }
 
 void Sprite_DrawDir(Sprite *s, Object *o) {

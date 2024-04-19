@@ -33,6 +33,7 @@
 #include "constants.h"
 #include "db.h"
 #include "file.h"
+#include "platform.h"
 
 #define DB_FILENAME "config.db"
 
@@ -110,7 +111,7 @@ void DB_Init(void) {
 void DB_Save(void) {
     FILE *fp = File_Open(DB_FILENAME, "wb");
     if (!fp) {
-        ERROR_MSG("Couldn't open " DB_FILENAME " for writing");
+        Platform_ShowError("Couldn't open " DB_FILENAME " for writing");
         return;
     }
 

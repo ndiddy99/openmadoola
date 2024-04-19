@@ -37,7 +37,6 @@
 
 #define STRINGIFY(x) STRINGIFY_IMPL(x)
 #define STRINGIFY_IMPL(x) #x
-#define ERROR_MSG(x) (SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, __FILE__ ":" STRINGIFY(__LINE__) ": ", x, NULL))
 #define ARRAY_LEN(x) (sizeof(x) / sizeof(x[0]))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

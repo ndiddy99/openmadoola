@@ -24,6 +24,7 @@
 #include "game.h"
 #include "graphics.h"
 #include "palette.h"
+#include "platform.h"
 
 // maps each of the 64 NES colors to an ARGB value
 Uint32 nesToRGB[64];
@@ -36,7 +37,7 @@ Uint8 flashTimer = 0;
 int Palette_Init(void) {
     FILE *fp = File_OpenResource("nes.pal");
     if (!fp) {
-        ERROR_MSG("Couldn't open nes.pal");
+        Platform_ShowError("Couldn't open nes.pal");
         return 0;
     }
 

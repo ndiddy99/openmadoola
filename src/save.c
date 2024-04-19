@@ -26,6 +26,7 @@
 #include "item.h"
 #include "joy.h"
 #include "lucia.h"
+#include "platform.h"
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
@@ -66,7 +67,7 @@ void Save_SaveFile(void) {
     snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
     FILE *fp = File_Open(filename, "wb");
     if (!fp) {
-        ERROR_MSG("Error opening save file for writing");
+        Platform_ShowError("Error opening save file for writing");
         return;
     }
 

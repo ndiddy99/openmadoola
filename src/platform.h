@@ -33,6 +33,15 @@ int Platform_Init(void);
 void Platform_Quit(void);
 
 /**
+ * @brief Displays an error message to the user
+ * @param fmt test to print
+ */
+#ifdef __GNUC__
+__attribute__((__format__(__printf__, 1, 2)))
+#endif
+void Platform_ShowError(char *fmt, ...);
+
+/**
  * @brief Should be run at the start of each frame.
  */
 void Platform_StartFrame(void);

@@ -25,6 +25,7 @@
 #include "constants.h"
 #include "file.h"
 #include "map.h"
+#include "platform.h"
 #include "rom.h"
 
 Uint8 prgRom[PRG_ROM_SIZE];
@@ -36,8 +37,6 @@ Uint16 tilesetBases[3] = {
     1280, // Cave
     1536, // Castle
 };
-
-static char errorBuff[80];
 
 static int Rom_LoadFromSteam(FILE *fp) {
     int size;
@@ -61,7 +60,7 @@ static int Rom_LoadFromSteam(FILE *fp) {
         }
     }
     if (!found) {
-        ERROR_MSG("Couldn't find ROM file in Steam data");
+        Platform_ShowError("Couldn't find ROM file in Steam data");
         goto error;
     }
 
@@ -98,6 +97,7 @@ static int Rom_LoadFromNesFile(FILE *fp) {
 
 int Rom_Load(void) {
     FILE *fp;
+
     // try to load from the Sunsoft collection if it's installed
     // TODO make configuration option, ask user to browse if necessary (nativefiledialog)
 #ifdef OM_WINDOWS
@@ -116,8 +116,7 @@ int Rom_Load(void) {
 int Rom_LoadChr(char *filename, int size) {
     FILE *fp = File_OpenResource(filename);
     if (!fp) {
-        snprintf(errorBuff, sizeof(errorBuff), "Couldn't find %s", filename);
-        ERROR_MSG(errorBuff);
+        Platform_ShowError("Rom_LoadChr: Couldn't find %s", filename);
         return 0;
     }
 
