@@ -269,7 +269,7 @@ static void Weapon_InitSmasher(void) {
 
     objects[1].type = OBJ_SMASHER;
     objects[1].timer = 3;
-    objects[1].hp = 10;
+    objects[1].hp = 9;
     Weapon_SubtractMagic();
 }
 
