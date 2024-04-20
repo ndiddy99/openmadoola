@@ -98,18 +98,27 @@ static int Rom_LoadFromNesFile(FILE *fp) {
 int Rom_Load(void) {
     FILE *fp;
 
-    // try to load from the Sunsoft collection if it's installed
-    // TODO make configuration option, ask user to browse if necessary (nativefiledialog)
+    // try to load data from the rom file
+    fp = File_OpenResource("madoola.nes");
+    if (fp && Rom_LoadFromNesFile(fp)) {
+        return 1;
+    }
+
+    // if there's no rom file, look for the asset file from the Sunsoft collection
+    fp = File_OpenResource("sharedassets1.assets");
+    if (fp && Rom_LoadFromSteam(fp)) {
+        return 1;
+    }
+
+    // if there's no asset file, try loading from the default install location for the Sunsoft collection
 #ifdef OM_WINDOWS
     fp = _wfopen(L"C:\\Program Files (x86)\\Steam\\steamapps\\common\\SUNSOFT is Back! レトロゲームセレクション\\SUNSOFT is Back! Retro Game Selection_Data\\sharedassets1.assets", L"rb");
     if (fp && Rom_LoadFromSteam(fp)) {
         return 1;
     }
 #endif
-    fp = File_OpenResource("madoola.nes");
-    if (fp && Rom_LoadFromNesFile(fp)) {
-        return 1;
-    }
+
+    Platform_ShowError("Couldn't find madoola.nes or sharedassets1.assets. Check the readme file for more information.");
     return 0;
 }
 
