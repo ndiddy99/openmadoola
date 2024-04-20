@@ -235,37 +235,3 @@ if(MSVC)
     # statically link the runtime library in case the user doesn't have msvc redistributable installed
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
-	
-# add Test build type (release but with debug code enabled)
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if(isMultiConfig)
-        if(NOT "Test" IN_LIST CMAKE_CONFIGURATION_TYPES)
-            list(APPEND CMAKE_CONFIGURATION_TYPES Test)
-        endif()
-    else()
-        set(allowedBuildTypes Debug Release Test)
-        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
-            STRINGS "${allowedBuildTypes}"
-        )
-        if(NOT CMAKE_BUILD_TYPE)
-            set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
-        elseif(NOT CMAKE_BUILD_TYPE IN_LIST allowedBuildTypes)
-            message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
-        endif()
-    endif()
-
-    # initialize Test configuration to same as release
-    set(CMAKE_C_FLAGS_TEST ${CMAKE_C_FLAGS_RELEASE})
-    set(CMAKE_CXX_FLAGS_TEST ${CMAKE_CXX_FLAGS_RELEASE})
-    set(CMAKE_EXE_LINKER_FLAGS_TEST ${CMAKE_EXE_LINKER_FLAGS_RELEASE})
-    set(CMAKE_SHARED_LINKER_FLAGS_TEST ${CMAKE_SHARED_LINKER_FLAGS_RELEASE})
-    set(CMAKE_STATIC_LINKER_FLAGS_TEST ${CMAKE_STATIC_LINKER_FLAGS_RELEASE})
-    set(CMAKE_MODULE_LINKER_FLAGS_TEST ${CMAKE_MODULE_LINKER_FLAGS_RELEASE})
-endif()
-
-# when to enable debug code
-target_compile_definitions(openmadoola PRIVATE 
-    $<$<CONFIG:Debug>:DEBUG>
-    $<$<CONFIG:Test>:DEBUG>
-)
