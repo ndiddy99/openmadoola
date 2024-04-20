@@ -19,6 +19,7 @@
 
 #pragma once
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef int8_t   Sint8;
 typedef uint8_t  Uint8;
