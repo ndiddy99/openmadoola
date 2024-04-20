@@ -61,7 +61,8 @@ static int Rom_LoadFromSteam(FILE *fp) {
     }
     if (!found) {
         Platform_ShowError("Couldn't find ROM file in Steam data");
-        goto error;
+        free(steamData);
+        return 0;
     }
 
     // read in data
@@ -73,10 +74,6 @@ static int Rom_LoadFromSteam(FILE *fp) {
     memcpy(chrRom, ptr, chrRomSize);
     free(steamData);
     return 1;
-
-error:
-    if (steamData) { free(steamData); }
-    return 0;
 }
 
 static int Rom_LoadFromNesFile(FILE *fp) {
