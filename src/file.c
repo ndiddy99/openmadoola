@@ -138,7 +138,6 @@ Uint8 *File_Load(FILE *fp, int *size) {
     rewind(fp);
     Uint8 *data = ommalloc(fileSize);
     fread(data, 1, fileSize, fp);
-    fclose(fp);
     if (size) { *size = fileSize; }
     return data;
 }
