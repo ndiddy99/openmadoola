@@ -6,7 +6,7 @@ Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
 
 ## Usage
 
-In order to function, OpenMadoola requires a Wing of Madoola ROM image as well as the font.bin and nes.pal data files from this repository. The ROM image can either be a standard NES ROM file named "madoola.nes" or the "sharedassets1.assets" file from [Sunsoft is Back! Retro Game Selection](https://store.steampowered.com/app/2821290/SUNSOFT_is_Back/) on Steam. OpenMadoola reads all the graphics and level data from the ROM image, and will refuse to start if it is not present. If you don't have an original cartridge or don't want to deal with dumping it, I would recommend buying the collection on Steam rather than downloading a ROM off the internet. It's only $13 and has a nice interface with high-quality scans of the manual as well as some concept art. It also shows Sunsoft that there's interest in their legacy IP. To retrieve the "sharedassets1.assets" file, go to your Steam Library, right click the collection, and click "Manage->Browse local files". It will be in the "SUNSOFT is Back! Retro Game Selection_Data" directory.
+In order to function, OpenMadoola requires a Wing of Madoola ROM image as well as the font.bin and nes.pal data files from this repository. The ROM image can either be a standard NES ROM file named "madoola.nes" or the "sharedassets1.assets" file from [Sunsoft is Back! Retro Game Selection](https://store.steampowered.com/app/2821290/SUNSOFT_is_Back/) on Steam. OpenMadoola reads all the graphics and level data from the ROM image, and will refuse to start if it is not present. If you don't have an original cartridge or don't want to deal with dumping it, I would recommend buying the collection on Steam rather than downloading a ROM off the internet. It's only $13 and has a nice interface with high-quality scans of the manual as well as some concept art. It also shows Sunsoft that there's interest in their legacy IP. To retrieve the "sharedassets1.assets" file, go to your Steam library, right click the Sunsoft collection, and click "Manage->Browse local files". It will be in the "SUNSOFT is Back! Retro Game Selection_Data" directory.
 
 ### UNIX-like platforms (GNU/Linux, Mac OS X, etc)
 
@@ -19,9 +19,9 @@ OpenMadoola will attempt to read the ROM image and data files from these directo
 
 It will also write configuration and save data to `~/.openmadoola`.
 
-### Other platforms (Windows, etc)
+### Windows
 
-OpenMadoola will attempt to read the ROM image and data files from the current working directory (typically the directory the executable is in). As a failsafe, it will also try reading the ROM image out of the default Steam install directory (C:\Program Files (x86)\Steam\steamapps\common\SUNSOFT is Back! レトロゲームセレクション) if it doesn't see a ROM image in the current working directory. OpenMadoola will write configuration and save data to the current working directory.
+OpenMadoola will attempt to read the ROM image and data files from the current working directory (typically the directory the executable is in). If it doesn't see a ROM image in the current working directory, it will also try reading from the default Steam install directory (C:\Program Files (x86)\Steam\steamapps\common\SUNSOFT is Back! レトロゲームセレクション). OpenMadoola will write configuration and save data to the current working directory.
 
 ### Default controls
 
