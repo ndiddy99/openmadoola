@@ -142,3 +142,13 @@ Uint8 *File_Load(FILE *fp, int *size) {
     if (size) { *size = fileSize; }
     return data;
 }
+
+Uint8 *File_OpenLoad(char *filename, int *size) {
+    FILE *fp = File_Open(filename, "rb");
+    if (fp) {
+        Uint8 *data = File_Load(fp, size);
+        fclose(fp);
+        return data;
+    }
+    return NULL;
+}

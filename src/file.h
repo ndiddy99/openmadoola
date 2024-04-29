@@ -73,3 +73,12 @@ FILE *File_OpenResource(char *filename);
  * @returns A pointer to the loaded data (malloced, user code must free it)
  */
 Uint8 *File_Load(FILE *fp, int *size);
+
+/**
+ * @brief Opens a file and loads its contents to memory
+ * @param filename The file to read
+ * @param size (out, optional) Size of the provided file
+ * @returns A pointer to the loaded data (malloced, user code must free it)
+ * or NULL if the file couldn't be opened
+ */
+Uint8 *File_OpenLoad(char *filename, int *size);

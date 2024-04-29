@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "alloc.h"
+#include "buffer.h"
 #include "constants.h"
 #include "db.h"
 #include "file.h"
@@ -78,51 +79,55 @@ void DB_Set(char *name, Uint8 *data, Uint32 dataLen) {
     }
 }
 
+Buffer *DB_Serialize(void) {
+    Buffer *buf = Buffer_Init(256);
+    Buffer_AddUint32(buf, (Uint32)numEntries);
+    for (int i = 0; i < numEntries; i++) {
+        // add 1 for the NUL terminator
+        Uint8 nameLen = (Uint8)strlen(entries[i].name) + 1;
+        Buffer_Add(buf, nameLen);
+        Buffer_AddData(buf, entries[i].name, nameLen);
+        Buffer_AddUint32(buf, entries[i].dataLen);
+        Buffer_AddData(buf, entries[i].data, entries[i].dataLen);
+    }
+    return buf;
+}
+
+void DB_Deserialize(Uint8 *data) {
+    char *name;
+    int cursor = 0;
+    Buffer *dataBuff = Buffer_Init(256);
+    Uint32 savedEntries = Buffer_DataReadUint32(data);
+    cursor += 4;
+    for (Uint32 i = 0; i < savedEntries; i++) {
+        Uint8 nameLen = data[cursor++];
+        name = data + cursor;
+        cursor += nameLen; // nameLen includes the NUL terminator
+        Uint32 dataLen = Buffer_DataReadUint32(data + cursor);
+        cursor += 4;
+        dataBuff->dataSize = 0;
+        Buffer_AddData(dataBuff, data + cursor, dataLen);
+        cursor += dataLen;
+        DB_Set(name, dataBuff->data, dataLen);
+    }
+    Buffer_Destroy(dataBuff);
+}
+
+void DB_Save(void) {
+    Buffer *buf = DB_Serialize();
+    Buffer_WriteToFile(buf, DB_FILENAME);
+    Buffer_Destroy(buf);
+}
+
 void DB_Init(void) {
     // init vars
     allocedEntries = 10;
     entries = ommalloc(allocedEntries * sizeof(DBEntry));
     numEntries = 0;
 
-    // load db file from disk
-    FILE *fp = File_Open(DB_FILENAME, "rb");
-    if (fp) {
-        // name can't be more than 256 bytes because of the length field
-        char name[256];
-        Uint32 dataBuffSize = 256;
-        Uint8 *dataBuff = ommalloc(dataBuffSize);
-        Uint32 savedEntries = File_ReadUint32BE(fp);
-        for (Uint32 i = 0; i < savedEntries; i++) {
-            Uint8 nameLen = fgetc(fp);
-            fread(name, 1, nameLen, fp);
-            Uint32 dataLen = File_ReadUint32BE(fp);
-            if (dataLen > dataBuffSize) {
-                dataBuffSize = dataLen;
-                dataBuff = omrealloc(dataBuff, dataBuffSize);
-            }
-            fread(dataBuff, 1, dataLen, fp);
-            DB_Set(name, dataBuff, dataLen);
-        }
-        free(dataBuff);
-        fclose(fp);
+    Uint8 *dbData = File_OpenLoad(DB_FILENAME, NULL);
+    if (dbData) {
+        DB_Deserialize(dbData);
+        free(dbData);
     }
-}
-
-void DB_Save(void) {
-    FILE *fp = File_Open(DB_FILENAME, "wb");
-    if (!fp) {
-        Platform_ShowError("Couldn't open " DB_FILENAME " for writing");
-        return;
-    }
-
-    File_WriteUint32BE((Uint32)numEntries, fp);
-    for (int i = 0; i < numEntries; i++) {
-        // add 1 for the NUL terminator
-        Uint8 nameLen = (Uint8)strlen(entries[i].name) + 1;
-        fputc(nameLen, fp);
-        fwrite(entries[i].name, 1, nameLen, fp);
-        File_WriteUint32BE(entries[i].dataLen, fp);
-        fwrite(entries[i].data, 1, entries[i].dataLen, fp);
-    }
-    fclose(fp);
 }
