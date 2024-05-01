@@ -31,6 +31,7 @@ void Save_SaveFile(void);
 
 /**
  * @brief Displays the save file screen.
- * @returns nonzero if the user loaded a save, zero if the user created a new game.
+ * @returns 0 if the user wanted to return to the title screen, 1 if the user
+ * started a new game, 2 if the user loaded a game
  */
 int Save_Screen(void);

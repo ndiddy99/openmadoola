@@ -188,13 +188,14 @@ startGameCode:
     Screen_Title();
     MainMenu_Run();
 
-showSaveScreen:
-    if (Save_Screen()) {
-        // stage number got set by the save screen so we don't need to set it here
-        health = 1000;
+showSaveScreen:;
+    int saveStatus = Save_Screen();
+    // return to title screen
+    if (saveStatus == 0) {
+        goto startGameCode;
     }
-    // if the player started a new game, initialize the game state
-    else {
+    // new game (initialize game state)
+    else if (saveStatus == 1) {
         health = 1000;
         maxHealth = 1000;
         maxMagic = 1000;
@@ -202,25 +203,26 @@ showSaveScreen:
 
         // initialize boots and weapon levels
         bootsLevel = 0;
-        for (int i = NUM_WEAPONS - 1; i >= 0; i--) {
-            weaponLevels[i] = 0;
-        }
+        memset(weaponLevels, 0, NUM_WEAPONS);
         weaponLevels[WEAPON_SWORD] = 1;
         Item_InitCollected();
-        for (int i = 0; i < 16; i++) {
-            bossDefeated[i] = 0;
-        }
+        memset(bossDefeated, 0, sizeof(bossDefeated));
         stage = 0;
         orbCollected = 0;
         keywordDisplay = 0;
     }
+    // player loaded a game
+    else {
+        // stage number got set by the save screen so we don't need to set it here
+        health = 1000;
+    }
 
-    Object_ListInit();
     paused = 0;
     currentWeapon = WEAPON_SWORD;
 
 initStage:
     Save_SaveFile();
+    Object_ListInit();
 
     magic = maxMagic;
     lastRoom = 0xffff;

@@ -163,6 +163,32 @@ static Uint16 luciaRunTiles[] = {
     0x4, 0x8, 0xc, 0x8,
 };
 
+// menu indices
+#define ERASE_INDEX NUM_FILES
+#define TITLE_INDEX (ERASE_INDEX + 1)
+
+// position defines
+#define HEADER_X 10
+#define HEADER_Y 2
+
+#define ERASE_X 10
+#define ERASE_Y 22
+#define ERASE_Y_PX (ERASE_Y * 8)
+#define ERASE_SPACING 4
+#define ERASE_SPACING_PX (ERASE_SPACING * 8)
+
+#define TITLE_X 10
+#define TITLE_Y (ERASE_Y + ERASE_SPACING)
+
+#define SAVE_X 8
+#define SAVE_Y 6
+#define SAVE_Y_PX (SAVE_Y * 8)
+#define SAVE_SPACING 6
+#define SAVE_SPACING_PX (SAVE_SPACING * 8)
+
+#define LUCIA_X_PX 48
+#define LUCIA_Y_PX (SAVE_Y_PX - 16)
+
 int Save_Screen(void) {
     int erase = 0;
     int cursor = currFile;
@@ -185,12 +211,12 @@ int Save_Screen(void) {
         // cursor movement (with wraparound)
         if (joyEdge & JOY_UP) {
             cursor--;
-            if (cursor < 0) { cursor = NUM_FILES; }
+            if (cursor < 0) { cursor = TITLE_INDEX; }
             Sound_Play(SFX_MENU);
         }
         if (joyEdge & (JOY_DOWN | JOY_SELECT)) {
             cursor++;
-            if (cursor > NUM_FILES) { cursor = 0; }
+            if (cursor > TITLE_INDEX) { cursor = 0; }
             Sound_Play(SFX_MENU);
         }
 
@@ -223,33 +249,35 @@ int Save_Screen(void) {
             }
             // move the cursor over if there's a file
             cursorSpr.x = (saveValid ? 26 : 64) - BG_CENTERED_X;
-            cursorSpr.y = 59 + (cursor * 48);
+            cursorSpr.y = (SAVE_Y_PX - 5) + (cursor * SAVE_SPACING_PX);
         }
         else {
             cursorSpr.x = 64 - BG_CENTERED_X;
-            cursorSpr.y = 187 + ((cursor - NUM_FILES) * 32);
+            cursorSpr.y = (ERASE_Y_PX - 5) + ((cursor - NUM_FILES) * ERASE_SPACING_PX);
         }
         Sprite_Draw(&cursorSpr, NULL);
 
         // draw the text
         if (!erase) {
-            BG_Print(10, 4, 0, "Select Game");
-            BG_Print(10, 24, 0, "Erase File");
+            BG_Print(HEADER_X, HEADER_Y, 0, "Select Game");
+            BG_Print(ERASE_X,  ERASE_Y,  0, "Erase File");
+            BG_Print(TITLE_X,  TITLE_Y,  0, "Title Screen");
         }
         else {
-            BG_Print(10, 4, 0, "Erase File ");
-            BG_Print(10, 24, 0, " Cancel   ");
+            BG_Print(HEADER_X, HEADER_Y, 0, "Erase File ");
+            BG_Print(ERASE_X,  ERASE_Y,  0, " Cancel   ");
+            BG_Print(TITLE_X, TITLE_Y, 0, "Title Screen");
         }
 
         // draw save file text
         for (int i = 0; i < NUM_FILES; i++) {
             if (files[i].signature == VALID_SIGNATURE) {
-                BG_Print(8, (i * 6) + 8, 0, "File %d   Stage - %2u -", i + 1, stages[i] + 1);
+                BG_Print(SAVE_X, (i * SAVE_SPACING) + SAVE_Y, 0, "File %d   Stage - %2u -", i + 1, stages[i] + 1);
                 // if the save file exists, draw a Lucia sprite for it
-                Save_DrawLucia(48, (i * 48) + 48, 0);
+                Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
             }
             else {
-                BG_Print(8, (i * 6) + 8, 0, "  New Game           ");
+                BG_Print(SAVE_X, (i * SAVE_SPACING) + SAVE_Y, 0, "  New Game           ");
             }
         }
 
@@ -259,17 +287,21 @@ int Save_Screen(void) {
 
         if (joyEdge & (JOY_A | JOY_START)) {
             // toggle normal/erase mode
-            if (cursor == NUM_FILES) {
+            if (cursor == ERASE_INDEX) {
                 erase ^= 1;
                 cursor = 0;
             }
-                // selected a file to erase
+            // return to tile screen
+            else if (cursor == TITLE_INDEX) {
+                return 0;
+            }
+            // selected a file to erase
             else if (erase) {
                 Save_EraseFile(cursor);
                 erase = 0;
                 cursor = 0;
             }
-                // selected a file to play
+            // selected a file to play
             else { break; }
         }
     }
@@ -277,7 +309,7 @@ int Save_Screen(void) {
     currFile = cursor;
     if (files[cursor].signature == VALID_SIGNATURE) {
         // lucia running offscreen animation
-        Sint16 luciaX = 48;
+        Sint16 luciaX = LUCIA_X_PX;
         int frames = 0;
         while (luciaX < 256) {
             System_StartFrame();
@@ -286,10 +318,10 @@ int Save_Screen(void) {
             frames++;
             for (int i = 0; i < NUM_FILES; i++) {
                 if (i == currFile) {
-                    Save_DrawLucia(luciaX, (i * 48) + 48, luciaRunTiles[(frames >> 3) & 3]);
+                    Save_DrawLucia(luciaX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, luciaRunTiles[(frames >> 3) & 3]);
                 }
                 else if (files[i].signature == VALID_SIGNATURE) {
-                    Save_DrawLucia(48, (i * 48) + 48, 0);
+                    Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
                 }
             }
             luciaX += 3;
@@ -301,8 +333,7 @@ int Save_Screen(void) {
 
         Save_LoadFile();
         stage = stages[cursor];
-        return 1;
+        return 2;
     }
-    return 0;
-
+    return 1;
 }
