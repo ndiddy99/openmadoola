@@ -172,9 +172,9 @@ static Uint16 luciaRunTiles[] = {
 #define HEADER_Y 2
 
 #define ERASE_X 10
-#define ERASE_Y 22
+#define ERASE_Y 23
 #define ERASE_Y_PX (ERASE_Y * 8)
-#define ERASE_SPACING 4
+#define ERASE_SPACING 3
 #define ERASE_SPACING_PX (ERASE_SPACING * 8)
 
 #define TITLE_X 10
@@ -248,11 +248,11 @@ int Save_Screen(void) {
                 }
             }
             // move the cursor over if there's a file
-            cursorSpr.x = (saveValid ? 26 : 64) - BG_CENTERED_X;
+            cursorSpr.x = (saveValid ? 30 : 80) - BG_CENTERED_X;
             cursorSpr.y = (SAVE_Y_PX - 5) + (cursor * SAVE_SPACING_PX);
         }
         else {
-            cursorSpr.x = 64 - BG_CENTERED_X;
+            cursorSpr.x = 72 - BG_CENTERED_X;
             cursorSpr.y = (ERASE_Y_PX - 5) + ((cursor - NUM_FILES) * ERASE_SPACING_PX);
         }
         Sprite_Draw(&cursorSpr, NULL);
@@ -265,8 +265,8 @@ int Save_Screen(void) {
         }
         else {
             BG_Print(HEADER_X, HEADER_Y, 0, "Erase File ");
-            BG_Print(ERASE_X,  ERASE_Y,  0, " Cancel   ");
-            BG_Print(TITLE_X, TITLE_Y, 0, "Title Screen");
+            BG_Print(ERASE_X,  ERASE_Y,  0, "Cancel    ");
+            BG_Print(TITLE_X,  TITLE_Y,  0, "Title Screen");
         }
 
         // draw save file text
@@ -277,7 +277,7 @@ int Save_Screen(void) {
                 Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
             }
             else {
-                BG_Print(SAVE_X, (i * SAVE_SPACING) + SAVE_Y, 0, "  New Game           ");
+                BG_Print(SAVE_X, (i * SAVE_SPACING) + SAVE_Y, 0, "   New Game            ");
             }
         }
 
