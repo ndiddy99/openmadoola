@@ -1,5 +1,5 @@
 /* db.h: "database" handler
- * Copyright (c) 2023, 2024 Nathan Misner
+ * Copyright (c) 2023 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -18,7 +18,6 @@
  */
 
 #pragma once
-#include "buffer.h"
 #include "constants.h"
 
 typedef struct {
@@ -28,6 +27,11 @@ typedef struct {
 } DBEntry;
 
 /**
+ * @brief Should be run on startup
+ */
+void DB_Init(void);
+
+/**
  * @brief Finds the given db item
  * @param name item name to look for
  * @returns either a DBEntry pointer or NULL if it couldn't be found
@@ -35,31 +39,14 @@ typedef struct {
 DBEntry *DB_Find(char *name);
 
 /**
- * @brief Sets the given db item to the given data, creating it if necessary
- * @param name item name (max length: 254 characters)
- * @param data data to write
- * @param dataLen size of data in bytes
- */
-void DB_Set(char *name, Uint8 *data, Uint32 dataLen);
-
-/**
- * @brief Serializes database to a buffer of bytes
- * @returns a pointer to the db's buffer (must be destroyed by caller)
- */
-Buffer *DB_Serialize(void);
-
-/**
- * @brief Loads the db state from a buffer of bytes
- * @param data bytes containing db state (preferably created by DB_Serialize at some point)
- */
-void DB_Deserialize(Uint8 *data);
-
-/**
  * @brief Saves the db to disk
  */
 void DB_Save(void);
 
 /**
- * @brief Should be run on startup
+ * @brief Sets the given db item to the given data, creating it if necessary
+ * @param name item name
+ * @param data data to write
+ * @param dataLen size of data in bytes
  */
-void DB_Init(void);
+void DB_Set(char *name, Uint8 *data, Uint32 dataLen);

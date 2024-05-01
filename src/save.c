@@ -20,7 +20,6 @@
 #include <string.h>
 
 #include "bg.h"
-#include "buffer.h"
 #include "constants.h"
 #include "file.h"
 #include "game.h"
@@ -63,68 +62,42 @@ typedef struct {
 static SaveFile files[NUM_FILES];
 static int currFile;
 
-Buffer *Save_Serialize(int num) {
-    Buffer *buf = Buffer_Init(sizeof(SaveFile));
-
-    Buffer_AddUint16(buf, files[num].maxHealth);
-    Buffer_AddUint16(buf, files[num].maxMagic);
-    Buffer_Add(buf, files[num].highestStage);
-    Buffer_Add(buf, files[num].keywordDisplay);
-    Buffer_Add(buf, files[num].orbCollected);
-    Buffer_AddData(buf, files[num].levels, ARRAY_LEN(files[num].levels));
-    Buffer_AddData(buf, files[num].items, ARRAY_LEN(files[num].items));
-    Buffer_AddData(buf, files[num].bossDefeated, ARRAY_LEN(files[num].bossDefeated));
-    Buffer_AddUint32(buf, VALID_SIGNATURE);
-
-    return buf;
-}
-
-void Save_Deserialize(Uint8 *data, int num) {
-    int cursor = 0;
-
-    files[num].maxHealth = Buffer_DataReadUint16(data + cursor);
-    cursor += 2;
-    files[num].maxMagic = Buffer_DataReadUint16(data + cursor);
-    cursor += 2;
-    files[num].highestStage = data[cursor++];
-    files[num].keywordDisplay = data[cursor++];
-    files[num].orbCollected = data[cursor++];
-    for (int i = 0; i < ARRAY_LEN(files[num].levels); i++) {
-        files[num].levels[i] = data[cursor++];
-    }
-    for (int i = 0; i < ARRAY_LEN(files[num].items); i++) {
-        files[num].items[i] = data[cursor++];
-    }
-    for (int i = 0; i < ARRAY_LEN(files[num].bossDefeated); i++) {
-        files[num].bossDefeated[i] = data[cursor++];
-    }
-    files[num].signature = Buffer_DataReadUint32(data + cursor);
-    cursor += 4;
-}
-
 void Save_SaveFile(void) {
     char filename[20];
     snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
+    FILE *fp = File_Open(filename, "wb");
+    if (!fp) {
+        Platform_ShowError("Error opening save file for writing");
+        return;
+    }
 
     files[currFile].maxHealth = maxHealth;
+    File_WriteUint16BE(maxHealth, fp);
     files[currFile].maxMagic = maxMagic;
+    File_WriteUint16BE(maxMagic, fp);
     files[currFile].highestStage = highestReachedStage;
+    fputc(highestReachedStage, fp);
     files[currFile].keywordDisplay = keywordDisplay;
+    fputc(keywordDisplay, fp);
     files[currFile].orbCollected = orbCollected;
+    fputc(orbCollected, fp);
     for (int i = 0; i < NUM_WEAPONS; i++) {
         files[currFile].levels[i] = weaponLevels[i];
+        fputc(weaponLevels[i], fp);
     }
     files[currFile].levels[NUM_WEAPONS] = bootsLevel;
+    fputc(bootsLevel, fp);
     for (int i = 0; i < ARRAY_LEN(itemsCollected); i++) {
         files[currFile].items[i] = itemsCollected[i];
+        fputc(itemsCollected[i], fp);
     }
     for (int i = 0; i < ARRAY_LEN(bossDefeated); i++) {
         files[currFile].bossDefeated[i] = bossDefeated[i];
+        fputc(bossDefeated[i], fp);
     }
     files[currFile].signature = VALID_SIGNATURE;
-    Buffer *buf = Save_Serialize(currFile);
-    Buffer_WriteToFile(buf, filename);
-    Buffer_Destroy(buf);
+    File_WriteUint32BE(VALID_SIGNATURE, fp);
+    fclose(fp);
 }
 
 void Save_LoadFile(void) {
@@ -156,10 +129,18 @@ void Save_Init(void) {
     char filename[20];
     for (int i = 0; i < NUM_FILES; i++) {
         snprintf(filename, sizeof(filename), "file%d.sav", i + 1);
-        Uint8 *fileData = File_OpenLoad(filename, NULL);
-        if (fileData) {
-            Save_Deserialize(fileData, i);
-            free(fileData);
+        FILE *fp = File_Open(filename, "rb");
+        if (fp) {
+            files[i].maxHealth = File_ReadUint16BE(fp);
+            files[i].maxMagic = File_ReadUint16BE(fp);
+            files[i].highestStage = fgetc(fp);
+            files[i].keywordDisplay = fgetc(fp);
+            files[i].orbCollected = fgetc(fp);
+            fread(&files[i].levels[0], 1, ARRAY_LEN(files[0].levels), fp);
+            fread(&files[i].items[0], 1, ARRAY_LEN(files[0].items), fp);
+            fread(&files[i].bossDefeated[0], 1, ARRAY_LEN(files[0].bossDefeated), fp);
+            files[i].signature = File_ReadUint32BE(fp);
+            fclose(fp);
         }
     }
 }
@@ -278,7 +259,7 @@ int Save_Screen(void) {
 
         if (joyEdge & (JOY_A | JOY_START)) {
             // toggle normal/erase mode
-            if (cursor >= NUM_FILES) {
+            if (cursor == NUM_FILES) {
                 erase ^= 1;
                 cursor = 0;
             }

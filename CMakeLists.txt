@@ -16,7 +16,6 @@ set(SOURCE_LIST
     # game code
     "src/main.c"
     "src/bg.c"
-    "src/buffer.c"
     "src/camera.c"
     "src/collision.c"
     "src/db.c"
@@ -98,7 +97,6 @@ set(HEADER_LIST
     "src/alloc.c"
     "src/alloc.h"
     "src/bg.h"
-    "src/buffer.h"
     "src/camera.h"
     "src/collision.h"
     "src/constants.h"
