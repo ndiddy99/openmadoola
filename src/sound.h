@@ -19,37 +19,40 @@
 
 #pragma once
 
-#define MUS_TITLE       0x0
-#define MUS_ENDING      0x1
-#define MUS_START       0x2
-#define MUS_CLEAR       0x3
-#define MUS_BOSS        0x4
-#define MUS_ITEM        0x5
-#define MUS_GAME_OVER   0x6
-#define MUS_CAVE        0x7
-#define MUS_OVERWORLD   0x8
-#define SFX_PERASKULL   0x9
-#define SFX_FIREBALL    0xa
-#define MUS_CASTLE      0xb
-#define SFX_SWORD       0xc
-#define SFX_MENU        0xd
-#define SFX_LUCIA_HIT   0xe
-#define SFX_BOMB        0xf
-#define SFX_JUMP        0x10
-#define SFX_ENEMY_HIT   0x11
-#define SFX_BOMB_SPLIT  0x12
-#define SFX_SHIELD_BALL 0x13
-#define SFX_NOMAJI      0x14
-#define SFX_BOUND_BALL  0x15
-#define SFX_YOKKO_CHAN  0x16
-#define SFX_ENEMY_KILL  0x17
-#define SFX_ITEM        0x18
-#define SFX_BOSS_KILL   0x19
-#define SFX_PAUSE       0x1a
-#define SFX_SELECT      0x1b
-#define SFX_FLAME_SWORD 0x1c
-#define SFX_NYURU       0x1d
-#define SFX_JOYRAIMA    0x1e
+typedef enum {
+    MUS_TITLE = 0,
+    MUS_ENDING,
+    MUS_START,
+    MUS_CLEAR,
+    MUS_BOSS,
+    MUS_ITEM,
+    MUS_GAME_OVER,
+    MUS_CAVE,
+    MUS_FOREST,
+    SFX_PERASKULL,
+    SFX_FIREBALL,
+    MUS_CASTLE,
+    SFX_SWORD,
+    SFX_MENU,
+    SFX_LUCIA_HIT,
+    SFX_BOMB,
+    SFX_JUMP,
+    SFX_ENEMY_HIT,
+    SFX_BOMB_SPLIT,
+    SFX_SHIELD_BALL,
+    SFX_NOMAJI,
+    SFX_BOUND_BALL,
+    SFX_YOKKO_CHAN,
+    SFX_ENEMY_KILL,
+    SFX_ITEM,
+    SFX_BOSS_KILL,
+    SFX_PAUSE,
+    SFX_SELECT,
+    SFX_FLAME_SWORD,
+    SFX_NYURU,
+    SFX_JOYRAIMA,
+    NUM_SOUNDS,
+} SOUND_NUM;
 
 // state of a playing instrument
 typedef struct {

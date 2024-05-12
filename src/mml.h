@@ -20,4 +20,4 @@
 #pragma once
 #include "sound.h"
 
-Sound *MML_Compile(char *filename);
+int MML_Compile(const char *filename, Sound *sound);

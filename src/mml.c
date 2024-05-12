@@ -31,7 +31,6 @@
 #include "sound.h"
 
 FILE *infile;
-char *infilename;
 
 // used for keeping track of where we are in the input file for error messages
 int line = 1;
@@ -80,12 +79,8 @@ typedef struct {
 InstData instruments[NUM_INSTRUMENTS];
 
 noreturn void errorExit(char *message) {
-    printf("%s Line %d column %d: %s\n", infilename, line, column, message);
+    printf("Line %d column %d: %s\n", line, column, message);
     exit(-1);
-}
-
-void warning(char *message) {
-    printf("%s Line %d column %d: %s\n", infilename, line, column, message);
 }
 
 void initInstrument(int num) {
@@ -230,7 +225,7 @@ int noteToFrames(void) {
     }
     int frames = getNoteFrames(noteNum);
     // handle tie(s)
-    char ch = readCh(0);
+    int ch = readCh(0);
     while (ch == '^') {
         noteNum = readNum();
         if (noteNum < 0) {
@@ -269,15 +264,15 @@ void writeCmd(InstData *i, Uint8 cmd, Uint8 param) {
     if (i->cursor >= CURSOR_LIMIT) { errorExit("Song too long"); }
 }
 
-Sound *MML_Compile(char *filename){
+int MML_Compile(const char *filename, Sound *sound){
     // input file
     infile = File_OpenResource(filename, "r");
     if (!infile) {
-        return NULL;
+        return 0;
     }
-    infilename = filename;
-    printf("--- Compiling %s ---\n", infilename);
+    printf("--- Compiling %s ---\n", filename);
 
+    int apu = -1;
     int ch;
     int note;
     int frames;
@@ -365,6 +360,7 @@ Sound *MML_Compile(char *filename){
             note = 11;
         doneNote:;
             checkInst(inst);
+            if (apu < 0) { errorExit("APU number must be initialized with A command"); }
             if ((inst->reg0 < 0) || (inst->reg1 < 0)) { errorExit("APU registers 0 & 1 must be initialized with R0 & R1 commands"); }
             if (inst->channel < 0) { errorExit("APU channel must be initialized with C command"); }
             int sharp = readCh(0);
@@ -382,6 +378,18 @@ Sound *MML_Compile(char *filename){
             frames = noteToFrames();
             writeCmd(inst, (inst->octave - 1) << 4 | note, frames);
             addInstFrames(inst, frames);
+            break;
+
+        // APU number
+        case 'A':
+            if (apu >= 0) { errorExit("APU number can't be changed"); }
+            int apuNum = readNum();
+            if ((apuNum == 0) || (apuNum == 1)) {
+                apu = apuNum;
+            }
+            else {
+                errorExit("APU number must be 0 or 1");
+            }
             break;
 
         // APU channel number
@@ -447,6 +455,9 @@ Sound *MML_Compile(char *filename){
         // plays noise
         case 'n':
             checkInst(inst);
+            if (apu < 0) { errorExit("APU number must be initialized with A command"); }
+            if ((inst->reg0 < 0) || (inst->reg1 < 0)) { errorExit("APU registers 0 & 1 must be initialized with R0 & R1 commands"); }
+            if (inst->channel != 3) { errorExit("Noise can only be played on APU channel 3"); }
             int noiseToPlay = readNum();
             if ((noiseToPlay < 0) || (noiseToPlay >= numNoises)) {
                 errorExit("Invalid noise number");
@@ -526,10 +537,8 @@ Sound *MML_Compile(char *filename){
         printf("Instrument %d: %d frames\n", instNum, inst->frames);
     }
 
-    Sound *sound = ommalloc(sizeof(Sound));
     memset(sound, 0, sizeof(Sound));
-    // TODO add parameter to mml instead of hardcoding here
-    sound->isMusic = 1;
+    sound->isMusic = apu;
 
     // finish up the instrument data
     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
@@ -564,5 +573,5 @@ Sound *MML_Compile(char *filename){
     }
 
     memset(instruments, 0, sizeof(instruments));
-    return sound;
+    return 1;
 }

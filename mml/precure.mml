@@ -1,0 +1,32 @@
+; Futari Wa Pretty Cure (Sega Pico) - Title
+; Composed by Kazuhiro Ogawa
+; Cover by marklincadet
+
+A1 ; music APU
+
+; Instrument parameters
+I0 C1 R0:4f R1:00 ; instrument 0: apu channe1 1 (pulse 2)
+I1 C2 R0:ff R1:00 ; instrument 1: apu channel 2 (triangle)
+I2 C0 R0:df R1:88 ; instrument 2: apu channel 0 (pulse 1)
+I3 C3 R0:00 R1:00 ; instrument 3: apu channel 3 (noise)
+
+; Noise patches
+N6 N6f N3
+
+t3 ; 16th note takes 3 frames (uh bpm)
+l16 ; default to 16th note
+
+I0 o3 L [r4c#8r8<b8>r4.c#rc#8r8c#8r8<b8>c#4]3 r4c#8r8c#rd#8r8e8f#8r8f#8e8r8d#8c#4 [r4c#8r8<b8>r4.c#rc#8r8c#8r8<b8>c#4]3 r4c#8r8c#rd#8r8e8f#8r8f#8e8r8d#8c#4<
+I1 o3 L [c#rc#r>c#rc#r<]8<[arar>arar<]6[brbr>brbr<]2>[c#rc#r>c#rc#r<]8<[arar>arar<]6[brbr>brbr<]2>
+I2 o3 L [r4e8r8d#8r4.ere8r8e8r8d#8e4]3 r4e8r8erf#8r8g#8a8r8a8g#8r8f#8e4 [r4e8r8d#8r4.ere8r8e8r8d#8e4]3 r4e8r8erf#8r8g#8a8r8a8g#8r8f#8e4
+I3    L [n2,2 n0,2]15[n0,8 n0,4]2n0,8n0,8
+
+I0 [e8d#8c#8<b8>c#8e8g#8>c#8e8g#8e8c#8<g#8e8c#8<g#8>]2 [e8d#8c#8<b8>c#8e8a8>c#8e8a8e8c#8<a8e8c#8<a8>]2 [e8d#8c#8<b8>c#8e8g#8>c#8e8g#8e8c#8<g#8e8c#8<g#8>]2 e8d#8c#8<b8>c#8e8a8>c#8e8a8e8c#8<a8e8c#8<a8> e8d#8c#8<b8>c#8e8a8>c#8f#8b8f#8d#8<b8f#8d#8<b8>>
+I1 [c#rc#r>c#rc#r<]8<[arar>arar<]6[brbr>brbr<]2>[c#rc#r>c#rc#r<]8<[arar>arar<]6[brbr>brbr<]2
+I2 c#1^1^1r2.c#8d#8e2.f#2.e4f#4a2.g#2.e2 c#1^1^1r2.c#8d#8e2.f#2.e4f#4a2.b2a4g#2
+I3 [n2,2 n0,2]15n2,4n0,4[n0,8]4
+
+I0 [a8e8c#8<a8>]4[b8f#8d#8<b8>]2[>c#8<g#8e8c#8]4[b8f#8d#8<b8>]2[a8e8c#8<a8>]8[b8f#8d#8<b8>]2[>c#8<g#8e8c#8]2[a8e8c#8<a8>]2[b8f#8d#8<b8>]2[>c#8<g#8e8c#8]2[g#8b8>d#8<]2>g#8b8
+I1 [arar>arar<]4[brbr>brbr<]2>[c#rc#r>c#rc#r<]4<[brbr>brbr<]2[arar>arar<]8[brbr>brbr<]2>[c#rc#r>c#rc#r<]2<[arar>arar<]2[brbr>brbr<]2>[c#rc#r>c#rc#r<]2[d#rd#r>d#rd#r<]2
+I2 a4r8g#4r8a1e4 f#4r8f#4r8g#4c#1 e4.d#4.e4f#4.e4.f#4a4r8a4r8g#1r4 a4r8g#4r8a1e4 b4r8b4r8a4g#1 a4.g#4.f#4b4.a4.g#4>c#4.<b4.>c#4d#4r8d#4r8e4
+I3 [n2,2 n0,2]7n2,2n0,4[n0,8]2 [n2,2 n0,2]7[n0,8]8

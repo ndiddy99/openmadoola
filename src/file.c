@@ -71,7 +71,7 @@ static void checkBuffSize(int size) {
 }
 #endif
 
-FILE *File_Open(char *filename, const char *mode) {
+FILE *File_Open(const char *filename, const char *mode) {
 #ifdef OM_UNIX
     const char dirname[] = OM_HOMEDIR;
     char *homedir = getenv("HOME");
@@ -104,7 +104,7 @@ static char *resourceDirs[] = {
 };
 #endif
 
-FILE *File_OpenResource(char *filename, const char *mode) {
+FILE *File_OpenResource(const char *filename, const char *mode) {
     // set up home data directory name
 #ifdef OM_UNIX
     if (!resourceDirs[0]) {
