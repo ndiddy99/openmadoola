@@ -3,7 +3,7 @@ OpenMadoola will look for MML files in its data directory (wherever you have the
 If the files are named correctly (search for "soundFilenames" [here](../src/sound.c)), they'll override the regular music or sound effects.
 
 ## Example Tracks
-If you composed anything and want it added here, submit a pull request.
+If you composed anything and want it added here, feel free to submit a pull request.
 
 - [precure.mml](precure.mml) - Futari Wa Pretty Cure (Sega Pico) - Title (cover by marklincadet)
 - [sunset.mml](sunset.mml) - marklincadet - Running from the Sunset
@@ -21,7 +21,7 @@ If you composed anything and want it added here, submit a pull request.
 | `L`               | Sets the loop point for the instrument. Instruments without loop points will only play once.                                                                                            | `L ; loop to here`                                    |
 | `a[length][.]`    | Note command. The length parameter and dot are optional.                                                                                                                                | `c#4. ; dotted quarter note C#`                       |
 | `r[length][.]`    | Rest command. The length parameter and dot are optional.                                                                                                                                | `r8 ; rest for the duration of an 8th note`           |                                                                                                                                                                  
-| `^[length]`       | Adds the length parameter to the previous note.                                                                                                                                         | `f4^4^4 ; length of 3 quarter notes`                  |
+| `^[length]`       | Tie command. Adds the length parameter to the previous note.                                                                                                                            | `f4^4^4 ; length of 3 quarter notes`                  |
 | `>` and `<`       | `>` = octave up, `<` = octave down. Valid octave numbers are between 1 and 8.                                                                                                           | `g>g ; play g and g one octave higher`                |
 | `N[hexval]`       | Adds a noise to the list. `val` gets written to 0x400e when the noise is played.                                                                                                        | `N6f ; add 0x6f to the noise list`                    |
 | `n[num],[length]` | Plays a noise. `num` is the index of the noise in the list (i.e. the first noise added will be 0, the second will be 1, etc).                                                           | `n2,2 ; play noise 2 for the duration of a half note` |
