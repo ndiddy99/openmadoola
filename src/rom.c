@@ -96,13 +96,13 @@ int Rom_Load(void) {
     FILE *fp;
 
     // try to load data from the rom file
-    fp = File_OpenResource("madoola.nes");
+    fp = File_OpenResource("madoola.nes", "rb");
     if (fp && Rom_LoadFromNesFile(fp)) {
         return 1;
     }
 
     // if there's no rom file, look for the asset file from the Sunsoft collection
-    fp = File_OpenResource("sharedassets1.assets");
+    fp = File_OpenResource("sharedassets1.assets", "rb");
     if (fp && Rom_LoadFromSteam(fp)) {
         return 1;
     }
@@ -120,7 +120,7 @@ int Rom_Load(void) {
 }
 
 int Rom_LoadChr(char *filename, int size) {
-    FILE *fp = File_OpenResource(filename);
+    FILE *fp = File_OpenResource(filename, "rb");
     if (!fp) {
         Platform_ShowError("Rom_LoadChr: Couldn't find %s", filename);
         return 0;

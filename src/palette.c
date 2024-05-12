@@ -35,7 +35,7 @@ static Uint8 flashPalette[PALETTE_SIZE * 8];
 Uint8 flashTimer = 0;
 
 int Palette_Init(void) {
-    FILE *fp = File_OpenResource("nes.pal");
+    FILE *fp = File_OpenResource("nes.pal", "rb");
     if (!fp) {
         Platform_ShowError("Couldn't open nes.pal");
         return 0;

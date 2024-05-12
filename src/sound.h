@@ -1,5 +1,5 @@
 /* sound.h: Sound engine and output code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -50,6 +50,25 @@
 #define SFX_FLAME_SWORD 0x1c
 #define SFX_NYURU       0x1d
 #define SFX_JOYRAIMA    0x1e
+
+// state of a playing instrument
+typedef struct {
+    Uint8 num;
+    Uint8 *data;
+    Uint8 channel;
+    Uint8 cursor;
+    Uint8 reg1;
+    Uint8 reg0;
+    Uint8 timer;
+    Uint8 loop;
+    Uint8 ctrlRegsSet;
+} Instrument;
+
+typedef struct {
+    Uint8 isMusic;
+    Uint8 count;
+    Instrument *data;
+} Sound;
 
 /**
  * @brief Initializes sound output

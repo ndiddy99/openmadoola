@@ -62,9 +62,10 @@ FILE *File_Open(char *filename, const char *mode);
  * @brief For opening a read-only data file. On unix-like systems, iterates
  * through a few directories before giving up (see resourceDirs array in file.c)
  * @param filename the name of the file to open
+ * @param mode fopen mode code
  * @returns the file pointer to the opened file
  */
-FILE *File_OpenResource(char *filename);
+FILE *File_OpenResource(char *filename, const char *mode);
 
 /**
  * @brief Loads the contents of the given file to memory

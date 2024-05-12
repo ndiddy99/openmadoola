@@ -25,6 +25,7 @@
 #include "constants.h"
 #include "db.h"
 #include "game.h"
+#include "mml.h"
 #include "platform.h"
 #include "rom.h"
 #include "sound.h"
@@ -34,26 +35,6 @@
 // how many frames of audio to store in the sound buffer (increase if your sound skips)
 #define BUFFERED_FRAMES 3
 
-#define NUM_INSTRUMENTS 6
-// state of a playing instrument
-typedef struct {
-    Uint8 num;
-    Uint8 *data;
-    Uint8 channel;
-    Uint8 cursor;
-    Uint8 reg1;
-    Uint8 reg0;
-    Uint8 timer;
-    Uint8 loop;
-    Uint8 ctrlRegsSet;
-} Instrument;
-
-typedef struct {
-    Uint8 isMusic;
-    Uint8 count;
-    Instrument *data;
-} Sound;
-
 #define NUM_SOUNDS 32
 static Sound sounds[NUM_SOUNDS];
 // where sound data is stored in CHR ROM
@@ -62,6 +43,7 @@ static Sound sounds[NUM_SOUNDS];
 #define PRG_ROM_SOUND (0x75DE)
 
 // currently playing instruments
+#define NUM_INSTRUMENTS 6
 static Instrument instruments[NUM_INSTRUMENTS];
 static Instrument savedInstruments[NUM_INSTRUMENTS];
 static Instrument musInstruments[NUM_INSTRUMENTS];
@@ -130,8 +112,6 @@ int Sound_Init(void) {
     sounds[SFX_PAUSE].data[0].num = 4;
     sounds[SFX_SELECT].data[0].num = 5;
     sounds[SFX_SELECT].data[1].num = 4;
-
-    Sound_Reset();
     return 1;
 }
 

@@ -104,7 +104,7 @@ static char *resourceDirs[] = {
 };
 #endif
 
-FILE *File_OpenResource(char *filename) {
+FILE *File_OpenResource(char *filename, const char *mode) {
     // set up home data directory name
 #ifdef OM_UNIX
     if (!resourceDirs[0]) {
@@ -123,13 +123,13 @@ FILE *File_OpenResource(char *filename) {
             checkBuffSize(strlen(resourceDirs[i]) + strlen(filename) + 1);
             strcpy(filenameBuff, resourceDirs[i]);
             strcat(filenameBuff, filename);
-            FILE *fp = fopen(filenameBuff, "rb");
+            FILE *fp = fopen(filenameBuff, mode);
             if (fp) { return fp; }
         }
     }
     return NULL;
 #else
-    return fopen(filename, "rb");
+    return fopen(filename, mode);
 #endif
 }
 
