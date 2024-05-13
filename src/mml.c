@@ -30,18 +30,20 @@
 #include "mml.h"
 #include "sound.h"
 
-FILE *infile;
+static FILE *infile;
 
 // used for keeping track of where we are in the input file for error messages
-int line = 1;
-int column = 0;
+static int line;
+static int column;
 // gets used instead of reading a character from the input file if it's not NO_CH
 #define NO_CH -2
-int nextCh = NO_CH;
+static int nextCh;
+// which apu we're using (0 or 1), set by the A command
+static int apu;
 // how many frames (1 frame = 1/60 second) a 16th note (smallest note we support) should take, set by the t command
-int tempo = -1;
+static int tempo;
 // default note length, set by the f command
-int defaultLength = -1;
+static int defaultLength;
 
 // we error out when we hit this cursor number (255 not 256 because the sound engine uses a cursor value of 255 as an
 // "instrument not playing" flag)
@@ -76,14 +78,14 @@ typedef struct {
 #define NUM_CHANNELS 4
 // maximum number of instruments the sound engine supports
 #define NUM_INSTRUMENTS 6
-InstData instruments[NUM_INSTRUMENTS];
+static InstData instruments[NUM_INSTRUMENTS];
 
-noreturn void errorExit(char *message) {
+static noreturn void errorExit(char *message) {
     printf("Line %d column %d: %s\n", line, column, message);
     exit(-1);
 }
 
-void initInstrument(int num) {
+static void initInstrument(int num) {
     instruments[num].enabled = 1;
     instruments[num].outBuff = Buffer_Init(256);
     instruments[num].cursor = 0;
@@ -97,7 +99,7 @@ void initInstrument(int num) {
     instruments[num].loopFrames = 0;
 }
 
-void nextLine(void) {
+static void nextLine(void) {
     int ch;
     while (1) {
         ch = getc(infile);
@@ -114,7 +116,7 @@ void nextLine(void) {
  * @param whitespace nonzero if you want to get whitespace, 0 if you want to skip whitespace
  * @returns the next character from the file
  */
-int readCh(int whitespace) {
+static int readCh(int whitespace) {
     int ch;
 
     while (1) {
@@ -135,12 +137,12 @@ int readCh(int whitespace) {
     return ch;
 }
 
-void pushCh(int ch) {
+static void pushCh(int ch) {
     nextCh = ch;
     column--;
 }
 
-int readNum(void) {
+static int readNum(void) {
     char numStr[5] = {0};
     int numCursor = 0;
 
@@ -163,7 +165,7 @@ int readNum(void) {
     errorExit("Number too large");
 }
 
-int readHex(void) {
+static int readHex(void) {
     char hexStr[3] = {0};
     int hexCursor = 0;
 
@@ -187,7 +189,7 @@ int readHex(void) {
     }
 }
 
-int getNoteFrames(int noteNum) {
+static int getNoteFrames(int noteNum) {
     // valid notes: powers of 2 between 1 and 16
     if ((noteNum >= 1) && (noteNum <= 16) && ((noteNum & (noteNum - 1)) == 0)) {
         int frames = tempo * (16 / noteNum);
@@ -212,15 +214,15 @@ int getNoteFrames(int noteNum) {
     }
 }
 
-int noteToFrames(void) {
-    if (tempo <= 0) { errorExit("Tempo not set"); }
+static int noteToFrames(void) {
+    if (tempo <= 0) { errorExit("Tempo must be set with t command"); }
     int noteNum = readNum();
     if (noteNum < 0) {
         if (defaultLength > 0) {
             return defaultLength;
         }
         else {
-            errorExit("Default note length must be initialized with l command");
+            errorExit("Default note length must be set with l command");
         }
     }
     int frames = getNoteFrames(noteNum);
@@ -243,11 +245,11 @@ int noteToFrames(void) {
     return frames;
 }
 
-void checkInst(InstData *i) {
+static void checkInst(InstData *i) {
     if (!i) { errorExit("InstData number must be defined with the I command."); }
 }
 
-void addInstFrames(InstData *i, int frames) {
+static void addInstFrames(InstData *i, int frames) {
     if (i->loopPos >= 0) {
         i->loopFrames += frames;
     }
@@ -256,8 +258,11 @@ void addInstFrames(InstData *i, int frames) {
     }
 }
 
-void writeCmd(InstData *i, Uint8 cmd, Uint8 param) {
+static void writeCmd(InstData *i, Uint8 cmd, Uint8 param) {
     checkInst(i);
+    if (apu < 0) { errorExit("APU number must be set with A command"); }
+    if ((i->reg0 < 0) || (i->reg1 < 0)) { errorExit("APU registers 0 & 1 must be initialized with R0 & R1 commands"); }
+    if (i->channel < 0) { errorExit("APU channel must be initialized with C command"); }
     Buffer_Add(i->outBuff, cmd);
     Buffer_Add(i->outBuff, param);
     i->cursor++;
@@ -272,7 +277,14 @@ int MML_Compile(const char *filename, Sound *sound){
     }
     printf("--- Compiling %s ---\n", filename);
 
-    int apu = -1;
+    // initialize compiler state
+    line = 1;
+    column = 0;
+    nextCh = NO_CH;
+    apu = -1;
+    tempo = -1;
+    defaultLength = -1;
+
     int ch;
     int note;
     int frames;
@@ -360,9 +372,6 @@ int MML_Compile(const char *filename, Sound *sound){
             note = 11;
         doneNote:;
             checkInst(inst);
-            if (apu < 0) { errorExit("APU number must be initialized with A command"); }
-            if ((inst->reg0 < 0) || (inst->reg1 < 0)) { errorExit("APU registers 0 & 1 must be initialized with R0 & R1 commands"); }
-            if (inst->channel < 0) { errorExit("APU channel must be initialized with C command"); }
             int sharp = readCh(0);
             if (sharp == '#') {
                 sharp = 1;
@@ -455,8 +464,6 @@ int MML_Compile(const char *filename, Sound *sound){
         // plays noise
         case 'n':
             checkInst(inst);
-            if (apu < 0) { errorExit("APU number must be initialized with A command"); }
-            if ((inst->reg0 < 0) || (inst->reg1 < 0)) { errorExit("APU registers 0 & 1 must be initialized with R0 & R1 commands"); }
             if (inst->channel != 3) { errorExit("Noise can only be played on APU channel 3"); }
             int noiseToPlay = readNum();
             if ((noiseToPlay < 0) || (noiseToPlay >= numNoises)) {

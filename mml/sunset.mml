@@ -9,7 +9,7 @@ I1 C1 R0:cf R1:00 ; instrument 1: apu channel 1 (pulse 2)
 I2 C0 R0:8f R1:00 ; instrument 2: apu channel 0 (pulse 1)
 
 t5 ; 16th note takes 5 frames (180 bpm)
-l16 ; default to 8th note
+l16 ; default to 16th note
 
 I0 o4 L [<a8r8a8r8>a8.r<a8 g8.rg8>c8r8d4c4< f8r8f8r8>f8.r<d8 g8.rg8r8b8.rb8>c8.r]2
 I1 o4 L [c8r8c8r4.c8<b4>c8 <b8>c8<b8>c8<b8>c8 <a8r8a8r4.>c8<b4>c8 <b8>c8<b8>c8<b8a8>]2

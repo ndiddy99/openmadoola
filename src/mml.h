@@ -20,4 +20,10 @@
 #pragma once
 #include "sound.h"
 
+/**
+ * @brief Compiles the given MML file to bytecode
+ * @param filename MML file to compile
+ * @param sound (out) where to write the sound metadata and bytecode (see sound.h)
+ * @returns 1 on successful compile, 0 on failed compile
+ */
 int MML_Compile(const char *filename, Sound *sound);
