@@ -59,10 +59,10 @@ typedef struct {
     Uint8 num;
     Uint8 *data;
     Uint8 channel;
-    Uint8 cursor;
+    Uint16 cursor;
     Uint8 reg1;
     Uint8 reg0;
-    Uint8 timer;
+    Uint16 timer;
     Uint8 loop;
     Uint8 ctrlRegsSet;
 } Instrument;

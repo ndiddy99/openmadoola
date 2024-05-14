@@ -45,9 +45,9 @@ static int tempo;
 // default note length, set by the f command
 static int defaultLength;
 
-// we error out when we hit this cursor number (255 not 256 because the sound engine uses a cursor value of 255 as an
-// "instrument not playing" flag)
-#define CURSOR_LIMIT 255
+// we error out when we hit this cursor number (65535 not 655366 because the sound engine uses a cursor value of 65535
+// as an "instrument not playing" flag)
+#define CURSOR_LIMIT 65535
 
 typedef struct {
     // whether the instrument is used
@@ -239,8 +239,8 @@ static int noteToFrames(void) {
 	ch = readCh(0);
     }
     pushCh(ch);
-    if (frames >= 256) {
-        errorExit("Note duration too long (max: 255 frames)");
+    if (frames >= 65536) {
+        errorExit("Note duration too long (max: 65535 frames)");
     }
     return frames;
 }
@@ -258,13 +258,13 @@ static void addInstFrames(InstData *i, int frames) {
     }
 }
 
-static void writeCmd(InstData *i, Uint8 cmd, Uint8 param) {
+static void writeCmd(InstData *i, Uint8 cmd, Uint16 param) {
     checkInst(i);
     if (apu < 0) { errorExit("APU number must be set with A command"); }
     if ((i->reg0 < 0) || (i->reg1 < 0)) { errorExit("APU registers 0 & 1 must be initialized with R0 & R1 commands"); }
     if (i->channel < 0) { errorExit("APU channel must be initialized with C command"); }
     Buffer_Add(i->outBuff, cmd);
-    Buffer_Add(i->outBuff, param);
+    Buffer_AddUint16(i->outBuff, param);
     i->cursor++;
     if (i->cursor >= CURSOR_LIMIT) { errorExit("Song too long"); }
 }

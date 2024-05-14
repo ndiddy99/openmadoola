@@ -22,6 +22,7 @@
 
 #include "alloc.h"
 #include "blargg_apu.h"
+#include "buffer.h"
 #include "constants.h"
 #include "db.h"
 #include "game.h"
@@ -92,6 +93,28 @@ static void Sound_RunInstrument(int apu, Instrument *inst);
 static void Sound_DisableChannel(int apu, Uint8 channel);
 static void Sound_EnableChannel(int apu, Uint8 channel);
 
+static Uint8 *Sound_ConvertData(Uint8 *instData) {
+    Buffer *buf = Buffer_Init(16);
+    int pos = 0;
+    while (1) {
+        // command: leave as is
+        Uint8 cmd = *instData++;
+        Buffer_Add(buf, cmd);
+        // parameter: convert to Uint16
+        Uint16 param = (Uint16)(*instData++);
+        Buffer_AddUint16(buf, param);
+        // if we're jumping backwards or we hit the end of the track, exit the loop
+        if (((cmd == 0xbf) && (param < pos)) || (cmd == 0xff)) {
+            break;
+        }
+        pos++;
+    }
+    // Buffer_Destroy also frees buff->data, which we don't want to do
+    Uint8 *data = buf->data;
+    free(buf);
+    return data;
+}
+
 static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
     int cursor = 0;
     out->count = romData[cursor++];
@@ -103,14 +126,16 @@ static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
         // title screen and ending music are stored in CHR ROM and loaded to
         // RAM during playback, so if we're seeing an address in RAM we know
         // that sound is stored in CHR ROM
+        Uint8 *instData;
         if (addr < 0x8000) {
             // sound data is loaded to 0x400 in memory
-            out->data[i].data = chrRom + CHR_ROM_SOUND + addr - 0x400;
+            instData = chrRom + CHR_ROM_SOUND + addr - 0x400;
         }
         else {
             // PRG ROM is mapped into NES memory at 0x8000-0xFFFF
-            out->data[i].data = prgRom + addr - 0x8000;
+            instData = prgRom + addr - 0x8000;
         }
+        out->data[i].data = Sound_ConvertData(instData);
         out->data[i].channel = romData[cursor++];
         out->data[i].cursor = romData[cursor++];
         out->data[i].reg1 = romData[cursor++];
@@ -184,8 +209,8 @@ int Sound_GetVolume(void) {
 void Sound_Reset(void) {
     // initialize sound engine state
     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
-        instruments[i].cursor = 0xff;
-        musInstruments[i].cursor = 0xff;
+        instruments[i].cursor = 0xffff;
+        musInstruments[i].cursor = 0xffff;
     }
     apuStatusCopy[0] = 0;
     apuStatusCopy[1] = 0;
@@ -284,7 +309,7 @@ static void Sound_RunInstrument(int apu, Instrument *inst) {
     Uint8 reg2, reg3;
 
     // "instrument not playing" flag
-    if (inst->cursor == 0xff) {
+    if (inst->cursor == 0xffff) {
         return;
     }
     inst->timer--;
@@ -294,10 +319,10 @@ static void Sound_RunInstrument(int apu, Instrument *inst) {
     }
     else {
         setReadPtr:;
-        Uint8 *read = inst->data + (inst->cursor * 2);
+        Uint8 *read = inst->data + (inst->cursor * 3);
         getCmd:
         if (*read == 0xff) {
-            inst->cursor = 0xff;
+            inst->cursor = 0xffff;
             inst->loop = 0xff;
             channelsInUse[(apu * APU_CHANNELS) + inst->channel] = 0;
             Sound_DisableChannel(apu, inst->channel);
@@ -305,15 +330,16 @@ static void Sound_RunInstrument(int apu, Instrument *inst) {
         }
 
         Uint8 cmd = *read++;
-        Uint8 param = *read++;
+        Uint16 param = Buffer_DataReadUint16(read);
+        read += 2;
 
         // a0-af: APU register setting
         if ((cmd >= 0xa0) && (cmd < 0xb0)) {
             if (cmd & 1) {
-                inst->reg1 = param;
+                inst->reg1 = (Uint8)param;
             }
             else {
-                inst->reg0 = param;
+                inst->reg0 = (Uint8)param;
             }
             inst->cursor++;
             inst->ctrlRegsSet = 0xff;
