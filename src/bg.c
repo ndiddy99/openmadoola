@@ -74,13 +74,20 @@ int BG_Print(Uint16 x, Uint16 y, Uint8 palnum, char *fmt, ...) {
 }
 
 int BG_VPrint(Uint16 x, Uint16 y, Uint8 palnum, char *fmt, va_list args) {
-    char buff[BG_WIDTH];
+    char buff[512];
     int len = vsnprintf(buff, sizeof(buff), fmt, args);
+    int startX = x;
 
     // copy buffer to the background
     char *text = buff;
     while (*text) {
-        BG_SetTile(x++, y, *text + TEXT_BASE, palnum);
+        if (*text == '\n') {
+            x = startX;
+            y++;
+        }
+        else {
+            BG_SetTile(x++, y, *text + TEXT_BASE, palnum);
+        }
         text++;
     }
     return len;

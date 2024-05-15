@@ -1,5 +1,5 @@
-/* mainmenu.c: Main menu screen
- * Copyright (c) 2023 Nathan Misner
+/* soundtest.c: Sound test screen
+ * Copyright (c) 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -19,8 +19,9 @@
 
 #include "bg.h"
 #include "constants.h"
+#include "joy.h"
 #include "menu.h"
-#include "options.h"
+#include "sound.h"
 #include "soundtest.h"
 #include "sprite.h"
 
@@ -35,14 +36,38 @@ static Uint8 palette[] = {
     0x0F, 0x13, 0x23, 0x33,
 };
 
+static int soundNum;
+
+static int getSoundNum(void) {
+    return soundNum;
+}
+
+static int setSoundNum(int sound) {
+    if (sound < 0) { sound = NUM_SOUNDS - 1; }
+    else if (sound >= NUM_SOUNDS) { sound = 0; }
+    soundNum = sound;
+    return soundNum;
+}
+
 static MenuItem items[] = {
-    MENU_BACK("Start Game"),
-    MENU_LINK("Options", Options_Run),
-    MENU_LINK("Sound Test", SoundTest_Run),
+    MENU_NUM("Sound", getSoundNum, setSoundNum, 1),
+    MENU_BACK("Back"),
 };
 
-void MainMenu_Run(void) {
+static void SoundTest_Draw(void) {
+    if (joyEdge & (JOY_A | JOY_START)) {
+        Sound_Reset();
+        Sound_Play(soundNum);
+    }
+
+    BG_Print(11, 2, 0, "Sound Test");
+    BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
+}
+
+void SoundTest_Run(void) {
     BG_SetAllPalettes(palette);
     Sprite_SetAllPalettes(palette + 16);
-    Menu_Run(11, 9, 4, items, ARRAY_LEN(items), NULL);
+    soundNum = 0;
+    Menu_Run(11, 7, 2, items, ARRAY_LEN(items), SoundTest_Draw);
+    Sound_Reset();
 }

@@ -60,11 +60,12 @@ typedef struct {
     Uint8 *data;
     Uint8 channel;
     Uint16 cursor;
-    Uint8 reg1;
     Uint8 reg0;
+    Uint8 reg1;
     Uint16 timer;
     Uint8 loop;
     Uint8 ctrlRegsSet;
+    Uint8 lastNote;
 } Instrument;
 
 typedef struct {
@@ -90,6 +91,13 @@ int Sound_SetVolume(int vol);
  * @returns the current volume.
  */
 int Sound_GetVolume(void);
+
+/**
+ * @param num Sound number we want to inspect (picks the correct APU)
+ * @returns informative text about the state of the sound engine (mainly used
+ * for taking up space on the sound test screen)
+ */
+char *Sound_GetDebugText(int num);
 
 /**
  * @brief Resets the sound engine (so nothing is playing)

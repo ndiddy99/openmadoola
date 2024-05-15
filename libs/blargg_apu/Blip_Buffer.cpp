@@ -347,7 +347,7 @@ long Blip_Buffer::read_samples( blip_sample_t* out, long max_samples, bool stere
 	
 	if ( !count )
 		return 0; // optimization
-	
+
 	int sample_offset = this->sample_offset;
 	int bass_shift = this->bass_shift;
 	buf_t_* buf = buffer_;

@@ -140,6 +140,7 @@ static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
         out->data[i].cursor = romData[cursor++];
         out->data[i].reg1 = romData[cursor++];
         out->data[i].reg0 = romData[cursor++];
+        out->data[i].lastNote = 0;
     }
 
     return romData + cursor;
@@ -204,6 +205,33 @@ int Sound_SetVolume(int vol) {
 
 int Sound_GetVolume(void) {
     return volume;
+}
+
+char *Sound_GetDebugText(int num) {
+    static char output[256] = {0};
+    char row[64];
+    Instrument *insts;
+    if ((gameType == GAME_TYPE_PLUS) && sounds[num].isMusic) {
+        insts = musInstruments;
+    }
+    else {
+        insts = instruments;
+    }
+    strcpy(output, "I C R0 R1 CURS NT TIMR LP\n\n");
+    for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+        snprintf(row, sizeof(row), "%d %d %02x %02x %04x %02x %04x %02x\n\n",
+                 i,
+                 insts[i].channel,
+                 insts[i].reg0,
+                 insts[i].reg1,
+                 insts[i].cursor,
+                 insts[i].lastNote,
+                 insts[i].timer,
+                 insts[i].loop);
+        strcat(output, row);
+    }
+
+    return output;
 }
 
 void Sound_Reset(void) {
@@ -392,6 +420,7 @@ static void Sound_RunInstrument(int apu, Instrument *inst) {
                 reg3 = freq >> 8;
             }
 
+            inst->lastNote = cmd;
             inst->timer = param;
             // length counter load
             reg3 |= 8;
