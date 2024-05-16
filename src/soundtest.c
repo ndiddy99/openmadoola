@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
+#include <string.h>
 
 #include "bg.h"
 #include "constants.h"
@@ -74,12 +75,23 @@ void SoundTest_Run(void) {
     Sound_Reset();
 }
 
-void SoundTest_RunStandalone(char *mmlFilename) {
-    if (MML_Compile(mmlFilename, &sounds[0])) {
+void SoundTest_RunStandalone(char *mmlPath) {
+    if (MML_Compile(mmlPath, &sounds[0])) {
         BG_Clear();
         BG_SetAllPalettes(palette);
         BG_Print(8, 2, 0, "OpenMadoola MML");
         BG_Print(3, 6, 0, "Now playing:");
+        char *mmlFilename;
+#ifdef OM_WINDOWS
+        if ((mmlFilename = strrchr(mmlPath, '\\'))) {
+#else
+        if ((mmlFilename = strrchr(mmlPath, '/'))) {
+#endif
+            mmlFilename++;
+        }
+        else {
+            mmlFilename = mmlPath;
+        }
         BG_Print(3, 8, 0, "%s", mmlFilename);
         Sound_Reset();
         Sound_Play(0);
