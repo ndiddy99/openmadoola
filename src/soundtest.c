@@ -21,9 +21,11 @@
 #include "constants.h"
 #include "joy.h"
 #include "menu.h"
+#include "mml.h"
 #include "sound.h"
 #include "soundtest.h"
 #include "sprite.h"
+#include "system.h"
 
 static Uint8 palette[] = {
     0x0F, 0x36, 0x26, 0x16,
@@ -70,4 +72,26 @@ void SoundTest_Run(void) {
     soundNum = 0;
     Menu_Run(11, 7, 2, items, ARRAY_LEN(items), SoundTest_Draw);
     Sound_Reset();
+}
+
+void SoundTest_RunStandalone(char *mmlFilename) {
+    if (MML_Compile(mmlFilename, &sounds[0])) {
+        BG_Clear();
+        BG_SetAllPalettes(palette);
+        BG_Print(8, 2, 0, "OpenMadoola MML");
+        BG_Print(3, 6, 0, "Now playing:");
+        BG_Print(3, 8, 0, "%s", mmlFilename);
+        Sound_Reset();
+        Sound_Play(0);
+        while (1) {
+            System_StartFrame();
+            BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
+            BG_Draw();
+            System_EndFrame();
+            if (joyEdge & (JOY_A | JOY_B | JOY_SELECT | JOY_START)) {
+                Sound_Reset();
+                Sound_Play(0);
+            }
+        }
+    }
 }

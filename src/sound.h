@@ -74,6 +74,8 @@ typedef struct {
     Instrument *data;
 } Sound;
 
+extern Sound sounds[NUM_SOUNDS];
+
 /**
  * @brief Initializes sound output
  * @returns 1 on success, 0 on failure

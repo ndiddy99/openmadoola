@@ -1,5 +1,5 @@
 /* main.c: Entry point
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -17,12 +17,20 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
 #include "game.h"
+#include "soundtest.h"
 #include "system.h"
 
 int main(int argc, char **argv) {
     if (!System_Init()) { return -1; }
 
-    Game_Run();
+    if (argc == 3 && (strcmp(argv[1], "-p") == 0)) {
+        SoundTest_RunStandalone(argv[2]);
+    }
+    else {
+        Game_Run();
+    }
     return 0;
 }

@@ -71,7 +71,7 @@ static const char *soundFilenames[NUM_SOUNDS] = {
     [SFX_JOYRAIMA] = "sfx_joyraima.mml",
 };
 
-static Sound sounds[NUM_SOUNDS];
+Sound sounds[NUM_SOUNDS];
 // where sound data is stored in CHR ROM
 #define CHR_ROM_SOUND (0x7B70)
 // where sound data is stored in PRG ROM
