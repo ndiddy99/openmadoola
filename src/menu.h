@@ -26,6 +26,7 @@ typedef enum {
     ITEM_TYPE_LINK,
     ITEM_TYPE_LIST,
     ITEM_TYPE_NUM,
+    ITEM_TYPE_NUMSET,
 } MenuItemType;
 
 typedef struct Menu Menu;
@@ -64,6 +65,13 @@ typedef struct MenuItem {
     .change = changeParam, \
     .step = stepParam}
 
+#define MENU_NUMSET(textParam, initParam, changeParam, stepParam, setParam) \
+    {.type = ITEM_TYPE_NUMSET, \
+    .text = textParam, \
+    .init = initParam, \
+    .change = changeParam, \
+    .step = stepParam, \
+    .link = setParam}
 /**
  * @brief Displays a menu screen
  * @param menuX display x position

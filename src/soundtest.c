@@ -49,17 +49,17 @@ static int setSoundNum(int sound) {
     return soundNum;
 }
 
+static void playSound(void) {
+    Sound_Reset();
+    Sound_Play(soundNum);
+}
+
 static MenuItem items[] = {
-    MENU_NUM("Sound", getSoundNum, setSoundNum, 1),
+    MENU_NUMSET("Sound", getSoundNum, setSoundNum, 1, playSound),
     MENU_BACK("Back"),
 };
 
 static void SoundTest_Draw(void) {
-    if (joyEdge & (JOY_A | JOY_START)) {
-        Sound_Reset();
-        Sound_Play(soundNum);
-    }
-
     BG_Print(11, 2, 0, "Sound Test");
     BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
 }
