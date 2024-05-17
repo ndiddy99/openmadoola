@@ -83,7 +83,8 @@ void SoundTest_RunStandalone(char *mmlPath) {
         BG_Print(3, 6, 0, "Now playing:");
         char *mmlFilename;
 #ifdef OM_WINDOWS
-        if ((mmlFilename = strrchr(mmlPath, '\\'))) {
+        if ((mmlFilename = strrchr(mmlPath, '\\')) ||
+            (mmlFilename = strrchr(mmlPath, '/'))) {
 #else
         if ((mmlFilename = strrchr(mmlPath, '/'))) {
 #endif
