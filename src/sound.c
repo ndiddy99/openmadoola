@@ -133,7 +133,7 @@ static Uint8 *Sound_LoadData(Uint8 *romData, Sound *out) {
         }
         else {
             // PRG ROM is mapped into NES memory at 0x8000-0xFFFF
-            instData = prgRom + addr - 0x8000;
+            instData = prgRom + (addr - 0x8000);
         }
         out->data[i].data = Sound_ConvertData(instData);
         out->data[i].channel = romData[cursor++];
