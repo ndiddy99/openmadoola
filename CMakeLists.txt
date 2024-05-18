@@ -174,7 +174,6 @@ set(HEADER_LIST
     "libs/blargg_apu/blargg_common.h"
     "libs/blargg_apu/blargg_source.h"
     "libs/blargg_apu/Blip_Buffer.h"
-    "libs/blargg_apu/Blip_Synth.h"
     "libs/blargg_apu/Nes_Apu.h"
     "libs/blargg_apu/Nes_Oscs.h"
 
