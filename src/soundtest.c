@@ -81,13 +81,16 @@ void SoundTest_RunStandalone(char *mmlPath) {
         BG_SetAllPalettes(palette);
         BG_Print(8, 2, 0, "OpenMadoola MML");
         BG_Print(3, 6, 0, "Now playing:");
-        char *mmlFilename;
 #ifdef OM_WINDOWS
-        if ((mmlFilename = strrchr(mmlPath, '\\')) ||
-            (mmlFilename = strrchr(mmlPath, '/'))) {
-#else
-        if ((mmlFilename = strrchr(mmlPath, '/'))) {
+        // Windows lets the user use either all forward slashes, all
+        // backslashes, or a mixture of the two as path separators. The
+        // simplest way to handle this situation is to replace the last
+        // backslash in the string with a forward slash.
+        char *backslash = strrchr(mmlPath, '\\');
+        if (backslash) { *backslash = '/'; }
 #endif
+        char *mmlFilename;
+        if ((mmlFilename = strrchr(mmlPath, '/'))) {
             mmlFilename++;
         }
         else {
