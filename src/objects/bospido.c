@@ -73,7 +73,6 @@ void Bospido_Obj(Object *o) {
             // instead of sticking to it
             if ((gameType == GAME_TYPE_PLUS) && (o->ySpeed < 0)) {
                 o->ySpeed = -o->ySpeed;
-                o->y.f.l += 0x10;
             }
             else {
                 o->ySpeed = 0;
