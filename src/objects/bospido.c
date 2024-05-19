@@ -69,7 +69,15 @@ void Bospido_Obj(Object *o) {
         Object_ApplyGravity(o);
         Object_CheckForWall(o);
         if (Object_UpdateYPos(o)) {
-            o->ySpeed = 0;
+            // plus mode exclusive fix: make bospido bounce off the ceiling
+            // instead of sticking to it
+            if ((gameType == GAME_TYPE_PLUS) && (o->ySpeed < 0)) {
+                o->ySpeed = -o->ySpeed;
+                o->y.f.l += 0x10;
+            }
+            else {
+                o->ySpeed = 0;
+            }
             o->y.f.l &= 0x80;
             Object_MoveTowardsLucia(o);
         }
