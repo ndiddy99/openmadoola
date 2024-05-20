@@ -44,5 +44,5 @@ void Lucia_LvlEndDoorObj(Object *o);
 void Lucia_WarpDoorObj(Object *o);
 void Lucia_DyingObj(Object *o);
 void Lucia_ClimbObj(Object *o);
-void Lucia_Air_Obj(Object *o);
+void Lucia_AirObj(Object *o);
 

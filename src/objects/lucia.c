@@ -291,7 +291,7 @@ make_climb:
 
 }
 
-void Lucia_Air_Obj(Object *o) {
+void Lucia_AirObj(Object *o) {
     // this function gets used for both Lucia's air and air locked movement
     // objects, so this is the code that's unique to the air object
     if (o->type == OBJ_LUCIA_AIR) {
@@ -516,6 +516,17 @@ checkDamage:
                 }
                 else {
                     // otherwise, bump her up
+                    // NOTE: Because a Y speed of 0x80 is equivalent to boots
+                    // level 3, this lets Lucia access areas she normally
+                    // couldn't if the player is holding A when Lucia is hit.
+                    // I decided not to fix this oversight because it makes.
+                    // movement more interesting and helps the player get out
+                    // of a softlock on stage 4 (if playing correctly).
+                    // The best way to fix the bug would probably be to make a
+                    // new object type for Lucia being knocked back that points
+                    // to the Lucia_AirObj function, and then make the "press A
+                    // to jump higher" code dependent on the object type not
+                    // being "Lucia knocked back".
                     o->ySpeed = 0x80;
                 }
                 // set a random x speed (-4 to 4 pixels)

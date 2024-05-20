@@ -1,5 +1,5 @@
 /* bospido.c: Bospido object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -69,14 +69,15 @@ void Bospido_Obj(Object *o) {
         Object_ApplyGravity(o);
         Object_CheckForWall(o);
         if (Object_UpdateYPos(o)) {
-            // plus mode exclusive fix: make bospido bounce off the ceiling
-            // instead of sticking to it
-            if ((gameType == GAME_TYPE_PLUS) && (o->ySpeed < 0)) {
-                o->ySpeed = -o->ySpeed;
-            }
-            else {
-                o->ySpeed = 0;
-            }
+            // NOTE: There's a bug from the original game where if Bospido
+            // touches the ceiling, it will get stuck. I decided to leave it
+            // like that because I think it's kinda fun and if you fix it,
+            // Lucia's cornered with Bospido repeatedly bouncing in front of
+            // her which is less interesting.
+            // An example fix for the bug is to replace "o->ySpeed = 0" with:
+            // if (o->ySpeed < 0) { o->ySpeed = -o->ySpeed; }
+            // else { o-ySpeed = 0; }
+            o->ySpeed = 0;
             o->y.f.l &= 0x80;
             Object_MoveTowardsLucia(o);
         }
