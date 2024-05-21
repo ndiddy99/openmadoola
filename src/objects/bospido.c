@@ -69,10 +69,9 @@ void Bospido_Obj(Object *o) {
         Object_ApplyGravity(o);
         Object_CheckForWall(o);
         if (Object_UpdateYPos(o)) {
-            // NOTE: There's a bug from the original game where if Bospido
-            // touches the ceiling, it will get stuck. I decided to leave it
-            // like that because I think it's kinda fun and if you fix it,
-            // Lucia's cornered with Bospido repeatedly bouncing in front of
+            // NOTE: There's a bug from the original game where if Bospido touches the ceiling,
+            // it will get stuck. I decided to leave it like that because I think it's kinda fun
+            // and if you fix it, Lucia's cornered with Bospido repeatedly bouncing in front of
             // her which is less interesting.
             // An example fix for the bug is to replace "o->ySpeed = 0" with:
             // if (o->ySpeed < 0) { o->ySpeed = -o->ySpeed; }

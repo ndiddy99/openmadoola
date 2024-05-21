@@ -92,15 +92,16 @@ int Collision_Handle(Object *o, Sprite *s, int size, Uint8 attackPower) {
     return Collision_WithLucia(o, s, size, attackPower);
 
 enemyDamaged:
-    // NOTE: When Lucia runs out of MP, weaponDamage gets set to whatever amount
-    // of damage the sword currently does. This causes a bug where if the player
-    // spams the flash attack and runs out of MP before flashTimer resets, the
-    // flash attack will do as much damage as the sword to every object on screen
-    // for every frame. I decided not to fix the bug because it's a fun trick to
-    // discover and it lets Lucia kill some bosses super fast.
+    // NOTE (bug from the original game): When Lucia runs out of MP, weaponDamage
+    // gets set to whatever amount of damage the sword currently does. This causes
+    // a bug where if the player spams the flash attack and runs out of MP before
+    // flashTimer resets, the flash attack will do as much damage as the sword to
+    // every object on screen for every frame. I decided not to fix the bug
+    // because it's a fun trick to discover and it lets Lucia kill some bosses
+    // super fast.
     // Example fix: replace "o->hp -= weaponDamage" with:
     // if (flashTimer) {
-    //     // you'll have to change weapon.h to export weaponDamageTbl for this to work
+    //     // you'll have to add weaponDamageTbl to weapon.h for this to work
     //     o->hp -= weaponDamageTbl[(WEAPON_FLASH * 3) + weaponLevels[WEAPON_FLASH]];
     // }
     // else {
