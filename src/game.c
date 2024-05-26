@@ -292,6 +292,7 @@ mainGameLoop:
         int switchRoom = Map_Door(&objects[0]);
         if (switchRoom == DOOR_ENDING) {
             if (darutosKilled) {
+                Save_SaveFile();
                 Ending_Run();
                 goto startGameCode;
             }
