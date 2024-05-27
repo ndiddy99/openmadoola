@@ -34,8 +34,7 @@ typedef uint32_t Uint32;
 //#define SCREEN_WIDTH (368) // approx. 16:9 aspect ratio
 #define SCREEN_HEIGHT (240)
 
-// pixel aspect ratio
-#define WINDOW_PAR (8.0f / 7.0f)
+#define PIXEL_ASPECT_RATIO (8.0f / 7.0f)
 
 #if (defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)))
 #define OM_UNIX
@@ -43,8 +42,6 @@ typedef uint32_t Uint32;
 #define OM_WINDOWS
 #endif
 
-#define STRINGIFY(x) STRINGIFY_IMPL(x)
-#define STRINGIFY_IMPL(x) #x
 #define ARRAY_LEN(x) (sizeof(x) / sizeof(x[0]))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

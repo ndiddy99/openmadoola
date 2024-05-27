@@ -78,7 +78,7 @@ static void Platform_PumpEvents(void);
 
 static int Platform_InitVideo(void) {
     // set up window
-    int windowWidth = ((int)(SCREEN_WIDTH * scale * WINDOW_PAR));
+    int windowWidth = ((int)(SCREEN_WIDTH * scale * PIXEL_ASPECT_RATIO));
     int windowHeight = SCREEN_HEIGHT * scale;
     window = SDL_CreateWindow(
         "OpenMadoola",
@@ -241,7 +241,7 @@ int Platform_SetVideoScale(int requested) {
     if ((requested > 0) && !fullscreen) {
         scale = requested;
         // resize window
-        int windowWidth = ((int)(SCREEN_WIDTH * scale * WINDOW_PAR));
+        int windowWidth = ((int)(SCREEN_WIDTH * scale * PIXEL_ASPECT_RATIO));
         int windowHeight = SCREEN_HEIGHT * scale;
         SDL_SetWindowSize(window, windowWidth, windowHeight);
         SDL_SetWindowPosition(window,
@@ -285,7 +285,7 @@ int Platform_SetFullscreen(int requested) {
                                          SDL_TEXTUREACCESS_TARGET,
                                          scaledWidth, scaledHeight);
         // set up destination area
-        fullscreenRect.w = scaledWidth * WINDOW_PAR;
+        fullscreenRect.w = scaledWidth * PIXEL_ASPECT_RATIO;
         fullscreenRect.h = (float)scaledHeight;
         fullscreenRect.x = (float)((displayMode->w / 2) - (fullscreenRect.w / 2));
         fullscreenRect.y = (float)((displayMode->h / 2) - (fullscreenRect.h / 2));
