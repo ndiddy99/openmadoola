@@ -17,6 +17,13 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "constants.h"
+#ifdef OM_WINDOWS
+#include <io.h>
+#include <Windows.h>
+#endif
+
+#include <stdio.h>
 #include <string.h>
 
 #include "game.h"
@@ -24,6 +31,27 @@
 #include "system.h"
 
 int main(int argc, char **argv) {
+    // Windows has two types of programs, "Console" and "Windows". Console
+    // programs will pop up a command line window when launched while Windows
+    // programs will never output anything to the console. We don't want either
+    // behavior. Instead, we want command line output when the program is
+    // launched from a command line, and no output when it's launched from a GUI.
+    // Every other OS has this behavior by default, but Windows requires a
+    // workaround. We build the executable as a Windows program. At launch, we
+    // check whether the program was launched from the command line. If it was,
+    // we manually attach console output to the command prompt.
+#ifdef OM_WINDOWS
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+        freopen("CONIN$", "r", stdin);
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+        // the console prompt gets printed when the program is launched, so
+        // this makes it so we start printing on the next line rather than
+        // the prompt's line
+        putchar('\n');
+    }
+#endif
+
     if (!System_Init()) { return -1; }
 
     if (argc == 3 && (strcmp(argv[1], "-p") == 0)) {
