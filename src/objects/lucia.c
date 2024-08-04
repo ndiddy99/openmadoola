@@ -420,7 +420,12 @@ static void Lucia_Draw(Object *o, int frame) {
         goto onDoorMetatile;
     }
 
-    if (health != 0) {
+    // arcade mode drains 1 hp every 32 frames
+    if ((gameType == GAME_TYPE_ARCADE) && !(frameCount & 0x1f)) {
+        health--;
+    }
+
+    if (health > 0) {
         luciaDoorFlag = 0;
         goto checkDamage;
     }

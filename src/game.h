@@ -23,6 +23,7 @@
 
 #define GAME_TYPE_ORIGINAL 0
 #define GAME_TYPE_PLUS 1
+#define GAME_TYPE_ARCADE 2
 extern Uint8 gameType;
 
 extern Uint8 spritePalettes[16];

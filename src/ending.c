@@ -223,11 +223,11 @@ void Ending_Run(void) {
     Ending_Animation();
     Sound_Play(MUS_ENDING);
     TextScroll_Init(0);
-    if (gameType == GAME_TYPE_PLUS) {
-        TextScroll_DispStr(endingTextArcade, Ending_MoveSpritesUp);
+    if (gameType == GAME_TYPE_ORIGINAL) {
+        TextScroll_DispStr(endingText, Ending_MoveSpritesUp);
     }
     else {
-        TextScroll_DispStr(endingText, Ending_MoveSpritesUp);
+        TextScroll_DispStr(endingTextArcade, Ending_MoveSpritesUp);
     }
     TextScroll_DispTiles(endingGfx, Ending_MoveSpritesUp);
     TextScroll_DispStr("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Ending_MoveSpritesUp);

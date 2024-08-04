@@ -114,14 +114,15 @@ extern Uint16 mapMetatiles[MAP_HEIGHT_METATILES * MAP_WIDTH_METATILES];
 
 /**
  * @brief Loads a room from the map data
- * @param room_num the room number to load
+ * @param roomNum the room number to load
 */
-void Map_Init(Uint8 room_num);
+void Map_Init(Uint8 roomNum);
 
 /**
  * @brief Loads the current room's palette into palette memory
+ * @param roomNum the room to load the palette for
 */
-void Map_LoadPalettes(void);
+void Map_LoadPalettes(Uint8 roomNum);
 
 Uint16 Map_GetMetatile(Object *o);
 

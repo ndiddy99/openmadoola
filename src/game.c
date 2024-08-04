@@ -77,7 +77,13 @@ static void Game_SetRoom(Uint8 roomNum);
 static void Game_HandlePaletteShifting(void);
 
 void Game_InitVars(Object *o) {
-    Map_LoadPalettes();
+    // arcade mode has room 0's bg color replaced by room 1's
+    if ((currRoom == 0) && (gameType == GAME_TYPE_ARCADE)) {
+        Map_LoadPalettes(1);
+    }
+    else {
+        Map_LoadPalettes(currRoom);
+    }
     // load sprite palettes
     Sprite_SetAllPalettes(spritePalettes);
     // clear all weapon objects
@@ -250,7 +256,7 @@ mainGameLoop:
     Game_HandlePause();
     if (paused == 0) {
         Sprite_ClearList();
-        if (gameType == GAME_TYPE_PLUS) {
+        if (gameType != GAME_TYPE_ORIGINAL) {
             Game_HandleWeaponSwitch();
         }
         HUD_Display();

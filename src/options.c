@@ -145,12 +145,13 @@ static void gamepadLink(void) {
     Menu_Run(12, 24, 2, controlsItems, ARRAY_LEN(controlsItems), controlsDraw);
 }
 
-static char *gameTypeOptions[] = {"Original", "Plus"};
+static char *gameTypeOptions[] = {"Original", "Plus", "Arcade"};
 
 static int gameTypeInit(void) { return gameType; }
 
 static int gameTypeCB(int num) {
-    num &= 1;
+    if (num < 0) { num = ARRAY_LEN(gameTypeOptions) - 1; }
+    if (num >= ARRAY_LEN(gameTypeOptions)) { num = 0; }
     gameType = num;
     DB_Set("gametype", &gameType, 1);
     DB_Save();

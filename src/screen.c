@@ -45,13 +45,34 @@ static Uint16 madoolaTiles[] = {
 
 static Uint8 titlePalette[] = {
     0x0F, 0x36, 0x26, 0x16,
-    0x0F, 0x11, 0x21, 0x31,
+    0x0F, 0x36, 0x26, 0x16,
     0x0F, 0x12, 0x22, 0x32,
     0x0F, 0x13, 0x23, 0x33,
     0x0F, 0x10, 0x20, 0x30,
     0x0F, 0x11, 0x21, 0x31,
     0x0F, 0x12, 0x22, 0x32,
     0x0F, 0x13, 0x23, 0x33,
+};
+
+static Uint8 titlePaletteArcade[] = {
+    0x0F, 0x36, 0x26, 0x16,
+    0x0F, 0x21, 0x11, 0x28,
+    0x0F, 0x12, 0x22, 0x32,
+    0x0F, 0x13, 0x23, 0x33,
+    0x0F, 0x10, 0x20, 0x30,
+    0x0F, 0x11, 0x21, 0x31,
+    0x0F, 0x12, 0x22, 0x32,
+    0x0F, 0x13, 0x23, 0x33,
+};
+
+static Uint8 titleCyclePals[] = {
+    0x0F, 0x21, 0x11, 0x28,
+    0x0F, 0x22, 0x12, 0x21,
+    0x0F, 0x26, 0x16, 0x22,
+    0x0F, 0x2a, 0x1a, 0x26,
+    0x0F, 0x20, 0x10, 0x2a,
+    0x0F, 0x24, 0x14, 0x20,
+    0x0F, 0x28, 0x18, 0x24,
 };
 
 static Uint16 *Screen_WriteTiles(Uint16 *tiles) {
@@ -67,11 +88,11 @@ static Uint16 *Screen_WriteTiles(Uint16 *tiles) {
 
 static void Screen_TitleDraw(void) {
     // draw title screen text
-    if (gameType == GAME_TYPE_PLUS) {
-        BG_Print(6, 6, 0, "The Wings of");
+    if (gameType == GAME_TYPE_ORIGINAL) {
+        BG_Print(6, 6, 1, "THE WING OF");
     }
     else {
-        BG_Print(6, 6, 0, "THE WING OF");
+        BG_Print(6, 6, 1, "The Wings of");
     }
     BG_Print(6, 19, 0, "OpenMadoola " OPENMADOOLA_VERSION);
     BG_Print(6, 21, 0, "infochunk.com/madoola");
@@ -81,7 +102,7 @@ static void Screen_TitleDraw(void) {
     // draw "Madoola" graphic
     for (int y = 0; y < 6; y++) {
         for (int x = 0; x < 20; x++) {
-            BG_SetTile(x + 6, y + 8, madoolaTiles[y * 20 + x], 0);
+            BG_SetTile(x + 6, y + 8, madoolaTiles[y * 20 + x], 1);
         }
     }
 }
@@ -119,12 +140,27 @@ void Screen_Title(void) {
 
     flashTimer = 0;
     BG_Clear();
-    BG_SetAllPalettes(titlePalette);
+    if (gameType == GAME_TYPE_ARCADE) {
+        BG_SetAllPalettes(titlePaletteArcade);
+    }
+    else {
+        BG_SetAllPalettes(titlePalette);
+    }
     Sprite_ClearList();
     Sound_Reset();
     Screen_TitleDraw();
 
-    if (gameType == GAME_TYPE_PLUS) {
+    if (gameType == GAME_TYPE_ORIGINAL) {
+        Sound_Play(MUS_TITLE);
+        BG_Scroll(BG_CENTERED_X, 0);
+        while (!exitFlag) {
+            System_StartFrame();
+            BG_Draw();
+            System_EndFrame();
+            if (joyEdge & JOY_START) { exitFlag = 1; }
+        }
+    }
+    else {
         while (!exitFlag) {
             System_StartFrame();
             switch (state) {
@@ -139,7 +175,7 @@ void Screen_Title(void) {
                     }
                 }
                 else {
-                    if (!musicPlaying) {
+                    if (!musicPlaying && (gameType == GAME_TYPE_PLUS)) {
                         musicPlaying = 1;
                         Sound_Play(MUS_TITLE);
                     }
@@ -151,6 +187,10 @@ void Screen_Title(void) {
                 break;
             // wait a few seconds
             case 1:
+                // arcade palette cycling
+                if (gameType == GAME_TYPE_ARCADE) {
+                    BG_SetPalette(1, titleCyclePals + (frames % 7) * 4);
+                }
                 if (++frames >= 900) {
                     frames = 0;
                     state++;
@@ -184,16 +224,6 @@ void Screen_Title(void) {
                     state = 0;
                 }
             }
-            BG_Draw();
-            System_EndFrame();
-            if (joyEdge & JOY_START) { exitFlag = 1; }
-        }
-    }
-    else {
-        Sound_Play(MUS_TITLE);
-        BG_Scroll(BG_CENTERED_X, 0);
-        while (!exitFlag) {
-            System_StartFrame();
             BG_Draw();
             System_EndFrame();
             if (joyEdge & JOY_START) { exitFlag = 1; }

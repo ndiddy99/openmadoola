@@ -37,8 +37,9 @@
 * @param xPos the x position to display the number at
 * @param yPos the y position to display the number at
 * @param palnum the sprite palette number to use
+* @param borders if borders should be shown
 */
-static void HUD_ShowNum(Uint16 num, Uint16 xPos, Uint16 yPos, Uint8 palnum) {
+static void HUD_ShowNum(Uint16 num, Uint16 xPos, Uint16 yPos, Uint8 palnum, Uint8 borders) {
     Sprite spr = { 0 };
     spr.mirror = 0;
     spr.size = SPRITE_8X16;
@@ -58,26 +59,44 @@ static void HUD_ShowNum(Uint16 num, Uint16 xPos, Uint16 yPos, Uint8 palnum) {
         num /= 10;
     }
 
-    // draw left border
-    spr.x = xPos;
-    spr.tile = BORDER_TILE;
-    Sprite_Draw(&spr, NULL);
+    if (borders) {
+        // draw left border
+        spr.x = xPos;
+        spr.tile = BORDER_TILE;
+        Sprite_Draw(&spr, NULL);
 
-    // draw right border
-    spr.x = xPos + (5 * DIGIT_WIDTH);
-    spr.mirror = H_MIRROR;
-    Sprite_Draw(&spr, NULL);
+        // draw right border
+        spr.x = xPos + (5 * DIGIT_WIDTH);
+        spr.mirror = H_MIRROR;
+        Sprite_Draw(&spr, NULL);
+    }
+}
+
+static void HUD_ShowScore(Uint32 num, Uint16 xPos, Uint16 yPos, Uint8 palnum) {
+    if (num > 99999999) { num = 99999999; }
+    HUD_ShowNum((Uint16)(num / 10000), xPos, yPos, palnum, 0);
+    HUD_ShowNum((Uint16)(num % 10000), xPos + 32, yPos, palnum, 0);
 }
 
 void HUD_Display(void) {
-    if (gameType == GAME_TYPE_PLUS) {
-        HUD_ShowNum(health, 14, 16, 3);
-        HUD_ShowNum(magic, 14, 36, 0);
+    switch (gameType) {
+    case GAME_TYPE_ORIGINAL:
+        HUD_ShowNum(health, (SCREEN_WIDTH / 2) - (HUD_WIDTH / 2), 16, 3, 1);
+        HUD_ShowNum(magic, (SCREEN_WIDTH / 2) - (HUD_WIDTH / 2), SCREEN_HEIGHT - 32, 0, 1);
+        break;
+
+    case GAME_TYPE_PLUS:
+        HUD_ShowNum(health, 14, 16, 3, 1);
+        HUD_ShowNum(magic, 14, 36, 0, 1);
         HUD_WeaponInit(18, 55);
-    }
-    else {
-        HUD_ShowNum(health, (SCREEN_WIDTH / 2) - (HUD_WIDTH / 2), 16, 3);
-        HUD_ShowNum(magic, (SCREEN_WIDTH / 2) - (HUD_WIDTH / 2), SCREEN_HEIGHT - 32, 0);
+        break;
+
+    case GAME_TYPE_ARCADE:
+        HUD_ShowScore(0, 16, 24, 1);
+        HUD_ShowNum(health, SCREEN_WIDTH - 60, SCREEN_HEIGHT - 65, 3, 0);
+        HUD_ShowNum(magic, SCREEN_WIDTH - 60, SCREEN_HEIGHT - 41, 0, 0);
+        HUD_WeaponInit(SCREEN_WIDTH - 68, SCREEN_HEIGHT - 41);
+        break;
     }
 }
 

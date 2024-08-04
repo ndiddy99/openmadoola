@@ -58,11 +58,11 @@ void Map_Init(Uint8 roomNum) {
     }
 
     // load the room's palettes
-    Map_LoadPalettes();
+    Map_LoadPalettes(roomNum);
 }
 
-void Map_LoadPalettes(void) {
-    memcpy(colorPalette, mapData.rooms[currRoom].palette, sizeof(mapData.rooms[currRoom].palette));
+void Map_LoadPalettes(Uint8 roomNum) {
+    memcpy(colorPalette, mapData.rooms[roomNum].palette, sizeof(mapData.rooms[roomNum].palette));
 }
 
 Uint16 Map_GetMetatile(Object *o) {
