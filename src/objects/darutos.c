@@ -143,7 +143,7 @@ void Darutos_Obj(Object *o) {
     // but that made Darutos not get drawn unless he was at least halfway
     // onscreen, making it harder to judge what side he was on. Instead we
     // calculate the sprite position manually and then use Sprite_SetDrawLargeAbs.
-    if (gameType == GAME_TYPE_PLUS) {
+    if (gameType != GAME_TYPE_ORIGINAL) {
         spr.x = ((o->x.v - cameraX.v) >> 4) + dispOffsetX;
         spr.y = ((o->y.v - cameraY.v) >> 4) - 9;
         spr.mirror = o->direction ? 0 : H_MIRROR;

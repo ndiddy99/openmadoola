@@ -100,7 +100,7 @@ void Item_Obj(Object *o) {
     // Calling Sprite_SetDraw on the object (which the original game did the
     // equivalent of) erases the horizontal mirroring on the orb, which make it
     // look less cool in my opinion. I'm pretty sure this is a bug.
-    if (gameType == GAME_TYPE_PLUS) {
+    if (gameType != GAME_TYPE_ORIGINAL) {
         if (!Sprite_SetPos(&spr, o, 0, 0)) {
             goto eraseItem;
         } else {

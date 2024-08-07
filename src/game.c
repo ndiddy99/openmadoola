@@ -42,6 +42,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "title.h"
 #include "weapon.h"
 
 #define SOFT_RESET (JOY_A | JOY_B | JOY_START | JOY_SELECT)
@@ -191,7 +192,7 @@ noreturn void Game_Run(void) {
     }
 
 startGameCode:
-    Screen_Title();
+    Title_Run();
     MainMenu_Run();
 
 showSaveScreen:;

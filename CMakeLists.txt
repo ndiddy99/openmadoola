@@ -68,6 +68,7 @@ set(SOURCE_LIST
     "src/sprite.c"
     "src/system.c"
     "src/textscroll.c"
+    "src/title.c"
     "src/weapon.c"
     ${PLATFORM_IMPL}
 
@@ -155,6 +156,7 @@ set(HEADER_LIST
     "src/sprite.h"
     "src/system.h"
     "src/textscroll.h"
+    "src/title.h"
     "src/weapon.h"
     
     # object code

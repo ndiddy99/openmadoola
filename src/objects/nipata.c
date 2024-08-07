@@ -57,7 +57,7 @@ void Nipata_Obj(Object *o) {
         int hitCeiling;
         // NOTE: This fixes a bug where if nipata spawned between two walls, it would
         // slowly rise up and then snap back down over and over.
-        if (gameType == GAME_TYPE_PLUS) {
+        if (gameType != GAME_TYPE_ORIGINAL) {
             Object_CalcYPos(o);
             hitCeiling = Map_SolidTileAbove(o->collision);
         }
