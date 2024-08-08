@@ -36,6 +36,7 @@ extern Uint8 numBossObjs;
 extern Sint8 keywordDisplay;
 extern Uint8 bossDefeated[16];
 extern Uint8 frameCount;
+extern Uint32 score;
 
 /**
  * @brief Initializes the title screen, game, etc and runs the game loop.

@@ -48,10 +48,10 @@ static Uint8 titlePaletteArcade[] = {
     0x0F, 0x28, 0x26, 0x16,
     0x0F, 0x21, 0x11, 0x28,
     0x0F, 0x20, 0x22, 0x32,
-    0x0F, 0x13, 0x23, 0x33,
+    0x0F, 0x0F, 0x0F, 0x0F,
 };
 
-static Uint8 titleCyclePals[] = {
+static Uint8 titleCyclePals1[] = {
     0x0F, 0x21, 0x11, 0x28,
     0x0F, 0x22, 0x12, 0x21,
     0x0F, 0x26, 0x16, 0x22,
@@ -59,6 +59,17 @@ static Uint8 titleCyclePals[] = {
     0x0F, 0x20, 0x10, 0x2a,
     0x0F, 0x24, 0x14, 0x20,
     0x0F, 0x28, 0x18, 0x24,
+};
+
+static Uint8 titleCyclePals3[] = {
+    0x0F, 0x0F, 0x0F, 0x0F,
+    0x0F, 0x06, 0x06, 0x06,
+    0x0F, 0x16, 0x16, 0x16,
+    0x0F, 0x26, 0x26, 0x26,
+    0x0F, 0x36, 0x36, 0x36,
+    0x0F, 0x26, 0x26, 0x26,
+    0x0F, 0x16, 0x16, 0x16,
+    0x0F, 0x06, 0x06, 0x06,
 };
 
 static Uint8 introTextPalette[] = {
@@ -83,6 +94,10 @@ static char introText[] = {
     "  land was always in the state\n\n"
     "           of chaos.\n\n"
     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+};
+
+static Uint8 highScorePalette[] = {
+    0x0F, 0x26, 0x20, 0x20,
 };
 
 static int musicPlaying = 0;
@@ -135,7 +150,8 @@ static int Title_ArcadeInit(void) {
     BG_Print(19, 4, 2, "00000000");
     BG_Print(7, 8, 1, "The Wings of");
     Title_DrawMadoolaGraphic(7, 10);
-    Title_DrawCopyrightText(6, 19);
+    BG_Print(6, 18, 3, "- PRESS START BUTTON -");
+    Title_DrawCopyrightText(6, 20);
     return 0;
 }
 
@@ -179,14 +195,19 @@ static int Title_ScreenPlus(void) {
 
 static int Title_ScreenArcade(void) {
     int frames = 0;
-    while (++frames < 256) {
+    while (++frames < 200) {
         System_StartFrame();
-        int paletteNum = (frames / 2) % 7;
-        BG_SetPalette(1, titleCyclePals + paletteNum * 4);
+        int madoolaPaletteNum = (frames / 2) % 7;
+        BG_SetPalette(1, titleCyclePals1 + madoolaPaletteNum * 4);
+        // NOTE: this is most likely supposed to be "frames / 2" but I think
+        // frames / 4 looks a LOT better
+        int startPaletteNum = (frames / 4) % 8;
+        BG_SetPalette(3, titleCyclePals3 + startPaletteNum * 4);
         BG_Draw();
         System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
     }
+    BG_SetPalette(3, titleCyclePals3);
     return 0;
 }
 
@@ -218,6 +239,32 @@ static int Title_TextScroll(void) {
     return TextScroll_DispStr(introText, NULL);
 }
 
+static int Title_HighScoresInit(void) {
+    BG_Clear();
+    BG_SetPalette(0, highScorePalette);
+    BG_Print(6,  6, 0, "RANK  NAME    SCORE");
+    BG_Print(6,  9, 0, "TOP   MSSAN   00400000");
+    BG_Print(6, 11, 0, "2ND   OIYTA   00350000");
+    BG_Print(6, 13, 0, "3RD   RMUSK   00300000");
+    BG_Print(6, 15, 0, "4TH   OOGUA   00250000");
+    BG_Print(6, 17, 0, "5TH   TMISG   00200000");
+    BG_Print(6, 19, 0, "6TH   TUUHA   00150000");
+    BG_Print(6, 21, 0, "7TH   ARRIW   00100000");
+    BG_Print(6, 23, 0, "8TH   RAAIA   00050000");
+    return 0;
+}
+
+static int Title_HighScores(void) {
+    int frames = 0;
+    while (++frames < 200) {
+        System_StartFrame();
+        BG_Draw();
+        System_EndFrame();
+        if (joyEdge & JOY_START) { return 1; }
+    }
+    return 0;
+}
+
 typedef int (*SequenceItem)(void);
 
 static SequenceItem originalSequence[] = {
@@ -236,6 +283,15 @@ static SequenceItem arcadeSequence[] = {
     Title_ScreenArcade,
     Title_AnimateOut,
     Title_TextScroll,
+    Title_ArcadeInit,
+    Title_AnimateIn,
+    Title_ScreenArcade,
+    Title_AnimateOut,
+    Title_HighScoresInit,
+    Title_AnimateIn,
+    Title_HighScores,
+    Title_AnimateOut,
+    // attract mode gameplay goes here
 };
 
 void Title_DoSequence(SequenceItem *sequence, int len) {

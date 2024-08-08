@@ -476,9 +476,13 @@ checkDamage:
     if (luciaHurtPoints) {
         // yokko-chan's collision value
         if (luciaHurtPoints == 0xFF) {
+            // arcade mode plays a fun sound effect when lucia touches yokko-chan
+            if (gameType == GAME_TYPE_ARCADE) {
+                Sound_Play(SFX_ITEM);
+            }
             // display the keyword if we haven't already
-            if (!keywordDisplay) {
-                keywordDisplay++;
+            else if (!keywordDisplay) {
+                    keywordDisplay++;
             }
         }
         // lucia collected an item

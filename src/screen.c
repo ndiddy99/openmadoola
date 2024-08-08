@@ -53,7 +53,7 @@ static Uint8 statusPalette[] = {
 };
 
 static Uint8 statusPaletteArcade[] = {
-    0x1D, 0x2B, 0x2B, 0x2B,
+    0x0F, 0x2B, 0x2B, 0x2B,
 };
 
 static Uint8 statusItemPalettes[] = {
@@ -93,8 +93,6 @@ void Screen_Status(void) {
         BG_SetPalette(0, statusPaletteArcade);
     }
     Sprite_SetAllPalettes(spritePalettes);
-    Sound_Reset();
-    Sound_Play(MUS_START);
 
     // print the text
     BG_Print(13,  3, 0, "STATUS");
@@ -138,7 +136,14 @@ void Screen_Stage(void) {
     BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, stagePalette);
-    BG_Print(12, 15, 0, "STAGE %2u", stage + 1);
+
+    if (gameType == GAME_TYPE_ARCADE) {
+        BG_Print(12, 12, 0, "STAGE %2u", stage + 1);
+        BG_Print(13, 17, 0, "LEFT 2");
+    }
+    else {
+        BG_Print(12, 15, 0, "STAGE %2u", stage + 1);
+    }
 
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {

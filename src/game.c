@@ -58,6 +58,7 @@ Uint8 numBossObjs;
 Uint8 bossDefeated[16];
 Uint8 frameCount;
 Sint8 keywordDisplay;
+Uint32 score;
 
 Uint8 spritePalettes[16] = {
     0x00, 0x12, 0x16, 0x36,
@@ -224,6 +225,7 @@ showSaveScreen:;
         health = 1000;
     }
 
+    score = 0;
     paused = 0;
     currentWeapon = WEAPON_SWORD;
 
@@ -233,8 +235,17 @@ initStage:
 
     magic = maxMagic;
     lastRoom = 0xffff;
-    Screen_Status();
-    Screen_Stage();
+
+    Sound_Reset();
+    Sound_Play(MUS_START);
+    if (gameType == GAME_TYPE_ARCADE) {
+        Screen_Stage();
+        Screen_Status();
+    }
+    else {
+        Screen_Status();
+        Screen_Stage();
+    }
 
     // set up lucia's position and the room number
     Object *lucia = &objects[0];

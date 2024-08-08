@@ -92,7 +92,7 @@ void HUD_Display(void) {
         break;
 
     case GAME_TYPE_ARCADE:
-        HUD_ShowScore(0, 16, 24, 1);
+        HUD_ShowScore(score, 16, 24, 1);
         HUD_ShowNum(health, SCREEN_WIDTH - 60, SCREEN_HEIGHT - 65, 3, 0);
         HUD_ShowNum(magic, SCREEN_WIDTH - 60, SCREEN_HEIGHT - 41, 0, 0);
         HUD_WeaponInit(SCREEN_WIDTH - 68, SCREEN_HEIGHT - 41);

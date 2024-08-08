@@ -39,7 +39,9 @@ void Nomaji_Obj(Object *o) {
     spr.size = SPRITE_16X16;
     spr.tile = 0x82;
 
-    Fireball_Spawn(0x3f, o);
+    if (gameType == GAME_TYPE_ARCADE) {
+        Fireball_Spawn(0x3f, o);
+    }
     if (o->stunnedTimer == 0) {
         if (Object_TouchingGround(o)) {
             if (((rngVal + frameCount) & 0xFF) < 0xF0) {
