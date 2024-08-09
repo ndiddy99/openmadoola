@@ -32,6 +32,7 @@ extern Sint16 health;
 extern Sint16 maxHealth;
 extern Sint16 magic;
 extern Sint16 maxMagic;
+extern Sint8 lives;
 
 extern Fixed16 luciaXPos;
 extern Fixed16 luciaYPos;

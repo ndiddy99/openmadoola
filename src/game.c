@@ -226,6 +226,7 @@ showSaveScreen:;
     }
 
     score = 0;
+    lives = 2;
     paused = 0;
     currentWeapon = WEAPON_SWORD;
 
@@ -336,6 +337,19 @@ mainGameLoop:
             orbCollected = 0;
         }
         goto initStage;
+    }
+    // if we're here, lucia died
+    else if (gameType == GAME_TYPE_ARCADE) {
+        lives--;
+        if (lives < 0) {
+            Save_SaveFile();
+            Screen_GameOver();
+            goto startGameCode;
+        }
+        else {
+            health = 1000;
+            goto initStage;
+        }
     }
     else {
         Save_SaveFile();

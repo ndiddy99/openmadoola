@@ -44,6 +44,7 @@ Sint16 health;
 Sint16 maxHealth;
 Sint16 magic;
 Sint16 maxMagic;
+Sint8 lives;
 
 Fixed16 luciaXPos;
 Fixed16 luciaYPos;
@@ -434,8 +435,11 @@ static void Lucia_Draw(Object *o, int frame) {
         roomChangeTimer = 150;
         o->type = OBJ_LUCIA_DYING;
         Sound_Reset();
-        Sound_Play(MUS_GAME_OVER);
-        Sound_Play(SFX_LUCIA_HIT);
+        // TODO play arcade lucia dead sound here
+        if (gameType != GAME_TYPE_ARCADE) {
+            Sound_Play(MUS_GAME_OVER);
+            Sound_Play(SFX_LUCIA_HIT);
+        }
         goto lockScroll;
     }
 

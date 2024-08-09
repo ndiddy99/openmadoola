@@ -139,7 +139,7 @@ void Screen_Stage(void) {
 
     if (gameType == GAME_TYPE_ARCADE) {
         BG_Print(12, 12, 0, "STAGE %2u", stage + 1);
-        BG_Print(13, 17, 0, "LEFT 2");
+        BG_Print(13, 17, 0, "LEFT %u", lives);
     }
     else {
         BG_Print(12, 15, 0, "STAGE %2u", stage + 1);
@@ -161,6 +161,11 @@ void Screen_GameOver(void) {
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, stagePalette);
     BG_Print(12, 15, 0, "GAME OVER");
+    // non-arcade game types start the game over music playing before the game
+    // over screen
+    if (gameType == GAME_TYPE_ARCADE) {
+        Sound_Play(MUS_GAME_OVER);
+    }
 
     // wait 4 seconds
     for (int i = 0; i < 240; i++) {
