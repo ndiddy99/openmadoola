@@ -211,7 +211,7 @@ char *Sound_GetDebugText(int num) {
     static char output[256] = {0};
     char row[64];
     Instrument *insts;
-    if ((gameType == GAME_TYPE_PLUS) && sounds[num].isMusic) {
+    if ((gameType != GAME_TYPE_ORIGINAL) && sounds[num].isMusic) {
         insts = musInstruments;
     }
     else {
@@ -251,7 +251,7 @@ void Sound_Play(int num) {
     // copy all instruments from a sound into their respective slots
     Instrument *destInsts;
     int apu;
-    if ((gameType == GAME_TYPE_PLUS) && sounds[num].isMusic) {
+    if ((gameType != GAME_TYPE_ORIGINAL) && sounds[num].isMusic) {
         destInsts = musInstruments;
         apu = 1;
     }

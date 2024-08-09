@@ -259,7 +259,7 @@ initStage:
 
 initRoom:
     Game_InitVars(lucia);
-    if ((gameType != GAME_TYPE_PLUS) || (currRoom != lastRoom)) {
+    if ((gameType == GAME_TYPE_ORIGINAL) || (currRoom != lastRoom)) {
         Game_PlayRoomSong();
     }
     lastRoom = currRoom;
@@ -411,11 +411,11 @@ static void Game_HandleWeaponSwitch(void) {
 static void Game_HandlePause(void) {
     if (paused) {
         if (joyEdge & JOY_START) {
-            if (gameType == GAME_TYPE_PLUS) {
-                Sound_LoadState();
+            if (gameType == GAME_TYPE_ORIGINAL) {
+                Game_PlayRoomSong();
             }
             else {
-                Game_PlayRoomSong();
+                Sound_LoadState();
             }
             Sound_Play(SFX_PAUSE);
             paused = 0;
