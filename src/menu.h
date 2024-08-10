@@ -1,5 +1,5 @@
 /* menu.h: Menu display code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -22,7 +22,7 @@
 
 typedef enum {
     ITEM_TYPE_NONE,
-    ITEM_TYPE_BACK,
+    ITEM_TYPE_ABORT,
     ITEM_TYPE_LINK,
     ITEM_TYPE_LIST,
     ITEM_TYPE_NUM,
@@ -42,9 +42,10 @@ typedef struct MenuItem {
     void (*link)(void);
 } MenuItem;
 
-#define MENU_BACK(textParam) \
-    {.type = ITEM_TYPE_BACK, \
-    .text =  textParam}
+#define MENU_ABORT(textParam, returnVal) \
+    {.type = ITEM_TYPE_ABORT, \
+    .text = textParam, \
+    .num = returnVal}
 
 #define MENU_LINK(textParam, linkParam) \
     {.type = ITEM_TYPE_LINK, \
@@ -80,5 +81,6 @@ typedef struct MenuItem {
  * @param items pointer to MenuItem array (see menu.h for MenuItem struct initialization macros)
  * @param numItems size of MenuItem array
  * @param draw optional function that gets run each frame
+ * @returns return value set in the selected MENU_ABORT option
  */
-void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing, MenuItem *items, int numItems, void (*draw)(void));
+int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing, MenuItem *items, int numItems, void (*draw)(void));

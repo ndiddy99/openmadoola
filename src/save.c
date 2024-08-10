@@ -165,7 +165,7 @@ static Uint16 luciaRunTiles[] = {
 
 // menu indices
 #define ERASE_INDEX NUM_FILES
-#define TITLE_INDEX (ERASE_INDEX + 1)
+#define MAIN_MENU_INDEX (ERASE_INDEX + 1)
 
 // position defines
 #define HEADER_X 10
@@ -211,12 +211,12 @@ int Save_Screen(void) {
         // cursor movement (with wraparound)
         if (joyEdge & JOY_UP) {
             cursor--;
-            if (cursor < 0) { cursor = TITLE_INDEX; }
+            if (cursor < 0) { cursor = MAIN_MENU_INDEX; }
             Sound_Play(SFX_MENU);
         }
         if (joyEdge & (JOY_DOWN | JOY_SELECT)) {
             cursor++;
-            if (cursor > TITLE_INDEX) { cursor = 0; }
+            if (cursor > MAIN_MENU_INDEX) { cursor = 0; }
             Sound_Play(SFX_MENU);
         }
 
@@ -261,12 +261,12 @@ int Save_Screen(void) {
         if (!erase) {
             BG_Print(HEADER_X, HEADER_Y, 0, "Select Game");
             BG_Print(ERASE_X,  ERASE_Y,  0, "Erase File");
-            BG_Print(TITLE_X,  TITLE_Y,  0, "Title Screen");
+            BG_Print(TITLE_X,  TITLE_Y,  0, "Main Menu");
         }
         else {
             BG_Print(HEADER_X, HEADER_Y, 0, "Erase File ");
             BG_Print(ERASE_X,  ERASE_Y,  0, "Cancel    ");
-            BG_Print(TITLE_X,  TITLE_Y,  0, "Title Screen");
+            BG_Print(TITLE_X,  TITLE_Y,  0, "Main Menu");
         }
 
         // draw save file text
@@ -291,8 +291,8 @@ int Save_Screen(void) {
                 erase ^= 1;
                 cursor = 0;
             }
-            // return to tile screen
-            else if (cursor == TITLE_INDEX) {
+            // return to main menu
+            else if (cursor == MAIN_MENU_INDEX) {
                 return 0;
             }
             // selected a file to erase

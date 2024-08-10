@@ -36,13 +36,14 @@ static Uint8 palette[] = {
 };
 
 static MenuItem items[] = {
-    MENU_BACK("Start Game"),
+    MENU_ABORT("Start Game", 1),
     MENU_LINK("Options", Options_Run),
     MENU_LINK("Sound Test", SoundTest_Run),
+    MENU_ABORT("Title Screen", 0),
 };
 
-void MainMenu_Run(void) {
+int MainMenu_Run(void) {
     BG_SetAllPalettes(palette);
     Sprite_SetAllPalettes(palette + 16);
-    Menu_Run(11, 9, 4, items, ARRAY_LEN(items), NULL);
+    return Menu_Run(10, 9, 3, items, ARRAY_LEN(items), NULL);
 }

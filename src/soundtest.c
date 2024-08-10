@@ -59,7 +59,7 @@ static void playSound(void) {
 
 static MenuItem items[] = {
     MENU_NUMSET("Sound", getSoundNum, setSoundNum, 1, playSound),
-    MENU_BACK("Back"),
+    MENU_ABORT("Back", 0),
 };
 
 static void SoundTest_Draw(void) {

@@ -1,5 +1,5 @@
 /* menu.c: Menu display code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -28,9 +28,10 @@
 #include "sprite.h"
 #include "system.h"
 
-void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numItems, void (*draw)(void)) {
+int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numItems, void (*draw)(void)) {
     int cursor = 0;
     int exitFlag = 0;
+    int returnVal;
     Sprite cursorSpr;
 
     Sound_Reset();
@@ -76,10 +77,11 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
             case ITEM_TYPE_NONE:
                 break;
 
-            case ITEM_TYPE_BACK:
+            case ITEM_TYPE_ABORT:
                 if (i == cursor) {
                     if (joyEdge & (JOY_A | JOY_START)) {
                         exitFlag = 1;
+                        returnVal = items[i].num;
                     }
                 }
                 BG_Print(menuX, currY, 0, "%s", items[i].text);
@@ -152,4 +154,6 @@ void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int num
         Sprite_EndFrame();
         System_EndFrame();
     }
+
+    return returnVal;
 }

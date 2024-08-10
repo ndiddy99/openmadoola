@@ -246,7 +246,7 @@ static int noteToFrames(void) {
 }
 
 static void checkInst(InstData *i) {
-    if (!i) { errorExit("InstData number must be defined with the I command."); }
+    if (!i) { errorExit("Instrument number must be defined with the I command."); }
 }
 
 static void addInstFrames(InstData *i, int frames) {

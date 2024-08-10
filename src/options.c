@@ -120,7 +120,7 @@ void controlsDraw(void) {
 
 static MenuItem controlsItems[] = {
     MENU_LINK("Map", Options_Map),
-    MENU_BACK("Back"),
+    MENU_ABORT("Back", 0),
 };
 
 static char *boolOptions[] = {"OFF", "ON"};
@@ -176,8 +176,8 @@ static MenuItem optionsItems[] = {
     MENU_LINK("Keyboard controls", keyboardLink),
     MENU_LINK("Gamepad controls", gamepadLink),
     MENU_LIST("Game type", gameTypeOptions, gameTypeInit, gameTypeCB),
-    MENU_LIST("Arcade mode timer", boolOptions, arcadeTimerInit, arcadeTimerCB),
-    MENU_BACK("Back"),
+    MENU_LIST("Arcade timer", boolOptions, arcadeTimerInit, arcadeTimerCB),
+    MENU_ABORT("Back", 0),
 };
 
 void Options_Draw(void) {

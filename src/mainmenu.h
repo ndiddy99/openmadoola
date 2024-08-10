@@ -21,5 +21,7 @@
 
 /**
  * @brief Shows the main menu screen.
+ * @returns 0 if the user wants to go to the title screen, 1 if the user wants
+ * to start the game
  */
-void MainMenu_Run(void);
+int MainMenu_Run(void);

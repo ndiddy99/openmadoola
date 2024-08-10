@@ -209,16 +209,20 @@ noreturn void Game_Run(void) {
 
 startGameCode:
     Title_Run();
-    MainMenu_Run();
 
-showSaveScreen:;
-    int saveStatus = Save_Screen();
-    // return to title screen
-    if (saveStatus == 0) {
+showMainMenu:
+    if (MainMenu_Run() == 0) {
         goto startGameCode;
     }
+
+showSaveScreen:
+    switch (Save_Screen()) {
+    // return to main menu
+    case 0:
+        goto showMainMenu;
+
     // new game (initialize game state)
-    else if (saveStatus == 1) {
+    case 1:
         health = 1000;
         maxHealth = 1000;
         maxMagic = 1000;
@@ -233,11 +237,13 @@ showSaveScreen:;
         stage = 0;
         orbCollected = 0;
         keywordDisplay = 0;
-    }
+        break;
+
     // player loaded a game
-    else {
+    case 2:
         // stage number got set by the save screen so we don't need to set it here
         health = 1000;
+        break;
     }
 
     score = 0;
