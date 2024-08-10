@@ -200,8 +200,8 @@ static int Title_ScreenArcade(void) {
         int madoolaPaletteNum = (frames / 2) % 7;
         BG_SetPalette(1, titleCyclePals1 + madoolaPaletteNum * 4);
         // NOTE: this is most likely supposed to be "frames / 2" but I think
-        // frames / 4 looks a LOT better
-        int startPaletteNum = (frames / 4) % 8;
+        // frames / 8 looks a LOT better
+        int startPaletteNum = (frames / 8) % 8;
         BG_SetPalette(3, titleCyclePals3 + startPaletteNum * 4);
         BG_Draw();
         System_EndFrame();

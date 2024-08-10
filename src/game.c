@@ -58,7 +58,9 @@ Uint8 numBossObjs;
 Uint8 bossDefeated[16];
 Uint8 frameCount;
 Sint8 keywordDisplay;
+// arcade stuff
 Uint32 score;
+Uint8 timerEnabled;
 
 Uint8 spritePalettes[16] = {
     0x00, 0x12, 0x16, 0x36,
@@ -187,9 +189,22 @@ noreturn void Game_Run(void) {
     Uint16 lastRoom;
 
     // initialize game type
-    DBEntry *gameTypeEntry = DB_Find("gametype");
-    if (gameTypeEntry) {
-        gameType = gameTypeEntry->data[0];
+    DBEntry *entry = DB_Find("gametype");
+    if (entry) {
+        gameType = entry->data[0];
+    }
+    else {
+        gameType = GAME_TYPE_PLUS;
+    }
+
+    // check whether to disable the timer- pretty sure this was a dip switch on
+    // the arcade version so it's an option here too
+    entry = DB_Find("timer");
+    if (entry) {
+        timerEnabled = entry->data[0];
+    }
+    else {
+        timerEnabled = 1;
     }
 
 startGameCode:

@@ -36,7 +36,9 @@ extern Uint8 numBossObjs;
 extern Sint8 keywordDisplay;
 extern Uint8 bossDefeated[16];
 extern Uint8 frameCount;
+// arcade stuff
 extern Uint32 score;
+extern Uint8 timerEnabled;
 
 /**
  * @brief Initializes the title screen, game, etc and runs the game loop.

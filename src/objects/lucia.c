@@ -404,6 +404,7 @@ static void Lucia_AddHPMP(Uint8 val) {
 }
 
 // TODO refactor
+#define TIMER_TICK_FRAMES 32
 static void Lucia_Draw(Object *o, int frame) {
     Sprite spr = { 0 };
     spr.size = SPRITE_16X16;
@@ -421,8 +422,8 @@ static void Lucia_Draw(Object *o, int frame) {
         goto onDoorMetatile;
     }
 
-    // arcade mode drains 1 hp every 32 frames
-    if ((gameType == GAME_TYPE_ARCADE) && !(frameCount & 0x1f)) {
+    // arcade mode drains 1 hp every 32 frames when the timer's enabled
+    if ((gameType == GAME_TYPE_ARCADE) && timerEnabled && !(frameCount & 0x1f)) {
         health--;
     }
 
