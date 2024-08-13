@@ -142,32 +142,22 @@ void HighScore_NameEntry(void) {
         // start immediately ends the high score entry
         if (joyEdge & JOY_START) { exitFlag = 1; }
         // letter selection
-        if (joyEdge & JOY_LEFT) {
-            charCursor--;
+        if (joyEdge & (JOY_LEFT | JOY_RIGHT)) {
+            if (joyEdge & JOY_LEFT) { charCursor--; }
+            if (joyEdge & JOY_RIGHT) { charCursor++; }
             Sound_Play(SFX_MENU);
             repeatTimer = 30;
         }
-        if (joyEdge & JOY_RIGHT) {
-            charCursor++;
-            Sound_Play(SFX_MENU);
-            repeatTimer = 30;
-        }
-        if (joy & JOY_LEFT) {
+        else if (joy & (JOY_LEFT | JOY_RIGHT)) {
             repeatTimer--;
             if (repeatTimer <= 0) {
-                charCursor--;
+                if (joy & JOY_LEFT) { charCursor--; }
+                if (joy & JOY_RIGHT) { charCursor++; }
                 Sound_Play(SFX_MENU);
                 repeatTimer = 5;
             }
         }
-        if (joy & JOY_RIGHT) {
-            repeatTimer--;
-            if (repeatTimer <= 0) {
-                charCursor++;
-                Sound_Play(SFX_MENU);
-                repeatTimer = 5;
-            }
-        }
+
         // handle wraparound
         if (charCursor < 0) { charCursor = ARRAY_LEN(highScoreCharset) - 2; }
         if (charCursor >= (ARRAY_LEN(highScoreCharset) - 1)) { charCursor = 0; }
