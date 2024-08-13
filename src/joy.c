@@ -112,7 +112,7 @@ void Joy_SaveMappings(void) {
         joyBuffer[(i * 4) + 2] = gamepadMappings[i] >> 8;
         joyBuffer[(i * 4) + 3] = gamepadMappings[i] & 0xff;
     }
-    DB_Set("joy", joyBuffer, ARRAY_LEN(joyBuffer));
+    DB_Set("joy", joyBuffer, sizeof(joyBuffer));
     DB_Save();
 }
 

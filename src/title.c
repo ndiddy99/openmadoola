@@ -20,6 +20,7 @@
 #include "bg.h"
 #include "constants.h"
 #include "game.h"
+#include "highscore.h"
 #include "joy.h"
 #include "palette.h"
 #include "sound.h"
@@ -96,16 +97,12 @@ static char introText[] = {
     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 };
 
-static Uint8 highScorePalette[] = {
-    0x0F, 0x26, 0x20, 0x20,
-};
-
 static int musicPlaying = 0;
 
 static void Title_DrawMadoolaGraphic(int x, int y) {
     for (int yCursor = 0; yCursor < 6; yCursor++) {
         for (int xCursor = 0; xCursor < 20; xCursor++) {
-            BG_SetTile(x + xCursor, y + yCursor, madoolaTiles[yCursor * 20 + xCursor], 1);
+            BG_SetTile(x + xCursor, y + yCursor, 1, madoolaTiles[yCursor * 20 + xCursor]);
         }
     }
 }
@@ -145,9 +142,9 @@ static int Title_ArcadeInit(void) {
     BG_Clear();
     BG_SetAllPalettes(titlePaletteArcade);
     BG_Print(5, 2, 0, "SCORE");
-    BG_Print(5, 4, 2, "00000000");
+    BG_Print(5, 4, 2, "%08lu", score);
     BG_Print(19, 2, 0, "HIGH-SCORE");
-    BG_Print(19, 4, 2, "00000000");
+    BG_Print(19, 4, 2, "%08lu", HighScore_GetTopScore());
     BG_Print(7, 8, 1, "The Wings of");
     Title_DrawMadoolaGraphic(7, 10);
     BG_Print(6, 18, 3, "- PRESS START BUTTON -");
@@ -241,16 +238,7 @@ static int Title_TextScroll(void) {
 
 static int Title_HighScoresInit(void) {
     BG_Clear();
-    BG_SetPalette(0, highScorePalette);
-    BG_Print(6,  6, 0, "RANK  NAME    SCORE");
-    BG_Print(6,  9, 0, "TOP   MSSAN   00400000");
-    BG_Print(6, 11, 0, "2ND   OIYTA   00350000");
-    BG_Print(6, 13, 0, "3RD   RMUSK   00300000");
-    BG_Print(6, 15, 0, "4TH   OOGUA   00250000");
-    BG_Print(6, 17, 0, "5TH   TMISG   00200000");
-    BG_Print(6, 19, 0, "6TH   TUUHA   00150000");
-    BG_Print(6, 21, 0, "7TH   ARRIW   00100000");
-    BG_Print(6, 23, 0, "8TH   RAAIA   00050000");
+    HighScore_Print(6, 6);
     return 0;
 }
 

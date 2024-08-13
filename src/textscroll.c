@@ -38,7 +38,7 @@ static Uint8 canSkip;
 static char *TextScroll_PrintLine(char *text) {
     Uint16 cursor = 0;
     while (*text && (*text != '\n')) {
-        BG_SetTile(cursor++, row, (Uint8)(*text) + TEXT_BASE, 0);
+        BG_SetTile(cursor++, row, 0, (Uint8)(*text) + TEXT_BASE);
         text++;
     }
     // advance past the newline
@@ -55,7 +55,7 @@ static Uint16 *TextScroll_PrintTiles(Uint16 *tiles) {
     if (*tiles != 1) {
         Uint16 cursor = 0;
         while (*tiles) {
-            BG_SetTile(cursor++, row, *tiles, 0);
+            BG_SetTile(cursor++, row, 0, *tiles);
             tiles++;
         }
     }
@@ -91,7 +91,7 @@ static int TextScroll_Down4(void (*func)(void)) {
 static void TextScroll_EraseOffscreenText(void) {
     Uint16 eraseRow = (row - 34) % BG_HEIGHT;
     for (int i = 0; i < 32; i++) {
-        BG_SetTile(i, eraseRow, ' ' + TEXT_BASE, 0);
+        BG_SetTile(i, eraseRow, 0, ' ' + TEXT_BASE);
     }
 }
 

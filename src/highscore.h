@@ -1,5 +1,5 @@
-/* system.h: Engine management code
- * Copyright (c) 2023 Nathan Misner
+/* highscore.h: High score code
+ * Copyright (c) 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -20,19 +20,25 @@
 #pragma once
 
 /**
- * @brief Initializes platform & engine code
- * @returns 0 on failure, nonzero on success
+ * @brief Sets up high score code. Should be run before saving/displaying
+ * high scores.
  */
-int System_Init(void);
+void HighScore_Init(void);
 
 /**
- * @brief Should be run by "user code" at the start of each frame. Tells the
- * platform & graphics code to start the frame and reads input.
+ * @brief Prints high score table to the screen.
+ * @param x table x position
+ * @param y table y position
  */
-void System_StartFrame(void);
+void HighScore_Print(int x, int y);
 
 /**
- * @brief Should be run by "user code" at the end of each frame. Runs the sound
- * engine and tells the platform code to end the frame.
+ * @brief Gets the top score from the high scores table.
+ * @returns The highest score.
  */
-void System_EndFrame(void);
+Uint32 HighScore_GetTopScore(void);
+
+/**
+ * @brief If the user's score is sufficiently high, shows the name entry screen
+ */
+void HighScore_NameEntry(void);

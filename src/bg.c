@@ -57,11 +57,15 @@ void BG_ClearRow(Uint16 row) {
     }
 }
 
-void BG_SetTile(Uint16 x, Uint16 y, Uint16 tile, Uint8 palnum) {
+void BG_SetTile(Uint16 x, Uint16 y, Uint8 palnum, Uint16 tile) {
     if ((x < BG_WIDTH) && (y < BG_HEIGHT)) {
         bgTiles[y][x].tile = tile;
         bgTiles[y][x].palnum = palnum;
     }
+}
+
+void BG_PutChar(Uint16 x, Uint16 y, Uint8 palnum, char ch) {
+    BG_SetTile(x, y, palnum, ch + TEXT_BASE);
 }
 
 int BG_Print(Uint16 x, Uint16 y, Uint8 palnum, char *fmt, ...) {
@@ -86,7 +90,7 @@ int BG_VPrint(Uint16 x, Uint16 y, Uint8 palnum, char *fmt, va_list args) {
             y++;
         }
         else {
-            BG_SetTile(x++, y, *text + TEXT_BASE, palnum);
+            BG_SetTile(x++, y, palnum, *text + TEXT_BASE);
         }
         text++;
     }

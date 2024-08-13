@@ -18,6 +18,7 @@
  */
 
 #include "db.h"
+#include "highscore.h"
 #include "joy.h"
 #include "palette.h"
 #include "platform.h"
@@ -40,6 +41,7 @@ int System_Init(void) {
     if (!Graphics_Init()) { return 0; }
     if (!Sound_Init()) { return 0; }
     Save_Init();
+    HighScore_Init();
     Joy_Init();
     Rom_GetMapData(&mapData);
     return 1;

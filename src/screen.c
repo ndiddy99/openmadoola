@@ -38,7 +38,7 @@ static Uint16 *Screen_WriteTiles(Uint16 *tiles) {
     Uint16 x = *tiles++;
     Uint16 y = *tiles++;
     while (*tiles) {
-        BG_SetTile(x++, y, *tiles, 0);
+        BG_SetTile(x++, y, 0, *tiles);
         tiles++;
     }
     tiles++; // advance past NUL terminator to next row
@@ -202,7 +202,7 @@ void Screen_Keyword(void) {
     }
     // --- show the keyword (neko dayo~) for 1 second ---
     BG_Clear();
-    BG_SetTile(12, 10, 0x29, 0);
+    BG_SetTile(12, 10, 0, 0x29);
     // draw each word of the keyword graphics
     Uint16 *row = keywordTiles;
     for (int i = 0; i < 4; i++) {

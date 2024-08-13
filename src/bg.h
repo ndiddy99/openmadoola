@@ -48,10 +48,19 @@ void BG_ClearRow(Uint16 row);
  * @brief Sets a tile's value on the tilemap
  * @param x the tile's x position
  * @param y the tile's y position
- * @param tilenum the tile's number
  * @param palnum the palette number
+ * @param tilenum the tile's number
 */
-void BG_SetTile(Uint16 x, Uint16 y, Uint16 tile, Uint8 palnum);
+void BG_SetTile(Uint16 x, Uint16 y, Uint8 palnum, Uint16 tile);
+
+/**
+ * @brief Puts a character on the background
+ * @param x character x position
+ * @param y character y position
+ * @param palnum character palette number
+ * @param ch character to put
+ */
+void BG_PutChar(Uint16 x, Uint16 y, Uint8 palnum, char ch);
 
 /**
  * @brief Prints a message to the screen

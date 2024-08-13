@@ -26,6 +26,7 @@
 #include "ending.h"
 #include "enemy.h"
 #include "game.h"
+#include "highscore.h"
 #include "hud.h"
 #include "item.h"
 #include "joy.h"
@@ -334,6 +335,9 @@ mainGameLoop:
             if (darutosKilled) {
                 Save_SaveFile();
                 Ending_Run();
+                if (gameType == GAME_TYPE_ARCADE) {
+                    HighScore_NameEntry();
+                }
                 goto startGameCode;
             }
             // put Lucia back where she was if she tried to enter the ending
@@ -365,6 +369,7 @@ mainGameLoop:
         if (lives < 0) {
             Save_SaveFile();
             Screen_GameOver();
+            HighScore_NameEntry();
             goto startGameCode;
         }
         else {
