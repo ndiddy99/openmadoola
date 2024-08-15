@@ -24,6 +24,7 @@
 #include "constants.h"
 #include "db.h"
 #include "game.h"
+#include "highscore.h"
 #include "joy.h"
 #include "sound.h"
 #include "system.h"
@@ -70,7 +71,7 @@ void HighScore_Init(void) {
         }
     }
     else {
-        memcpy(&scores, &defaultScores, sizeof(scores));
+        HighScore_ResetScores();
     }
 }
 
@@ -87,6 +88,11 @@ static void HighScore_Save(void) {
     }
     DB_Set("highscores", buffer, cursor);
     DB_Save();
+}
+
+void HighScore_ResetScores(void) {
+    memcpy(&scores, &defaultScores, sizeof(scores));
+    HighScore_Save();
 }
 
 void HighScore_Print(int x, int y) {
@@ -120,7 +126,7 @@ void HighScore_NameEntry(void) {
 
     // initialize name & score
     scores[scoreNum].score = score;
-    strcpy(scores[scoreNum].name, "     ");
+    memcpy(scores[scoreNum].name, "     ", NAME_SIZE);
 
     BG_Clear();
     BG_Print(6, 3, 0, "CONGRATULATIONS, YOU\n\nGOT A HIGH SCORE.");
@@ -188,7 +194,7 @@ void HighScore_NameEntry(void) {
 
     // if player is content to remain anonymous
     if (!nameCursor) {
-        strcpy(scores[scoreNum].name, "-----");
+        memcpy(scores[scoreNum].name, "-----", NAME_SIZE);
         BG_Print(nameX, nameY, 0, "%s", scores[scoreNum].name);
     }
     // otherwise, cover up the cursor tile

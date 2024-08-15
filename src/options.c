@@ -22,6 +22,7 @@
 #include "db.h"
 #include "game.h"
 #include "graphics.h"
+#include "highscore.h"
 #include "input.h"
 #include "joy.h"
 #include "menu.h"
@@ -168,6 +169,22 @@ static int arcadeTimerCB(int num) {
     return num;
 }
 
+static MenuItem highScoreItems[] = {
+    MENU_ABORT("Reset", 1),
+    MENU_ABORT("Back", 0),
+};
+
+static void highScoreResetDraw(void) {
+    BG_Print(7, 2, 0, "Reset High Scores");
+    BG_Print(4, 6, 0, "Are you sure you want to\n\nreset the arcade mode\n\nhigh score table?");
+}
+
+static void highScoreResetLink(void) {
+    if (Menu_Run(12, 14, 2, highScoreItems, ARRAY_LEN(highScoreItems), highScoreResetDraw)) {
+        HighScore_ResetScores();
+    }
+}
+
 static MenuItem optionsItems[] = {
     MENU_LIST("Fullscreen", boolOptions, Platform_GetFullscreen, fullscreenCB),
     MENU_NUM("Window scale", Platform_GetVideoScale, Platform_SetVideoScale, 1),
@@ -177,6 +194,7 @@ static MenuItem optionsItems[] = {
     MENU_LINK("Gamepad controls", gamepadLink),
     MENU_LIST("Game type", gameTypeOptions, gameTypeInit, gameTypeCB),
     MENU_LIST("Arcade timer", boolOptions, arcadeTimerInit, arcadeTimerCB),
+    MENU_LINK("Reset high scores", highScoreResetLink),
     MENU_ABORT("Back", 0),
 };
 

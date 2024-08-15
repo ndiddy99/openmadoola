@@ -26,6 +26,11 @@
 void HighScore_Init(void);
 
 /**
+ * @brief Resets high score table to default.
+ */
+void HighScore_ResetScores(void);
+
+/**
  * @brief Prints high score table to the screen.
  * @param x table x position
  * @param y table y position
