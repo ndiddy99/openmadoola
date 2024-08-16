@@ -180,6 +180,13 @@ void HighScore_NameEntry(void) {
             if (nameCursor) {
                 BG_PutChar(nameX + nameCursor, nameY, 0, ' ');
                 scores[scoreNum].name[nameCursor--] = ' ';
+                // set charCursor to the value of the letter we're on
+                for (int i = 0; i < ARRAY_LEN(highScoreCharset); i++) {
+                    if (highScoreCharset[i] == scores[scoreNum].name[nameCursor]) {
+                        charCursor = i;
+                        break;
+                    }
+                }
                 Sound_Play(SFX_FLAME_SWORD);
             }
         }
