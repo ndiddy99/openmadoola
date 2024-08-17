@@ -432,6 +432,7 @@ static void Lucia_Draw(Object *o, int frame) {
         goto checkDamage;
     }
     else {
+        health = 0;
         o->stunnedTimer = 0;
         roomChangeTimer = 150;
         o->type = OBJ_LUCIA_DYING;
