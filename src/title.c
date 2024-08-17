@@ -142,9 +142,9 @@ static int Title_ArcadeInit(void) {
     BG_Clear();
     BG_SetAllPalettes(titlePaletteArcade);
     BG_Print(5, 2, 0, "SCORE");
-    BG_Print(5, 4, 2, "%08lu", score);
+    BG_Print(5, 4, 2, "%08u", score);
     BG_Print(19, 2, 0, "HIGH-SCORE");
-    BG_Print(19, 4, 2, "%08lu", HighScore_GetTopScore());
+    BG_Print(19, 4, 2, "%08u", HighScore_GetTopScore());
     BG_Print(7, 8, 1, "The Wings of");
     Title_DrawMadoolaGraphic(7, 10);
     BG_Print(6, 18, 3, "- PRESS START BUTTON -");
