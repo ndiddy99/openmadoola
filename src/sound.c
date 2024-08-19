@@ -30,6 +30,7 @@
 #include "platform.h"
 #include "rom.h"
 #include "sound.h"
+#include "util.h"
 
 // audio settings
 #define SOUND_FREQ 44100
@@ -358,7 +359,7 @@ static void Sound_RunInstrument(int apu, Instrument *inst) {
         }
 
         Uint8 cmd = *read++;
-        Uint16 param = Buffer_DataReadUint16(read);
+        Uint16 param = Util_LoadUint16(read);
         read += 2;
 
         // a0-af: APU register setting

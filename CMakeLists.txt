@@ -44,6 +44,7 @@ set(SOURCE_LIST
     "src/camera.c"
     "src/collision.c"
     "src/db.c"
+    "src/demo.c"
     "src/ending.c"
     "src/enemy.c"
     "src/file.c"
@@ -70,6 +71,7 @@ set(SOURCE_LIST
     "src/system.c"
     "src/textscroll.c"
     "src/title.c"
+    "src/util.c"
     "src/weapon.c"
     ${PLATFORM_IMPL}
 
@@ -131,6 +133,7 @@ set(HEADER_LIST
     "src/collision.h"
     "src/constants.h"
     "src/db.h"
+    "src/demo.h"
     "src/ending.h"
     "src/enemy.h"
     "src/file.h"
@@ -158,6 +161,7 @@ set(HEADER_LIST
     "src/system.h"
     "src/textscroll.h"
     "src/title.h"
+    "src/util.h"
     "src/weapon.h"
     
     # object code

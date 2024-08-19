@@ -35,6 +35,13 @@ typedef struct {
 Buffer *Buffer_Init(int allocSize);
 
 /**
+ * @brief Creates a new buffer holding the contents of the provided file
+ * @param filename File to load from
+ * @returns pointer to new buffer, or NULL if we couldn't open the file
+ */
+Buffer *Buffer_InitFromFile(char *filename);
+
+/**
  * @brief Frees all memory associated with a buffer
  * @param buf The buffer to destroy
  */
@@ -63,13 +70,6 @@ void Buffer_AddData(Buffer *buf, Uint8 *data, int len);
 void Buffer_AddUint16(Buffer *buf, Uint16 data);
 
 /**
- * @brief Reads a Uint16 out of a buffer's data array
- * @param data pointer to the Uint16 in the data array
- * @returns The Uint16
- */
-Uint16 Buffer_DataReadUint16(Uint8 *data);
-
-/**
  * @brief Reads a Uint16 out of a buffer
  * @param buf buffer to read out of
  * @param index where to read from in the buffer
@@ -78,18 +78,26 @@ Uint16 Buffer_DataReadUint16(Uint8 *data);
 Uint16 Buffer_ReadUint16(Buffer *buf, int index);
 
 /**
+ * @brief Adds a Sint16 to the end of a buffer (big-endian format)
+ * @param buf buffer to add to
+ * @param data Sint16 to add
+ */
+void Buffer_AddSint16(Buffer *buf, Sint16 data);
+
+/**
+ * @brief Reads a Sint16 out of a buffer
+ * @param buf buffer to read out of
+ * @param index where to read from in the buffer
+ * @return The Sint16
+ */
+Sint16 Buffer_ReadSint16(Buffer *buf, int index);
+
+/**
  * @brief Adds a Uint32 to the end of a buffer (big-endian format)
  * @param buf buffer to add to
  * @param data Uint32 to add
  */
 void Buffer_AddUint32(Buffer *buf, Uint32 data);
-
-/**
- * @brief Reads a Uint32 out of a buffer's data array
- * @param data pointer to the Uint32 in the data array
- * @returns The Uint32
- */
-Uint32 Buffer_DataReadUint32(Uint8 *data);
 
 /**
  * @brief Reads a Uint32 out of a buffer
@@ -106,6 +114,14 @@ Uint32 Buffer_ReadUint32(Buffer *buf, int index);
  * @param size how many bytes to read
  */
 void Buffer_AddFromFile(Buffer *buf, FILE *fp, int size);
+
+/**
+ * @brief Adds the entire contents of a file to a buffer. fp will be at the end
+ * of the file and needs to be rewound if you want to read anything else from it.
+ * @param buf Buffer to add to
+ * @param filename file to read from
+ */
+void Buffer_AddFile(Buffer *buf, FILE *fp);
 
 /**
  * @brief Writes a buffer to a file

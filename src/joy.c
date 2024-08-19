@@ -21,6 +21,7 @@
 
 #include "constants.h"
 #include "db.h"
+#include "demo.h"
 #include "file.h"
 #include "input.h"
 #include "joy.h"
@@ -136,11 +137,20 @@ void Joy_Update(void) {
     Uint32 joyLast = joy;
     joy = 0;
 
-    Uint32 mask = 1;
-    for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
-        if (inputState[keyMappings[i]])     { joy |= mask; }
-        if (inputState[gamepadMappings[i]]) { joy |= mask; }
-        mask <<= 1;
+    if (Demo_Playing()) {
+        joy = Demo_GetInput();
+    }
+    else {
+        Uint32 mask = 1;
+        for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
+            if (inputState[keyMappings[i]]) { joy |= mask; }
+            if (inputState[gamepadMappings[i]]) { joy |= mask; }
+            mask <<= 1;
+        }
+
+        if (Demo_Recording()) {
+            Demo_RecordInput(joy);
+        }
     }
 
     joyEdge = (~joyLast) & joy;

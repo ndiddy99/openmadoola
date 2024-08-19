@@ -17,19 +17,24 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "bg.h"
+#include "buffer.h"
 #include "constants.h"
+#include "demo.h"
 #include "file.h"
 #include "game.h"
 #include "item.h"
 #include "joy.h"
 #include "lucia.h"
 #include "platform.h"
+#include "save.h"
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "util.h"
 #include "weapon.h"
 
 static Uint8 savePalette[] = {
@@ -43,105 +48,76 @@ static Uint8 savePalette[] = {
     0x0f, 0x0f, 0x0f, 0x0f,
 };
 
-// :)
-#define VALID_SIGNATURE 0xB16B00B5
-
-typedef struct {
-    Uint16 maxHealth;
-    Uint16 maxMagic;
-    Uint8 highestStage;
-    Uint8 keywordDisplay;
-    Uint8 orbCollected;
-    Uint8 levels[NUM_WEAPONS + 1];
-    Uint8 items[8];
-    Uint8 bossDefeated[16];
-    Uint32 signature;
-} SaveFile;
-
 #define NUM_FILES 3
-static SaveFile files[NUM_FILES];
+static Buffer *files[NUM_FILES];
 static int currFile;
+
+void Save_Serialize(Buffer *buf) {
+    Buffer_AddSint16(buf, maxHealth);
+    Buffer_AddSint16(buf, maxMagic);
+    Buffer_Add(buf, highestReachedStage);
+    Buffer_Add(buf, keywordDisplay);
+    Buffer_Add(buf, orbCollected);
+    for (int i = 0; i < NUM_WEAPONS; i++) {
+        Buffer_Add(buf, weaponLevels[i]);
+    }
+    Buffer_Add(buf, bootsLevel);
+    for (int i = 0; i < ARRAY_LEN(itemsCollected); i++) {
+        Buffer_Add(buf, itemsCollected[i]);
+    }
+    for (int i = 0; i < ARRAY_LEN(bossDefeated); i++) {
+        Buffer_Add(buf, bossDefeated[i]);
+    }
+}
+
+int Save_Deserialize(Uint8 *data) {
+    int cursor = 0;
+    maxHealth = Util_LoadSint16(data + cursor);
+    cursor += 2;
+    maxMagic = Util_LoadSint16(data + cursor);
+    cursor += 2;
+    highestReachedStage = data[cursor++];
+    keywordDisplay = data[cursor++];
+    orbCollected = data[cursor++];
+    memcpy(weaponLevels, data + cursor, sizeof(weaponLevels));
+    cursor += sizeof(weaponLevels);
+    bootsLevel = data[cursor++];
+    memcpy(itemsCollected, data + cursor, sizeof(itemsCollected));
+    cursor += sizeof(itemsCollected);
+    memcpy(bossDefeated, data + cursor, sizeof(bossDefeated));
+    cursor += sizeof(bossDefeated);
+    return cursor;
+}
 
 void Save_SaveFile(void) {
     char filename[20];
-    snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
-    FILE *fp = File_Open(filename, "wb");
-    if (!fp) {
-        Platform_ShowError("Error opening save file for writing");
+    // don't save if we're playing back a demo
+    if (Demo_Playing()) {
         return;
     }
 
-    files[currFile].maxHealth = maxHealth;
-    File_WriteUint16BE(maxHealth, fp);
-    files[currFile].maxMagic = maxMagic;
-    File_WriteUint16BE(maxMagic, fp);
-    files[currFile].highestStage = highestReachedStage;
-    fputc(highestReachedStage, fp);
-    files[currFile].keywordDisplay = keywordDisplay;
-    fputc(keywordDisplay, fp);
-    files[currFile].orbCollected = orbCollected;
-    fputc(orbCollected, fp);
-    for (int i = 0; i < NUM_WEAPONS; i++) {
-        files[currFile].levels[i] = weaponLevels[i];
-        fputc(weaponLevels[i], fp);
+    if (!files[currFile]) {
+        files[currFile] = Buffer_Init(64);
     }
-    files[currFile].levels[NUM_WEAPONS] = bootsLevel;
-    fputc(bootsLevel, fp);
-    for (int i = 0; i < ARRAY_LEN(itemsCollected); i++) {
-        files[currFile].items[i] = itemsCollected[i];
-        fputc(itemsCollected[i], fp);
-    }
-    for (int i = 0; i < ARRAY_LEN(bossDefeated); i++) {
-        files[currFile].bossDefeated[i] = bossDefeated[i];
-        fputc(bossDefeated[i], fp);
-    }
-    files[currFile].signature = VALID_SIGNATURE;
-    File_WriteUint32BE(VALID_SIGNATURE, fp);
-    fclose(fp);
-}
-
-void Save_LoadFile(void) {
-    maxHealth = files[currFile].maxHealth;
-    maxMagic = files[currFile].maxMagic;
-    highestReachedStage = files[currFile].highestStage;
-    keywordDisplay = files[currFile].keywordDisplay;
-    orbCollected = files[currFile].orbCollected;
-    memcpy(weaponLevels, files[currFile].levels, sizeof(weaponLevels));
-    bootsLevel = files[currFile].levels[NUM_WEAPONS];
-    memcpy(itemsCollected, files[currFile].items, sizeof(itemsCollected));
-    memcpy(bossDefeated, files[currFile].bossDefeated, sizeof(bossDefeated));
+    files[currFile]->dataSize = 0;
+    Save_Serialize(files[currFile]);
+    snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
+    Buffer_WriteToFile(files[currFile], filename);
 }
 
 void Save_EraseFile(int num) {
-    memset(&files[num], 0, sizeof(SaveFile));
+    Buffer_Destroy(files[num]);
+    files[num] = NULL;
     char filename[20];
     snprintf(filename, sizeof(filename), "file%d.sav", num + 1);
-    FILE *fp = File_Open(filename, "wb");
-    if (fp) {
-        for (int i = 0; i < sizeof(SaveFile); i++) {
-            fputc(0, fp);
-        }
-        fclose(fp);
-    }
+    remove(filename);
 }
 
 void Save_Init(void) {
     char filename[20];
     for (int i = 0; i < NUM_FILES; i++) {
         snprintf(filename, sizeof(filename), "file%d.sav", i + 1);
-        FILE *fp = File_Open(filename, "rb");
-        if (fp) {
-            files[i].maxHealth = File_ReadUint16BE(fp);
-            files[i].maxMagic = File_ReadUint16BE(fp);
-            files[i].highestStage = fgetc(fp);
-            files[i].keywordDisplay = fgetc(fp);
-            files[i].orbCollected = fgetc(fp);
-            fread(&files[i].levels[0], 1, ARRAY_LEN(files[0].levels), fp);
-            fread(&files[i].items[0], 1, ARRAY_LEN(files[0].items), fp);
-            fread(&files[i].bossDefeated[0], 1, ARRAY_LEN(files[0].bossDefeated), fp);
-            files[i].signature = File_ReadUint32BE(fp);
-            fclose(fp);
-        }
+        files[i] = Buffer_InitFromFile(filename);
     }
 }
 
@@ -193,6 +169,7 @@ int Save_Screen(void) {
     int erase = 0;
     int cursor = currFile;
     int stages[NUM_FILES];
+    int highestStages[NUM_FILES];
     Sprite cursorSpr = { 0 };
 
     Sound_Reset();
@@ -201,7 +178,9 @@ int Save_Screen(void) {
     BG_SetAllPalettes(savePalette);
     Sprite_SetAllPalettes(savePalette + 16);
     for (int i = 0; i < NUM_FILES; i++) {
-        stages[i] = files[i].highestStage;
+        Save_Deserialize(files[i]->data);
+        stages[i] = highestReachedStage;
+        highestStages[i] = stages[i];
     }
 
     while (1) {
@@ -234,8 +213,7 @@ int Save_Screen(void) {
         }
         // first 3 positions = save files, last = "erase game" text
         if (cursor < NUM_FILES) {
-            int saveValid = (files[cursor].signature == VALID_SIGNATURE);
-            if (saveValid && !erase) {
+            if (files[cursor] && !erase) {
                 if (joyEdge & JOY_LEFT) {
                     stages[cursor]--;
                     stages[cursor] = MAX(stages[cursor], 0);
@@ -243,12 +221,12 @@ int Save_Screen(void) {
                 }
                 if (joyEdge & JOY_RIGHT) {
                     stages[cursor]++;
-                    stages[cursor] = MIN(stages[cursor], files[cursor].highestStage);
+                    stages[cursor] = MIN(stages[cursor], highestStages[cursor]);
                     Sound_Play(SFX_MENU);
                 }
             }
             // move the cursor over if there's a file
-            cursorSpr.x = (saveValid ? 30 : 80) - BG_CENTERED_X;
+            cursorSpr.x = (files[cursor] ? 30 : 80) - BG_CENTERED_X;
             cursorSpr.y = (SAVE_Y_PX - 5) + (cursor * SAVE_SPACING_PX);
         }
         else {
@@ -271,7 +249,7 @@ int Save_Screen(void) {
 
         // draw save file text
         for (int i = 0; i < NUM_FILES; i++) {
-            if (files[i].signature == VALID_SIGNATURE) {
+            if (files[i]) {
                 BG_Print(SAVE_X, (i * SAVE_SPACING) + SAVE_Y, 0, "File %d   Stage - %2u -", i + 1, stages[i] + 1);
                 // if the save file exists, draw a Lucia sprite for it
                 Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
@@ -293,7 +271,7 @@ int Save_Screen(void) {
             }
             // return to main menu
             else if (cursor == MAIN_MENU_INDEX) {
-                return 0;
+                return SAVE_SCREEN_BACK;
             }
             // selected a file to erase
             else if (erase) {
@@ -307,7 +285,7 @@ int Save_Screen(void) {
     }
 
     currFile = cursor;
-    if (files[cursor].signature == VALID_SIGNATURE) {
+    if (files[cursor]) {
         // lucia running offscreen animation
         Sint16 luciaX = LUCIA_X_PX;
         int frames = 0;
@@ -320,7 +298,7 @@ int Save_Screen(void) {
                 if (i == currFile) {
                     Save_DrawLucia(luciaX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, luciaRunTiles[(frames >> 3) & 3]);
                 }
-                else if (files[i].signature == VALID_SIGNATURE) {
+                else if (files[i]) {
                     Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
                 }
             }
@@ -331,9 +309,9 @@ int Save_Screen(void) {
             if (joyEdge & JOY_START) { break; }
         }
 
-        Save_LoadFile();
+        Save_Deserialize(files[cursor]->data);
         stage = stages[cursor];
-        return 2;
+        return SAVE_SCREEN_LOADGAME;
     }
-    return 1;
+    return SAVE_SCREEN_NEWGAME;
 }

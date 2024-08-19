@@ -24,6 +24,7 @@
 #include "constants.h"
 #include "file.h"
 #include "platform.h"
+#include "util.h"
 
 Buffer *Buffer_Init(int allocSize) {
     if (allocSize <= 0) { return NULL; }
@@ -32,6 +33,22 @@ Buffer *Buffer_Init(int allocSize) {
     buf->dataSize = 0;
     buf->data = ommalloc(allocSize);
     return buf;
+}
+
+Buffer *Buffer_InitFromFile(char *filename) {
+    FILE *fp = File_Open(filename, "rb");
+    if (fp) {
+        fseek(fp, 0, SEEK_END);
+        int size = ftell(fp);
+        rewind(fp);
+        Buffer *buf = Buffer_Init(size);
+        Buffer_AddFromFile(buf, fp, size);
+        fclose(fp);
+        return buf;
+    }
+    else {
+        return NULL;
+    }
 }
 
 void Buffer_Destroy(Buffer *buf) {
@@ -55,37 +72,31 @@ void Buffer_AddData(Buffer *buf, Uint8 *data, int len) {
 }
 
 void Buffer_AddUint16(Buffer *buf, Uint16 data) {
-    Buffer_Add(buf, (Uint8)((data >> 8) & 0xff));
-    Buffer_Add(buf, (Uint8)(data & 0xff));
-}
-
-Uint16 Buffer_DataReadUint16(Uint8 *data) {
-    Uint16 val = ((Uint16)data[0]) << 8;
-    val |= (Uint16)data[1];
-    return val;
+    Uint8 dataArr[sizeof(data)];
+    Util_SaveUint16(data, dataArr);
+    Buffer_AddData(buf, dataArr, sizeof(dataArr));
 }
 
 Uint16 Buffer_ReadUint16(Buffer *buf, int index) {
-    return Buffer_DataReadUint16(buf->data + index);
+    return Util_LoadUint16(buf->data + index);
+}
+
+void Buffer_AddSint16(Buffer *buf, Sint16 data) {
+    Buffer_AddUint16(buf, (Sint16)data);
+}
+
+Sint16 Buffer_ReadSint16(Buffer *buf, int index) {
+    return Util_LoadSint16(buf->data + index);
 }
 
 void Buffer_AddUint32(Buffer *buf, Uint32 data) {
-    Buffer_Add(buf, (Uint8)((data >> 24) & 0xff));
-    Buffer_Add(buf, (Uint8)((data >> 16) & 0xff));
-    Buffer_Add(buf, (Uint8)((data >>  8) & 0xff));
-    Buffer_Add(buf, (Uint8)(data & 0xff));
-}
-
-Uint32 Buffer_DataReadUint32(Uint8 *data) {
-    Uint32 val = ((Uint32)data[0]) << 24;
-    val |= ((Uint32)data[1]) << 16;
-    val |= ((Uint32)data[2]) << 8;
-    val |= (Uint32)data[3];
-    return val;
+    Uint8 dataArr[sizeof(data)];
+    Util_SaveUint32(data, dataArr);
+    Buffer_AddData(buf, dataArr, sizeof(dataArr));
 }
 
 Uint32 Buffer_ReadUint32(Buffer *buf, int index) {
-    return Buffer_DataReadUint32(buf->data + index);
+    return Util_LoadUint32(buf->data + index);
 }
 
 void Buffer_AddFromFile(Buffer *buf, FILE *fp, int size) {
@@ -97,6 +108,13 @@ void Buffer_AddFromFile(Buffer *buf, FILE *fp, int size) {
         Buffer_Add(buf, (Uint8)data);
         count++;
     }
+}
+
+void Buffer_AddFile(Buffer *buf, FILE *fp) {
+    fseek(fp, 0, SEEK_END);
+    int size = ftell(fp);
+    rewind(fp);
+    Buffer_AddFromFile(buf, fp, size);
 }
 
 void Buffer_WriteToFile(Buffer *buf, char *filename) {

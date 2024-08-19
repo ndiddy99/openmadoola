@@ -28,6 +28,7 @@
 #include "joy.h"
 #include "sound.h"
 #include "system.h"
+#include "util.h"
 
 #define NAME_SIZE 6
 typedef struct {
@@ -66,7 +67,7 @@ void HighScore_Init(void) {
         for (int i = 0; i < NUM_SCORES; i++) {
             memcpy(&scores[i].name, entry->data + cursor, NAME_SIZE);
             cursor += NAME_SIZE;
-            scores[i].score = Buffer_DataReadUint32(entry->data + cursor);
+            scores[i].score = Util_LoadUint32(entry->data + cursor);
             cursor += 4;
         }
     }
@@ -81,10 +82,8 @@ static void HighScore_Save(void) {
     for (int i = 0; i < NUM_SCORES; i++) {
         memcpy(buffer + cursor, &scores[i].name, NAME_SIZE);
         cursor += NAME_SIZE;
-        buffer[cursor++] = (scores[i].score >> 24) & 0xff;
-        buffer[cursor++] = (scores[i].score >> 16) & 0xff;
-        buffer[cursor++] = (scores[i].score >>  8) & 0xff;
-        buffer[cursor++] = scores[i].score & 0xff;
+        Util_SaveUint32(scores[i].score, buffer + cursor);
+        cursor += sizeof(Uint32);
     }
     DB_Set("highscores", buffer, cursor);
     DB_Save();

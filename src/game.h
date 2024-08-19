@@ -36,6 +36,7 @@ extern Uint8 numBossObjs;
 extern Sint8 keywordDisplay;
 extern Uint8 bossDefeated[16];
 extern Uint8 frameCount;
+extern Uint8 recordDemos;
 // arcade stuff
 extern Uint32 score;
 extern Uint8 timerEnabled;
@@ -44,6 +45,20 @@ extern Uint8 timerEnabled;
  * @brief Initializes the title screen, game, etc and runs the game loop.
 */
 noreturn void Game_Run(void);
+
+typedef enum {
+    STAGE_EXIT_NEXTSTAGE,
+    STAGE_EXIT_RESET,
+    STAGE_EXIT_SAVESCREEN,
+} GameRunStageExit;
+
+/**
+ * @brief Runs the game's code for a single stage. Lots of globals need to be
+ * initialized before running this, don't use it if you don't know what you're
+ * doing.
+ * @returns Value representing how the stage ended, see GameRunStageExit enum
+ */
+int Game_RunStage(void);
 
 /**
  * @brief Plays the song associated with the current room.

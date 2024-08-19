@@ -26,6 +26,7 @@
 
 #include <string.h>
 
+#include "demo.h"
 #include "game.h"
 #include "soundtest.h"
 #include "system.h"
@@ -54,11 +55,19 @@ int main(int argc, char **argv) {
 
     if (!System_Init()) { return -1; }
 
-    if (argc == 3 && (strcmp(argv[1], "-p") == 0)) {
+    if ((argc == 3) && (strcmp(argv[1], "-p") == 0)) {
         SoundTest_RunStandalone(argv[2]);
+        return 0;
     }
-    else {
-        Game_Run();
+
+    if ((argc == 3) && (strcmp(argv[1], "-d") == 0)) {
+        Demo_Playback(argv[2]);
+        return 0;
     }
+
+    if ((argc == 2) && (strcmp(argv[1], "-r") == 0)) {
+        recordDemos = 1;
+    }
+    Game_Run();
     return 0;
 }

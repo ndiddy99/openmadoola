@@ -23,6 +23,7 @@
 #include "camera.h"
 #include "darutos.h"
 #include "db.h"
+#include "demo.h"
 #include "ending.h"
 #include "enemy.h"
 #include "game.h"
@@ -59,6 +60,7 @@ Uint8 numBossObjs;
 Uint8 bossDefeated[16];
 Uint8 frameCount;
 Sint8 keywordDisplay;
+Uint8 recordDemos;
 // arcade stuff
 Uint32 score;
 Uint8 timerEnabled;
@@ -184,73 +186,9 @@ static void Game_SpawnFountain(SpawnInfo *info) {
     Sprite_SetPalette(2, fountainPalette);
 }
 
-// TODO refactor this function into several so i don't have to use gotos
-noreturn void Game_Run(void) {
+int Game_RunStage(void) {
     // the last room number Lucia was in this stage
     Uint16 lastRoom;
-
-    // initialize game type
-    DBEntry *entry = DB_Find("gametype");
-    if (entry) {
-        gameType = entry->data[0];
-    }
-    else {
-        gameType = GAME_TYPE_PLUS;
-    }
-
-    // check whether to disable the timer- pretty sure this was a dip switch on
-    // the arcade version so it's an option here too
-    entry = DB_Find("timer");
-    if (entry) {
-        timerEnabled = entry->data[0];
-    }
-    else {
-        timerEnabled = 1;
-    }
-
-startGameCode:
-    Title_Run();
-
-showMainMenu:
-    if (MainMenu_Run() == 0) {
-        goto startGameCode;
-    }
-
-showSaveScreen:
-    switch (Save_Screen()) {
-    // return to main menu
-    case 0:
-        goto showMainMenu;
-
-    // new game (initialize game state)
-    case 1:
-        health = 1000;
-        maxHealth = 1000;
-        maxMagic = 1000;
-        highestReachedStage = 0;
-
-        // initialize boots and weapon levels
-        bootsLevel = 0;
-        memset(weaponLevels, 0, NUM_WEAPONS);
-        weaponLevels[WEAPON_SWORD] = 1;
-        Item_InitCollected();
-        memset(bossDefeated, 0, sizeof(bossDefeated));
-        stage = 0;
-        orbCollected = 0;
-        keywordDisplay = 0;
-        break;
-
-    // player loaded a game
-    case 2:
-        // stage number got set by the save screen so we don't need to set it here
-        health = 1000;
-        break;
-    }
-
-    score = 0;
-    lives = 2;
-    paused = 0;
-    currentWeapon = WEAPON_SWORD;
 
 initStage:
     Save_SaveFile();
@@ -312,7 +250,7 @@ mainGameLoop:
 
     // --- soft reset code (NOTE: not in original game) ---
     if ((joy & SOFT_RESET) == SOFT_RESET) {
-        goto startGameCode;
+        return STAGE_EXIT_RESET;
     }
 
     // --- handle keyword screen ---
@@ -338,7 +276,7 @@ mainGameLoop:
                 if (gameType == GAME_TYPE_ARCADE) {
                     HighScore_NameEntry();
                 }
-                goto startGameCode;
+                return STAGE_EXIT_RESET;
             }
             // put Lucia back where she was if she tried to enter the ending
             // door without killing Darutos
@@ -355,13 +293,7 @@ mainGameLoop:
         goto initRoom;
     }
     else if (objects[0].type == OBJ_LUCIA_LVL_END_DOOR) {
-        stage++;
-        stage &= 0xf;
-        if (stage > highestReachedStage) {
-            highestReachedStage = stage;
-            orbCollected = 0;
-        }
-        goto initStage;
+        return STAGE_EXIT_NEXTSTAGE;
     }
     // if we're here, lucia died
     else if (gameType == GAME_TYPE_ARCADE) {
@@ -370,7 +302,7 @@ mainGameLoop:
             Save_SaveFile();
             Screen_GameOver();
             HighScore_NameEntry();
-            goto startGameCode;
+            return STAGE_EXIT_RESET;
         }
         else {
             health = 1000;
@@ -380,8 +312,102 @@ mainGameLoop:
     else {
         Save_SaveFile();
         Screen_GameOver();
-        goto showSaveScreen;
+        return STAGE_EXIT_SAVESCREEN;
     }
+}
+
+noreturn void Game_Run(void) {
+    // initialize game type
+    DBEntry *entry = DB_Find("gametype");
+    if (entry) {
+        gameType = entry->data[0];
+    }
+    else {
+        gameType = GAME_TYPE_PLUS;
+    }
+
+    // check whether to disable the timer- pretty sure this was a dip switch on
+    // the arcade version so it's an option here too
+    entry = DB_Find("timer");
+    if (entry) {
+        timerEnabled = entry->data[0];
+    }
+    else {
+        timerEnabled = 1;
+    }
+
+startGameCode:
+    Title_Run();
+
+showMainMenu:
+    if (MainMenu_Run() == 0) {
+        goto startGameCode;
+    }
+
+showSaveScreen:
+    switch (Save_Screen()) {
+    // return to main menu
+    case SAVE_SCREEN_BACK:
+        goto showMainMenu;
+
+    // new game (initialize game state)
+    case SAVE_SCREEN_NEWGAME:
+        health = 1000;
+        maxHealth = 1000;
+        maxMagic = 1000;
+        highestReachedStage = 0;
+
+        // initialize boots and weapon levels
+        bootsLevel = 0;
+        memset(weaponLevels, 0, NUM_WEAPONS);
+        weaponLevels[WEAPON_SWORD] = 1;
+        Item_InitCollected();
+        memset(bossDefeated, 0, sizeof(bossDefeated));
+        stage = 0;
+        orbCollected = 0;
+        keywordDisplay = 0;
+        break;
+
+    // player loaded a game
+    case SAVE_SCREEN_LOADGAME:
+        // stage number got set by the save screen so we don't need to set it here
+        health = 1000;
+        break;
+    }
+
+    score = 0;
+    lives = 2;
+    paused = 0;
+    currentWeapon = WEAPON_SWORD;
+
+    while (1) {
+        if (recordDemos) {
+            Demo_Record();
+        }
+        int stageResult = Game_RunStage();
+        char filename[20];
+        snprintf(filename, sizeof(filename), "stage%d.dem", stage);
+        if (recordDemos) {
+            Demo_Save(filename);
+        }
+        switch (stageResult) {
+        case STAGE_EXIT_NEXTSTAGE:
+            stage++;
+            stage &= 0xf;
+            if (stage > highestReachedStage) {
+                highestReachedStage = stage;
+                orbCollected = 0;
+            }
+            break;
+
+        case STAGE_EXIT_RESET:
+            goto startGameCode;
+
+        case STAGE_EXIT_SAVESCREEN:
+            goto showSaveScreen;
+        }
+    }
+
 
 }
 
