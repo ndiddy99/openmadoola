@@ -39,12 +39,22 @@ extern Uint8 frameCount;
 extern Uint8 recordDemos;
 // arcade stuff
 extern Uint32 score;
-extern Uint8 timerEnabled;
 
 /**
  * @brief Initializes the title screen, game, etc and runs the game loop.
 */
 noreturn void Game_Run(void);
+
+/**
+ * @brief Records a stage demo.
+ * @param filename what to save the demo as
+ * @param _stage stage number
+ * @param _health health/max health
+ * @param _magic magic/max magic
+ * @param _bootsLevel boots level
+ * @param _weaponLevels weapon levels (must have size NUM_WEAPONS)
+ */
+void Game_RecordDemo(char *filename, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels);
 
 typedef enum {
     STAGE_EXIT_NEXTSTAGE,

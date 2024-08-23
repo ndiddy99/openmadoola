@@ -159,16 +159,6 @@ static int gameTypeCB(int num) {
     return num;
 }
 
-static int arcadeTimerInit(void) { return timerEnabled; }
-
-static int arcadeTimerCB(int num) {
-    num &= 1;
-    timerEnabled = num;
-    DB_Set("timer", &timerEnabled, 1);
-    DB_Save();
-    return num;
-}
-
 static MenuItem highScoreItems[] = {
     MENU_ABORT("Reset", 1),
     MENU_ABORT("Back", 0),
@@ -193,7 +183,6 @@ static MenuItem optionsItems[] = {
     MENU_LINK("Keyboard controls", keyboardLink),
     MENU_LINK("Gamepad controls", gamepadLink),
     MENU_LIST("Game type", gameTypeOptions, gameTypeInit, gameTypeCB),
-    MENU_LIST("Arcade timer", boolOptions, arcadeTimerInit, arcadeTimerCB),
     MENU_LINK("Reset high scores", highScoreResetLink),
     MENU_ABORT("Back", 0),
 };

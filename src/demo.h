@@ -56,5 +56,6 @@ Uint32 Demo_GetInput(void);
 
 /**
  * @brief Saves a demo recording to disk. Does nothing unless Demo_Record has previously been run.
+ * @param filename what to save the demo as
  */
-void Demo_Save(void);
+void Demo_Save(char *filename);

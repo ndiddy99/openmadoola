@@ -30,6 +30,7 @@
 #include "game.h"
 #include "soundtest.h"
 #include "system.h"
+#include "weapon.h"
 
 int main(int argc, char **argv) {
     // Windows has two types of programs, "Console" and "Windows". Console
@@ -65,9 +66,20 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    if ((argc == 2) && (strcmp(argv[1], "-r") == 0)) {
-        recordDemos = 1;
+    if ((argc == (7 + NUM_WEAPONS)) && (strcmp(argv[1], "-r") == 0)) {
+        char *filename = argv[2];
+        Uint8 stage = (Uint8)atoi(argv[3]);
+        Sint16 health = (Sint16)atoi(argv[4]);
+        Sint16 magic = (Sint16)atoi(argv[5]);
+        Uint8 boots = (Uint8)atoi(argv[6]);
+        Uint8 weapons[NUM_WEAPONS];
+        for (int i = 0; i < NUM_WEAPONS; i++) {
+            weapons[i] = (Uint8)atoi(argv[7 + i]);
+        }
+        Game_RecordDemo(argv[2], stage, health, magic, boots, weapons);
+        return 0;
     }
+
     Game_Run();
     return 0;
 }

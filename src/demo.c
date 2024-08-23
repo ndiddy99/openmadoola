@@ -31,7 +31,7 @@ static int recording = 0;
 static int playing = 0;
 static Uint32 lastInput;
 static Uint8 inputFrames;
-static Uint32 cursor;
+static int cursor;
 
 void Demo_Record(void) {
     if (!demoBuff) {
@@ -133,13 +133,11 @@ Uint32 Demo_GetInput(void) {
     return joy;
 }
 
-void Demo_Save(void) {
+void Demo_Save(char *filename) {
     if (!recording) { return; }
     // finish up the recording
     Buffer_Add(demoBuff, inputFrames);
     Buffer_AddUint32(demoBuff, lastInput);
     recording = 0;
-    char filename[20];
-    snprintf(filename, sizeof(filename), "stage%d.dem", stage + 1);
     Buffer_WriteToFile(demoBuff, filename);
 }
