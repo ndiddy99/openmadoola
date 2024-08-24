@@ -63,6 +63,7 @@ Sint8 keywordDisplay;
 Uint8 recordDemos;
 // arcade stuff
 Uint32 score;
+Uint32 lastScore;
 
 Uint8 spritePalettes[16] = {
     0x00, 0x12, 0x16, 0x36,
@@ -227,6 +228,7 @@ showSaveScreen:
     // new game (initialize game state)
     case SAVE_SCREEN_NEWGAME:
         Game_InitNewGame();
+        Save_SaveFile();
         break;
 
     // player loaded a game
@@ -247,13 +249,31 @@ showSaveScreen:
                 highestReachedStage = stage;
                 orbCollected = 0;
             }
+            Save_SaveFile();
+            break;
+
+        case STAGE_EXIT_DIED:
+            if (gameType == GAME_TYPE_ARCADE) {
+                lives--;
+                if (lives < 0) {
+                    Save_SaveFile();
+                    Screen_GameOver();
+                    HighScore_NameEntry();
+                    goto startGameCode;
+                }
+                else {
+                    health = 1000;
+                }
+            }
+            else {
+                Save_SaveFile();
+                Screen_GameOver();
+                goto showSaveScreen;
+            }
             break;
 
         case STAGE_EXIT_RESET:
             goto startGameCode;
-
-        case STAGE_EXIT_SAVESCREEN:
-            goto showSaveScreen;
         }
     }
 }
@@ -277,10 +297,7 @@ int Game_RunStage(void) {
     // the last room number Lucia was in this stage
     Uint16 lastRoom;
 
-initStage:
-    Save_SaveFile();
     Object_ListInit();
-
     magic = maxMagic;
     lastRoom = 0xffff;
 
@@ -382,24 +399,8 @@ mainGameLoop:
     else if (objects[0].type == OBJ_LUCIA_LVL_END_DOOR) {
         return STAGE_EXIT_NEXTSTAGE;
     }
-    // if we're here, lucia died
-    else if (gameType == GAME_TYPE_ARCADE) {
-        lives--;
-        if (lives < 0) {
-            Save_SaveFile();
-            Screen_GameOver();
-            HighScore_NameEntry();
-            return STAGE_EXIT_RESET;
-        }
-        else {
-            health = 1000;
-            goto initStage;
-        }
-    }
     else {
-        Save_SaveFile();
-        Screen_GameOver();
-        return STAGE_EXIT_SAVESCREEN;
+        return STAGE_EXIT_DIED;
     }
 }
 

@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
     if ((argc == (7 + NUM_WEAPONS)) && (strcmp(argv[1], "-r") == 0)) {
         char *filename = argv[2];
-        Uint8 stage = (Uint8)atoi(argv[3]);
+        Uint8 stage = (Uint8)atoi(argv[3]) - 1;
         Sint16 health = (Sint16)atoi(argv[4]);
         Sint16 magic = (Sint16)atoi(argv[5]);
         Uint8 boots = (Uint8)atoi(argv[6]);

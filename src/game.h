@@ -58,8 +58,8 @@ void Game_RecordDemo(char *filename, Uint8 _stage, Sint16 _health, Sint16 _magic
 
 typedef enum {
     STAGE_EXIT_NEXTSTAGE,
+    STAGE_EXIT_DIED,
     STAGE_EXIT_RESET,
-    STAGE_EXIT_SAVESCREEN,
 } GameRunStageExit;
 
 /**

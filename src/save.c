@@ -91,10 +91,6 @@ int Save_Deserialize(Uint8 *data) {
 
 void Save_SaveFile(void) {
     char filename[20];
-    // don't save if we're playing back a demo
-    if (Demo_Playing()) {
-        return;
-    }
 
     if (!files[currFile]) {
         files[currFile] = Buffer_Init(64);
@@ -178,9 +174,11 @@ int Save_Screen(void) {
     BG_SetAllPalettes(savePalette);
     Sprite_SetAllPalettes(savePalette + 16);
     for (int i = 0; i < NUM_FILES; i++) {
-        Save_Deserialize(files[i]->data);
-        stages[i] = highestReachedStage;
-        highestStages[i] = stages[i];
+        if (files[i]) {
+            Save_Deserialize(files[i]->data);
+            stages[i] = highestReachedStage;
+            highestStages[i] = stages[i];
+        }
     }
 
     while (1) {
