@@ -23,6 +23,13 @@
 extern Uint8 rngVal;
 
 /**
+ * @brief Seeds the RNG from current time. Necessary because the demos overwrite
+ * the RNG seed and I don't want that to make every new game start with the same
+ * enemy pattern.
+ */
+void RNG_Seed(void);
+
+/**
 * @brief Updates the RNG value
 * @returns the new RNG value
 */

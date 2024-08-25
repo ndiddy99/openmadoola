@@ -18,6 +18,7 @@
  */
 
 #pragma once
+#include "constants.h"
 
 /**
  * @brief Sets up high score code. Should be run before saving/displaying
@@ -44,6 +45,12 @@ void HighScore_Print(int x, int y);
 Uint32 HighScore_GetTopScore(void);
 
 /**
- * @brief If the user's score is sufficiently high, shows the name entry screen
+ * @returns the score from the last completed game.
  */
-void HighScore_NameEntry(void);
+Uint32 HighScore_GetLastScore(void);
+
+/**
+ * @brief If the user's score is sufficiently high, shows the name entry screen
+ * @param score the score to save
+ */
+void HighScore_NameEntry(Uint32 score);

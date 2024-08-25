@@ -18,18 +18,31 @@
  */
 
 #pragma once
+#include "weapon.h"
+
+typedef struct {
+    Uint8 rngVal;
+    Uint8 gameType;
+    Uint8 stage;
+    Sint16 health;
+    Sint16 magic;
+    Uint8 bootsLevel;
+    Uint8 weaponLevels[NUM_WEAPONS];
+} DemoData;
 
 /**
  * @brief Starts a demo recording.
+ * @param data game state that gets recorded
  */
-void Demo_Record(void);
+void Demo_Record(DemoData *data);
 
 /**
- * @brief Starts demo playback. Runs for a single stage.
+ * @brief Loads demo data and prepares to play back demo
  * @param filename demo file to load
- * @returns nonzero if demo played successfully, zero otherwise
+ * @param out where the game state gets written to
+ * @returns nonzero if demo loaded successfully, zero otherwise
  */
-int Demo_Playback(char *filename);
+int Demo_Playback(char *filename, DemoData *out);
 
 /**
  * @returns nonzero if demo is recording, zero otherwise 
@@ -44,7 +57,7 @@ int Demo_Playing(void);
 /**
  * @brief Records input from a given frame. Should be run every frame you're recording a demo.
  * Does nothing if you're not recording.
- * @param input joypad input
+ * @param input this frame's joypad input
  */
 void Demo_RecordInput(Uint32 input);
 

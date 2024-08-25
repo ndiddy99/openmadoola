@@ -16,10 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
+#include <stdlib.h>
+#include <time.h>
 
 #include "constants.h"
 
 Uint8 rngVal;
+
+void RNG_Seed(void) {
+    srand((unsigned int)time(NULL));
+    rngVal = (Uint8)rand();
+}
 
 Uint8 RNG_Get(void) {
     rngVal++;

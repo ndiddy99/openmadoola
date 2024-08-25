@@ -23,7 +23,6 @@
 #include "buffer.h"
 #include "constants.h"
 #include "db.h"
-#include "game.h"
 #include "highscore.h"
 #include "joy.h"
 #include "sound.h"
@@ -37,11 +36,6 @@ typedef struct {
 } HighScore;
 
 #define NUM_SCORES 8
-static char *rankStrings[NUM_SCORES] = {
-    "TOP", "2ND", "3RD", "4TH", "5TH", "6TH", "7TH", "8TH",
-};
-
-static HighScore scores[NUM_SCORES];
 static HighScore defaultScores[NUM_SCORES] = {
     {.name = "MSSAN", .score = 400000},
     {.name = "OIYTA", .score = 350000},
@@ -52,13 +46,19 @@ static HighScore defaultScores[NUM_SCORES] = {
     {.name = "ARRIW", .score = 100000},
     {.name = "RAAIA", .score =  50000},
 };
+static HighScore scores[NUM_SCORES];
+static Uint32 lastScore;
+
+static char *rankStrings[NUM_SCORES] = {
+    "TOP", "2ND", "3RD", "4TH", "5TH", "6TH", "7TH", "8TH",
+};
+
+static char highScoreCharset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789. ";
 
 static Uint8 highScorePalette[] = {
     0x0F, 0x26, 0x20, 0x20,
     0x0F, 0x36, 0x20, 0x20,
 };
-
-static char highScoreCharset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789. ";
 
 void HighScore_Init(void) {
     DBEntry *entry = DB_Find("highscores");
@@ -74,6 +74,7 @@ void HighScore_Init(void) {
     else {
         HighScore_ResetScores();
     }
+    lastScore = 0;
 }
 
 static void HighScore_Save(void) {
@@ -107,7 +108,12 @@ Uint32 HighScore_GetTopScore(void) {
     return scores[0].score;
 }
 
-void HighScore_NameEntry(void) {
+Uint32 HighScore_GetLastScore(void) {
+    return lastScore;
+}
+
+void HighScore_NameEntry(Uint32 score) {
+    lastScore = score;
     int scoreNum;
     for (scoreNum = 0; scoreNum < NUM_SCORES; scoreNum++) {
         if (score > scores[scoreNum].score) {

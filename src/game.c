@@ -37,6 +37,7 @@
 #include "object.h"
 #include "options.h"
 #include "palette.h"
+#include "platform.h"
 #include "rng.h"
 #include "rom.h"
 #include "save.h"
@@ -60,10 +61,8 @@ Uint8 numBossObjs;
 Uint8 bossDefeated[16];
 Uint8 frameCount;
 Sint8 keywordDisplay;
-Uint8 recordDemos;
 // arcade stuff
 Uint32 score;
-Uint32 lastScore;
 
 Uint8 spritePalettes[16] = {
     0x00, 0x12, 0x16, 0x36,
@@ -239,6 +238,7 @@ showSaveScreen:
     }
 
     Game_InitCommon();
+    RNG_Seed();
 
     while (1) {
         switch (Game_RunStage()) {
@@ -258,7 +258,7 @@ showSaveScreen:
                 if (lives < 0) {
                     Save_SaveFile();
                     Screen_GameOver();
-                    HighScore_NameEntry();
+                    HighScore_NameEntry(score);
                     goto startGameCode;
                 }
                 else {
@@ -272,30 +272,71 @@ showSaveScreen:
             }
             break;
 
+        case STAGE_EXIT_WON:
+            Save_SaveFile();
+            Ending_Run();
+            if (gameType == GAME_TYPE_ARCADE) {
+                HighScore_NameEntry(score);
+            }
+            goto startGameCode;
+
         case STAGE_EXIT_RESET:
             goto startGameCode;
         }
     }
 }
 
-void Game_RecordDemo(char *filename, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
+static void Game_InitDemo(DemoData *data) {
     Game_InitNewGame();
     Game_InitCommon();
-    stage = _stage;
-    health = _health;
-    maxHealth = _health;
-    magic = _magic;
-    maxMagic = _magic;
-    bootsLevel = _bootsLevel;
-    memcpy(weaponLevels, _weaponLevels, sizeof(weaponLevels));
-    Demo_Record();
+    gameType = data->gameType;
+    stage = data->stage;
+    health = data->health;
+    maxHealth = data->health;
+    magic = data->magic;
+    maxMagic = data->magic;
+    bootsLevel = data->bootsLevel;
+    memcpy(weaponLevels, data->weaponLevels, sizeof(weaponLevels));
+}
+
+void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
+    DemoData data;
+    data.rngVal = rngVal;
+    data.gameType = _gameType;
+    data.stage = _stage;
+    data.health = _health;
+    data.magic = _magic;
+    data.bootsLevel = _bootsLevel;
+    memcpy(data.weaponLevels, _weaponLevels, sizeof(data.weaponLevels));
+    Game_InitDemo(&data);
+    Demo_Record(&data);
     Game_RunStage();
     Demo_Save(filename);
+}
+
+void Game_PlayDemo(char *filename) {
+    DemoData data;
+    if (!Demo_Playback(filename, &data)) {
+        Platform_ShowError("Couldn't open demo file %s.", filename);
+        return;
+    };
+    Game_InitDemo(&data);
+    rngVal = data.rngVal;
+    Game_RunStage();
 }
 
 int Game_RunStage(void) {
     // the last room number Lucia was in this stage
     Uint16 lastRoom;
+
+    // initialize game type
+    DBEntry *entry = DB_Find("gametype");
+    if (entry) {
+        gameType = entry->data[0];
+    }
+    else {
+        gameType = GAME_TYPE_PLUS;
+    }
 
     Object_ListInit();
     magic = maxMagic;
@@ -331,12 +372,23 @@ initRoom:
 mainGameLoop:
     System_StartFrame();
     Game_HandlePause();
-    if (paused == 0) {
+    if (!paused) {
         Sprite_ClearList();
-        if (gameType != GAME_TYPE_ORIGINAL) {
+        switch (gameType) {
+        case GAME_TYPE_ORIGINAL:
+            HUD_DisplayOriginal(health, magic);
+            break;
+
+        case GAME_TYPE_PLUS:
             Game_HandleWeaponSwitch();
+            HUD_DisplayPlus(health, magic);
+            break;
+
+        case GAME_TYPE_ARCADE:
+            Game_HandleWeaponSwitch();
+            HUD_DisplayArcade(health, magic, score);
+            break;
         }
-        HUD_Display();
         RNG_Get(); // update RNG once per frame
         Weapon_Process();
         Object_ListRun();
@@ -375,12 +427,7 @@ mainGameLoop:
         int switchRoom = Map_Door(&objects[0]);
         if (switchRoom == DOOR_ENDING) {
             if (darutosKilled) {
-                Save_SaveFile();
-                Ending_Run();
-                if (gameType == GAME_TYPE_ARCADE) {
-                    HighScore_NameEntry();
-                }
-                return STAGE_EXIT_RESET;
+                return STAGE_EXIT_WON;
             }
             // put Lucia back where she was if she tried to enter the ending
             // door without killing Darutos
@@ -435,6 +482,11 @@ void Game_PlayRoomSong(void) {
     else {
         Sound_Play(song);
     }
+}
+
+void Game_AddScore(Uint32 points) {
+    score += points;
+    score = MIN(score, 99999999);
 }
 
 static void Game_HandleWeaponSwitch(void) {

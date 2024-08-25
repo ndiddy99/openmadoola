@@ -1,5 +1,5 @@
 /* hud.h: HUD display code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -20,10 +20,9 @@
 #pragma once
 #include "constants.h"
 
-/**
- * @brief Shows the health and magic counters
- */
-void HUD_Display(void);
+void HUD_DisplayOriginal(Sint16 health, Sint16 magic);
+void HUD_DisplayPlus(Sint16 health, Sint16 magic);
+void HUD_DisplayArcade(Sint16 health, Sint16 magic, Uint32 score);
 
 /**
  * @brief Reserves sprites for the weapon display (necessary to split out because

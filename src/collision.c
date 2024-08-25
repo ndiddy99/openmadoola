@@ -114,8 +114,7 @@ enemyDamaged:
         return 1;
     }
     else {
-        score += (attackPower * 10);
-        score = MIN(score, 99999999);
+        Game_AddScore(attackPower * 10);
         Sound_Play(SFX_ENEMY_KILL);
         if (bossActive) {
             numBossObjs--;

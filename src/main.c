@@ -62,21 +62,23 @@ int main(int argc, char **argv) {
     }
 
     if ((argc == 3) && (strcmp(argv[1], "-d") == 0)) {
-        Demo_Playback(argv[2]);
+        Game_PlayDemo(argv[2]);
         return 0;
     }
 
-    if ((argc == (7 + NUM_WEAPONS)) && (strcmp(argv[1], "-r") == 0)) {
-        char *filename = argv[2];
-        Uint8 stage = (Uint8)atoi(argv[3]) - 1;
-        Sint16 health = (Sint16)atoi(argv[4]);
-        Sint16 magic = (Sint16)atoi(argv[5]);
-        Uint8 boots = (Uint8)atoi(argv[6]);
+    if ((argc == (8 + NUM_WEAPONS)) && (strcmp(argv[1], "-r") == 0)) {
+        int param = 2;
+        char *filename = argv[param++];
+        Uint8 type = (Uint8)atoi(argv[param++]);
+        Uint8 stage = (Uint8)atoi(argv[param++]) - 1;
+        Sint16 health = (Sint16)atoi(argv[param++]);
+        Sint16 magic = (Sint16)atoi(argv[param++]);
+        Uint8 boots = (Uint8)atoi(argv[param++]);
         Uint8 weapons[NUM_WEAPONS];
         for (int i = 0; i < NUM_WEAPONS; i++) {
-            weapons[i] = (Uint8)atoi(argv[7 + i]);
+            weapons[i] = (Uint8)atoi(argv[param++]);
         }
-        Game_RecordDemo(argv[2], stage, health, magic, boots, weapons);
+        Game_RecordDemo(filename, type, stage, health, magic, boots, weapons);
         return 0;
     }
 

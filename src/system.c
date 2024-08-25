@@ -23,6 +23,7 @@
 #include "joy.h"
 #include "palette.h"
 #include "platform.h"
+#include "rng.h"
 #include "rom.h"
 #include "save.h"
 #include "sound.h"
@@ -34,14 +35,6 @@ int System_Init(void) {
     if (!Rom_LoadChr("font.bin", 4096)) { return 0; }
     if (!Palette_Init())                { return 0; }
     DB_Init();
-    // initialize game type
-    DBEntry *entry = DB_Find("gametype");
-    if (entry) {
-        gameType = entry->data[0];
-    }
-    else {
-        gameType = GAME_TYPE_PLUS;
-    }
 
     // initialize platform code
     if (!Platform_Init()) { return 0; }
@@ -52,6 +45,7 @@ int System_Init(void) {
     Save_Init();
     HighScore_Init();
     Joy_Init();
+    RNG_Seed();
     Rom_GetMapData(&mapData);
     return 1;
 }

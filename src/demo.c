@@ -16,49 +16,52 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
+#include <string.h>
 
 #include "buffer.h"
 #include "constants.h"
+#include "demo.h"
 #include "file.h"
-#include "game.h"
 #include "lucia.h"
-#include "rng.h"
 #include "save.h"
 #include "util.h"
+#include "weapon.h"
 
 static Buffer *demoBuff = NULL;
 static int recording = 0;
 static int playing = 0;
 static Uint32 lastInput;
-static Uint8 inputFrames;
+static Uint8 frameCount;
+static int first;
 static int cursor;
 
-void Demo_Record(void) {
+void Demo_Record(DemoData *data) {
     if (!demoBuff) {
         demoBuff = Buffer_Init(8192);
     }
     else {
         demoBuff->dataSize = 0;
     }
+    first = 1;
     recording = 1;
     playing = 0;
     // record non-input stuff needed to play back the demo
-    Buffer_Add(demoBuff, gameType);
-    Buffer_Add(demoBuff, stage);
-    Buffer_Add(demoBuff, rngVal);
-    Buffer_AddSint16(demoBuff, health);
-    Buffer_AddUint32(demoBuff, score);
-    Buffer_Add(demoBuff, lives);
-    Save_Serialize(demoBuff);
+    Buffer_Add(demoBuff, data->rngVal);
+    Buffer_Add(demoBuff, data->gameType);
+    Buffer_Add(demoBuff, data->stage);
+    Buffer_AddSint16(demoBuff, data->health);
+    Buffer_AddSint16(demoBuff, data->magic);
+    Buffer_Add(demoBuff, data->bootsLevel);
+    Buffer_AddData(demoBuff, data->weaponLevels, NUM_WEAPONS);
 }
 
-int Demo_Playback(char *filename) {
+int Demo_Playback(char *filename, DemoData *out) {
     if (!demoBuff) {
         demoBuff = Buffer_InitFromFile(filename);
         if (!demoBuff) { return 0; }
     }
     else {
-        FILE *fp = File_Open(filename, "rb");
+        FILE *fp = File_OpenResource(filename, "rb");
         if (!fp) { return 0; }
         demoBuff->dataSize = 0;
         Buffer_AddFile(demoBuff, fp);
@@ -69,20 +72,15 @@ int Demo_Playback(char *filename) {
     recording = 0;
     cursor = 0;
 
-    gameType = demoBuff->data[cursor++];
-    stage = demoBuff->data[cursor++];
-    rngVal = demoBuff->data[cursor++];
-    health = Util_LoadSint16(demoBuff->data + cursor);
-    cursor += sizeof(health);
-    score = Util_LoadUint32(demoBuff->data + cursor);
-    cursor += sizeof(score);
-    lives = demoBuff->data[cursor++];
-    cursor += Save_Deserialize(demoBuff->data + cursor);
-
-    inputFrames = demoBuff->data[cursor++];
-    lastInput = Util_LoadUint32(demoBuff->data + cursor);
-    cursor += sizeof(lastInput);
-    Game_RunStage();
+    out->rngVal = demoBuff->data[cursor++];
+    out->gameType = demoBuff->data[cursor++];
+    out->stage = demoBuff->data[cursor++];
+    out->health = Util_LoadSint16(demoBuff->data + cursor); cursor += 2;
+    out->magic = Util_LoadSint16(demoBuff->data + cursor); cursor += 2;
+    out->bootsLevel = demoBuff->data[cursor++];
+    memcpy(out->weaponLevels, demoBuff->data + cursor, sizeof(out->weaponLevels));
+    cursor += sizeof(weaponLevels);
+    frameCount = demoBuff->data[cursor];
     return 1;
 }
 
@@ -97,47 +95,38 @@ int Demo_Playing(void) {
 void Demo_RecordInput(Uint32 input) {
     if (!recording) { return; }
 
-    if (!demoBuff->dataSize) {
+    if (first || (lastInput != input)) {
+        first = 0;
         lastInput = input;
-        inputFrames = 0;
+        Buffer_Add(demoBuff, 0); // frame counter
+        Buffer_AddUint32(demoBuff, input);
     }
     else {
-        if (lastInput == input) {
-            inputFrames++;
-            if (inputFrames == 0xff) {
-                Buffer_Add(demoBuff, inputFrames);
-                Buffer_AddUint32(demoBuff, input);
-            }
+        Uint8 *frameCountPtr = &(demoBuff->data[demoBuff->dataSize - 5]);
+        if (*frameCountPtr == 255) {
+            Buffer_Add(demoBuff, 0);
+            Buffer_AddUint32(demoBuff, lastInput);
         }
         else {
-            Buffer_Add(demoBuff, inputFrames);
-            Buffer_AddUint32(demoBuff, lastInput);
-            lastInput = input;
-            inputFrames = 0;
+            (*frameCountPtr)++;
         }
     }
 }
 
 Uint32 Demo_GetInput(void) {
-    if (!playing || (cursor >= demoBuff->dataSize)) { return 0; }
+    if (!playing || (cursor > demoBuff->dataSize)) { return 0; }
     
-    Uint32 joy = lastInput;
-    if (inputFrames == 0) {
-        inputFrames = demoBuff->data[cursor++];
-        lastInput = Util_LoadUint32(demoBuff->data + cursor);
-        cursor += sizeof(lastInput);
-    }
-    else {
-        inputFrames--;
+    Uint32 joy = Util_LoadUint32(demoBuff->data + cursor + 1);
+    frameCount--;
+    if (frameCount == 255) {
+        cursor += 5;
+        frameCount = demoBuff->data[cursor];
     }
     return joy;
 }
 
 void Demo_Save(char *filename) {
     if (!recording) { return; }
-    // finish up the recording
-    Buffer_Add(demoBuff, inputFrames);
-    Buffer_AddUint32(demoBuff, lastInput);
     recording = 0;
     Buffer_WriteToFile(demoBuff, filename);
 }
