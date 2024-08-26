@@ -85,7 +85,7 @@ static void Screen_StatusIcon(Uint16 x, Uint16 y, Uint16 tile, Uint8 palette, Ui
     }
 }
 
-void Screen_Status(void) {
+int Screen_Status(void) {
     BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetAllPalettes(statusPalette);
@@ -123,16 +123,17 @@ void Screen_Status(void) {
         Sprite_EndFrame();
         System_EndFrame();
         if (joyEdge & JOY_START) {
-            break;
+            return 1;
         }
     }
+    return 0;
 }
 
 static Uint8 stagePalette[] = {
     0x0F, 0x2C, 0x2B, 0x2B,
 };
 
-void Screen_Stage(void) {
+int Screen_Stage(void) {
     BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, stagePalette);
@@ -151,9 +152,10 @@ void Screen_Stage(void) {
         BG_Draw();
         System_EndFrame();
         if (joyEdge & JOY_START) {
-            break;
+            return 1;
         }
     }
+    return 0;
 }
 
 void Screen_GameOver(void) {

@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     }
 
     if ((argc == 3) && (strcmp(argv[1], "-d") == 0)) {
-        Game_PlayDemo(argv[2]);
+        Game_PlayDemo(argv[2], NO_DEMO_TIMER);
         return 0;
     }
 

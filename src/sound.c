@@ -89,6 +89,7 @@ static Uint8 channelsInUse[APU_CHANNELS * 2];
 static Uint8 apuStatusCopy[2];
 // 0-100
 static int volume = 50;
+static int muted;
 
 static void Sound_RunInstrument(int apu, Instrument *inst);
 static void Sound_DisableChannel(int apu, Uint8 channel);
@@ -154,6 +155,7 @@ int Sound_Init(void) {
         volume = (int)entry->data[0];
     }
     Blargg_Apu_Volume(volume);
+    muted = 0;
 
     // load sound data from the ROM
     Uint8 *src = chrRom + CHR_ROM_SOUND;
@@ -206,6 +208,14 @@ int Sound_SetVolume(int vol) {
 
 int Sound_GetVolume(void) {
     return volume;
+}
+
+void Sound_Mute(void) {
+    muted = 1;
+}
+
+void Sound_Unmute(void) {
+    muted = 0;
 }
 
 char *Sound_GetDebugText(int num) {
@@ -312,9 +322,14 @@ void Sound_Run(void) {
     }
     Blargg_Apu_Samples(0, buff0, SAMPLES_PER_FRAME * BUFFERED_FRAMES);
     Sint32 outputSamples = Blargg_Apu_Samples(1, buff1, SAMPLES_PER_FRAME * BUFFERED_FRAMES);
-    // mix output from both APUs together
-    for (int i = 0; i < outputSamples; i++) {
-        buff0[i] += buff1[i];
+    if (muted) {
+        memset(buff0, 0, sizeof(buff0));
+    }
+    else {
+        // mix output from both APUs together
+        for (int i = 0; i < outputSamples; i++) {
+            buff0[i] += buff1[i];
+        }
     }
     Platform_QueueSamples(buff0, outputSamples);
 }

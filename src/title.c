@@ -253,6 +253,16 @@ static int Title_HighScores(void) {
     return 0;
 }
 
+static int Title_Demo(void) {
+    Sprite_ClearList();
+    Sound_Mute();
+    Game_PlayDemo("stage1.dem", 840);
+    Sound_Reset();
+    Sound_Unmute();
+    Sprite_ClearList();
+    return 0;
+}
+
 typedef int (*SequenceItem)(void);
 
 static SequenceItem originalSequence[] = {
@@ -279,7 +289,7 @@ static SequenceItem arcadeSequence[] = {
     Title_AnimateIn,
     Title_HighScores,
     Title_AnimateOut,
-    // attract mode gameplay goes here
+    Title_Demo,
 };
 
 void Title_DoSequence(SequenceItem *sequence, int len) {

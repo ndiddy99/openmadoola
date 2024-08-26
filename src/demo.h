@@ -45,6 +45,11 @@ void Demo_Record(DemoData *data);
 int Demo_Playback(char *filename, DemoData *out);
 
 /**
+ * @brief Ends demo recording/playback
+ */
+void Demo_Uninit(void);
+
+/**
  * @returns nonzero if demo is recording, zero otherwise 
  */
 int Demo_Recording(void);

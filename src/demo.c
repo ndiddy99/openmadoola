@@ -84,6 +84,11 @@ int Demo_Playback(char *filename, DemoData *out) {
     return 1;
 }
 
+void Demo_Uninit(void) {
+    recording = 0;
+    playing = 0;
+}
+
 int Demo_Recording(void) {
     return recording;
 }

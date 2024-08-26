@@ -95,6 +95,16 @@ int Sound_SetVolume(int vol);
 int Sound_GetVolume(void);
 
 /**
+ * @brief Mutes the sound. Overrides any volume setting.
+ */
+void Sound_Mute(void);
+
+/**
+ * @brief Unmutes the sound. Does nothing unless sound is muted.
+ */
+void Sound_Unmute(void);
+
+/**
  * @param num Sound number we want to inspect (picks the correct APU)
  * @returns informative text about the state of the sound engine (mainly used
  * for taking up space on the sound test screen)

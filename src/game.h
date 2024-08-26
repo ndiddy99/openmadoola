@@ -54,26 +54,13 @@ noreturn void Game_Run(void);
  */
 void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels);
 
+#define NO_DEMO_TIMER 0
 /**
  * @brief Plays back a stage demo.
  * @param filename demo file to load
+ * @param demoTimer how many frames to play the demo for
  */
-void Game_PlayDemo(char *filename);
-
-typedef enum {
-    STAGE_EXIT_NEXTSTAGE,
-    STAGE_EXIT_DIED,
-    STAGE_EXIT_WON,
-    STAGE_EXIT_RESET,
-} GameRunStageExit;
-
-/**
- * @brief Runs the game's code for a single stage. Lots of globals need to be
- * initialized before running this, don't use it if you don't know what you're
- * doing.
- * @returns Value representing how the stage ended, see GameRunStageExit enum
- */
-int Game_RunStage(void);
+void Game_PlayDemo(char *filename, int timer);
 
 /**
  * @brief Plays the song associated with the current room.

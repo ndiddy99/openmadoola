@@ -82,6 +82,15 @@ static void Game_HandleRoomChange(void);
 static void Game_SetRoom(Uint8 roomNum);
 static void Game_HandlePaletteShifting(void);
 
+typedef enum {
+    STAGE_EXIT_NEXTSTAGE,
+    STAGE_EXIT_DIED,
+    STAGE_EXIT_WON,
+    STAGE_EXIT_RESET,
+    STAGE_EXIT_TIMER,
+} GameRunStageExit;
+static int Game_RunStage(int timer);
+
 static void Game_InitRoomVars(Object *o) {
     // arcade mode has room 0's bg color replaced by room 1's
     if ((currRoom == 0) && (gameType == GAME_TYPE_ARCADE)) {
@@ -210,6 +219,15 @@ static void Game_InitCommon(void) {
 }
 
 noreturn void Game_Run(void) {
+    // initialize game type
+    DBEntry *entry = DB_Find("gametype");
+    if (entry) {
+        gameType = entry->data[0];
+    }
+    else {
+        gameType = GAME_TYPE_PLUS;
+    }
+
 startGameCode:
     Title_Run();
 
@@ -241,7 +259,7 @@ showSaveScreen:
     RNG_Seed();
 
     while (1) {
-        switch (Game_RunStage()) {
+        switch (Game_RunStage(NO_DEMO_TIMER)) {
         case STAGE_EXIT_NEXTSTAGE:
             stage++;
             stage &= 0xf;
@@ -310,11 +328,11 @@ void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _heal
     memcpy(data.weaponLevels, _weaponLevels, sizeof(data.weaponLevels));
     Game_InitDemo(&data);
     Demo_Record(&data);
-    Game_RunStage();
+    Game_RunStage(NO_DEMO_TIMER);
     Demo_Save(filename);
 }
 
-void Game_PlayDemo(char *filename) {
+void Game_PlayDemo(char *filename, int timer) {
     DemoData data;
     if (!Demo_Playback(filename, &data)) {
         Platform_ShowError("Couldn't open demo file %s.", filename);
@@ -322,25 +340,16 @@ void Game_PlayDemo(char *filename) {
     };
     Game_InitDemo(&data);
     rngVal = data.rngVal;
-    Game_RunStage();
+    Game_RunStage(timer);
+    Demo_Uninit();
 }
 
-int Game_RunStage(void) {
+static int Game_RunStage(int demoTimer) {
     // the last room number Lucia was in this stage
-    Uint16 lastRoom;
-
-    // initialize game type
-    DBEntry *entry = DB_Find("gametype");
-    if (entry) {
-        gameType = entry->data[0];
-    }
-    else {
-        gameType = GAME_TYPE_PLUS;
-    }
+    Uint16 lastRoom = 0xffff;
 
     Object_ListInit();
     magic = maxMagic;
-    lastRoom = 0xffff;
 
     Sound_Reset();
     Sound_Play(MUS_START);
@@ -419,6 +428,14 @@ mainGameLoop:
         // force music to play
         lastRoom = 0xffff;
         goto initRoom;
+    }
+
+    // --- handle demo timer ---
+    if (demoTimer != NO_DEMO_TIMER) {
+        demoTimer--;
+        if (demoTimer == 0) {
+            return STAGE_EXIT_TIMER;
+        }
     }
 
     // --- handle doors ---

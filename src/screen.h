@@ -26,13 +26,15 @@ void Screen_Title(void);
 
 /**
  * @brief Draws the status screen, runs for 3 seconds or until the user presses start.
+ * @returns 1 if the user pressed start, 0 if the user waited for 3 seconds.
 */
-void Screen_Status(void);
+int Screen_Status(void);
 
 /**
  * @brief Draws the stage screen, runs for 3 seconds or until the user presses start.
+ * @returns 1 if the user pressed start, 0 if the user waited for 3 seconds.
 */
-void Screen_Stage(void);
+int Screen_Stage(void);
 
 /**
  * @brief Draws the game over screen, runs for 4 seconds.
