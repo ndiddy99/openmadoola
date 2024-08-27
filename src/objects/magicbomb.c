@@ -33,7 +33,7 @@ static Sint8 bombSpeedTbl[] = {
 void MagicBomb_Obj(Object *o) {
     Sprite spr = { 0 };
     spr.tile = 0x62;
-    spr.palette = (frameCount << 1) & 3;
+    spr.palette = (gameFrames << 1) & 3;
     spr.size = SPRITE_8X16;
 
     if (o->timer) { o->timer--; }

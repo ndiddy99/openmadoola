@@ -26,7 +26,7 @@
 
 static void WeaponFire_CommonObj(Object *o) {
     Sprite spr = { 0 };
-    if (frameCount & 4) {
+    if (gameFrames & 4) {
         spr.mirror = V_MIRROR;
     }
     spr.tile = 0x44;

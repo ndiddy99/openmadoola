@@ -4,7 +4,6 @@
 *.lvl
 *.db
 *.sav
-*.dem
 imgui.ini
 build/
 .idea/

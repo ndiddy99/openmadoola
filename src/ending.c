@@ -86,7 +86,7 @@ static void Ending_WaitFrames(int count) {
         BG_Draw();
         Sprite_EndFrame();
         System_EndFrame();
-        frameCount++;
+        gameFrames++;
     }
 }
 

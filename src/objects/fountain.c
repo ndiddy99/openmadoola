@@ -28,7 +28,7 @@ void Fountain_Obj(Object *o) {
     o->x.f.l = 0x80;
     o->y.f.l = 0x80;
     // animate water by mirroring the middle and bottom sprites
-    o->direction = (frameCount << 4) & 0x80;
+    o->direction = (gameFrames << 4) & 0x80;
     
     Sprite spr = { 0 };
     // draw middle of the water sprite
@@ -53,7 +53,7 @@ void Fountain_Obj(Object *o) {
         Sprite_Draw(&spr, NULL);
 
         // give lucia the equivalent of a 500 hp powerup every 16 frames
-        if ((frameCount & 0xf) == 0) {
+        if ((gameFrames & 0xf) == 0) {
             spr.y += 10;
             Collision_WithLucia(o, &spr, COLLISION_SIZE_16X32, ITEM_FLAG + ITEM_APPLE);
         }

@@ -39,7 +39,7 @@ static Sint8 shieldBallOffsetTbl[] = {
 };
 
 static Sint8 ShieldBall_GetOffset(Uint8 num) {
-    Uint8 index = (frameCount >> 2) & 3;
+    Uint8 index = (gameFrames >> 2) & 3;
     return shieldBallOffsetTbl[index] + num;
 }
 
@@ -59,7 +59,7 @@ static Sint8 ShieldBall_GetX(Uint8 index) {
 }
 
 void ShieldBall_Obj(Object *o) {
-    if ((frameCount & 3) == 0) {
+    if ((gameFrames & 3) == 0) {
         o->timer--;
         if (o->timer == 0) {
             Weapon_EraseCollisionCoords();
@@ -68,14 +68,14 @@ void ShieldBall_Obj(Object *o) {
         }
     }
 
-    Uint8 posOffset = (currObjectIndex << 2) + frameCount;
+    Uint8 posOffset = (currObjectIndex << 2) + gameFrames;
     Sprite spr = { 0 };
     spr.size = SPRITE_8X16;
 
     spr.x = ShieldBall_GetX(posOffset) + luciaSpriteX;
     spr.y = ShieldBall_GetY(posOffset) + luciaSpriteY - 8;
     spr.tile = 0x62;
-    spr.palette = ((frameCount >> 1) + currObjectIndex) & 3;
+    spr.palette = ((gameFrames >> 1) + currObjectIndex) & 3;
     Sprite_Draw(&spr, NULL);
     Weapon_SetCollisionCoords(spr.x, spr.y);
 }

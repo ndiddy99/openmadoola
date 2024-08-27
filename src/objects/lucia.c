@@ -29,8 +29,6 @@
 #include "sprite.h"
 #include "weapon.h"
 
-extern Uint8 frameCount;
-
 #define WING_MP (1000)
 
 Uint8 bootsLevel;
@@ -168,7 +166,7 @@ void Lucia_NormalObj(Object *o) {
 
     // running
     else {
-        Lucia_Draw(o, (frameCount >> 3) & 3);
+        Lucia_Draw(o, (gameFrames >> 3) & 3);
         return;
     }
 }
@@ -423,7 +421,7 @@ static void Lucia_Draw(Object *o, int frame) {
     }
 
     // arcade mode drains 1 hp every 32 frames
-    if ((gameType == GAME_TYPE_ARCADE) && !(frameCount & 0x1f)) {
+    if ((gameType == GAME_TYPE_ARCADE) && !(gameFrames & 0x1f)) {
         health--;
     }
 

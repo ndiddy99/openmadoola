@@ -35,7 +35,7 @@ void BoundBall_Obj(Object *o) {
     Sint8 dispOffsetX = (RNG_Get() & 31) - 16;
     Sint8 dispOffsetY = (RNG_Get() & 31) - 16;
     Sprite spr = { 0 };
-    spr.palette = (frameCount >> 1) & 3;
+    spr.palette = (gameFrames >> 1) & 3;
     if (weaponLevels[WEAPON_BOUND_BALL] >= 3) {
         spr.tile = 0x4E;
         spr.size = SPRITE_16X16;

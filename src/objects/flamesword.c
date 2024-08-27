@@ -28,7 +28,7 @@ void FlameSword_Obj(Object *o) {
     Object_CalcXYPos(o);
     Sprite spr = { 0 };
 
-    if (frameCount & 0x10) {
+    if (gameFrames & 0x10) {
         spr.mirror = V_MIRROR;
     }
     spr.tile = 0x44;

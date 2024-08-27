@@ -48,9 +48,9 @@ void Explosion_Obj(Object *o) {
         Sprite_SetDraw(&spr, o, 0, 0);
     }
     // randomly spawn a powerup if lucia is lucky
-    else if (!(frameCount & 0xF0)) {
+    else if (!(gameFrames & 0xF0)) {
         o->type = OBJ_ITEM;
-        o->hp = (frameCount & 3) + ITEM_RED_POTION;
+        o->hp = (gameFrames & 3) + ITEM_RED_POTION;
         Object_InitCollision(o);
     }
     // better luck next time...

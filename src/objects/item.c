@@ -81,8 +81,8 @@ void Item_Obj(Object *o) {
 
     // set up sprite attributes
     if (o->hp == ITEM_ORB) {
-        spr.mirror = frameCount & 3;
-        spr.palette = frameCount & 3;
+        spr.mirror = gameFrames & 3;
+        spr.palette = gameFrames & 3;
         spr.size = SPRITE_16X16;
     }
     else {

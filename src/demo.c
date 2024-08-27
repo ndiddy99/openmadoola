@@ -47,6 +47,7 @@ void Demo_Record(DemoData *data) {
     playing = 0;
     // record non-input stuff needed to play back the demo
     Buffer_Add(demoBuff, data->rngVal);
+    Buffer_Add(demoBuff, data->gameFrames);
     Buffer_Add(demoBuff, data->gameType);
     Buffer_Add(demoBuff, data->stage);
     Buffer_AddSint16(demoBuff, data->health);
@@ -73,6 +74,7 @@ int Demo_Playback(char *filename, DemoData *out) {
     cursor = 0;
 
     out->rngVal = demoBuff->data[cursor++];
+    out->gameFrames = demoBuff->data[cursor++];
     out->gameType = demoBuff->data[cursor++];
     out->stage = demoBuff->data[cursor++];
     out->health = Util_LoadSint16(demoBuff->data + cursor); cursor += 2;

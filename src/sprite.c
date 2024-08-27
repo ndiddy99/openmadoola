@@ -116,7 +116,7 @@ int Sprite_SetPos(Sprite *s, Object *o, Sint16 xOffset, Sint16 yOffset) {
 
 void Sprite_Draw(Sprite *s, Object *o) {
     if (o && o->stunnedTimer) {
-        if ((frameCount & 2) == 0) {
+        if ((gameFrames & 2) == 0) {
             return;
         }
     }

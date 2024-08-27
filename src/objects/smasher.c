@@ -78,7 +78,7 @@ void Smasher_Obj(Object *o) {
 
     Sprite spr = { 0 };
     spr.size = SPRITE_16X16;
-    spr.mirror = frameCount & 3;
+    spr.mirror = gameFrames & 3;
     spr.tile = 0x44;
     o->x = objects[objectCenterNum].x;
     o->y = objects[objectCenterNum].y;

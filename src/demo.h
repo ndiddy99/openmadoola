@@ -22,6 +22,7 @@
 
 typedef struct {
     Uint8 rngVal;
+    Uint8 gameFrames;
     Uint8 gameType;
     Uint8 stage;
     Sint16 health;

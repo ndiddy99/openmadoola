@@ -20,11 +20,6 @@
 #pragma once
 
 /**
- * @brief Draws the title screen, runs in a loop until the user presses start.
-*/
-void Screen_Title(void);
-
-/**
  * @brief Draws the status screen, runs for 3 seconds or until the user presses start.
  * @returns 1 if the user pressed start, 0 if the user waited for 3 seconds.
 */

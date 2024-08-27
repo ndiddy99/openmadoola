@@ -41,7 +41,7 @@ static int Enemy_InitLocation(Object *o) {
     o->stunnedTimer = 0;
     // "randomly" pick a y value
     o->y.f.l = 0x80;
-    o->y.f.h = (frameCount & 0xf) + cameraY.f.h;
+    o->y.f.h = (gameFrames & 0xf) + cameraY.f.h;
     Object_InitCollision(o);
     // don't allow spawning enemies off the bottom of the map
     if (o->collision >= (MAP_WIDTH_METATILES * MAP_HEIGHT_METATILES)) { 
@@ -61,7 +61,7 @@ void Enemy_Spawn(void) {
     Uint16 high4 = (rand & 0xf) << 5;
     rand = low5 | high4;
     // frame count gets added without clearing the carry flag
-    rand += frameCount;
+    rand += gameFrames;
     if (rand & 0x100) { rand++; }
     rand &= 0xff;
 

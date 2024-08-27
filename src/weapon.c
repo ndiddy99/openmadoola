@@ -226,7 +226,7 @@ static void Weapon_InitBoundBall(void) {
 
     if (joy & JOY_UP) {
         o->ySpeed = 0x81;
-        o->xSpeed = (frameCount & 0x3f) - 0x20;
+        o->xSpeed = (gameFrames & 0x3f) - 0x20;
     }
     else {
         if (objects[0].direction) {
@@ -236,7 +236,7 @@ static void Weapon_InitBoundBall(void) {
             o->xSpeed = 0x7f;
         }
 
-        o->ySpeed = (frameCount & 0x3f) - 0x20;
+        o->ySpeed = (gameFrames & 0x3f) - 0x20;
     }
 
     o->type = OBJ_BOUND_BALL;

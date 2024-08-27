@@ -59,7 +59,7 @@ Uint8 roomChangeTimer;
 Uint8 bossActive;
 Uint8 numBossObjs;
 Uint8 bossDefeated[16];
-Uint8 frameCount;
+Uint8 gameFrames;
 Sint8 keywordDisplay;
 // arcade stuff
 Uint32 score;
@@ -320,6 +320,7 @@ static void Game_InitDemo(DemoData *data) {
 void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
     DemoData data;
     data.rngVal = rngVal;
+    data.gameFrames = gameFrames;
     data.gameType = _gameType;
     data.stage = _stage;
     data.health = _health;
@@ -340,6 +341,7 @@ void Game_PlayDemo(char *filename, int timer) {
     };
     Game_InitDemo(&data);
     rngVal = data.rngVal;
+    gameFrames = data.gameFrames;
     Game_RunStage(timer);
     Demo_Uninit();
 }
@@ -410,7 +412,7 @@ mainGameLoop:
     Map_Draw();
     Sprite_EndFrame();
     System_EndFrame();
-    frameCount++;
+    gameFrames++;
     Game_HandlePaletteShifting();
 
     // --- soft reset code (NOTE: not in original game) ---
@@ -563,7 +565,7 @@ static void Game_HandlePaletteShifting(void) {
         return;
     }
 
-    if ((frameCount & 3) == 0) {
+    if ((gameFrames & 3) == 0) {
         Uint8 temp = colorPalette[15];
         colorPalette[15] = colorPalette[14];
         colorPalette[14] = colorPalette[13];

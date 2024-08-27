@@ -64,8 +64,8 @@ int Collision_Handle(Object *o, Sprite *s, int size, Uint8 attackPower) {
         hitSpr.y = s->y;
         hitSpr.tile = 0x4A;
         hitSpr.palette = 0;
-        // use frameCount to "randomly" set the hit graphic's mirroring
-        hitSpr.mirror = (frameCount >> 4) & 3;
+        // use gameFrames to "randomly" set the hit graphic's mirroring
+        hitSpr.mirror = (gameFrames >> 4) & 3;
          Sprite_Draw(&hitSpr, o);
     }
 

@@ -56,7 +56,7 @@ Uint8 *Palette_Run(void) {
     if (flashTimer) {
         flashTimer--;
         for (int i = 0; i < ARRAY_LEN(colorPalette); i++) {
-            flashPalette[i] = (((frameCount << 2) & 0x30) + colorPalette[i]) & 0x3f;
+            flashPalette[i] = (((gameFrames << 2) & 0x30) + colorPalette[i]) & 0x3f;
         }
         return flashPalette;
     }
