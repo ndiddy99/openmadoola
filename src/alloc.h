@@ -18,6 +18,7 @@
  */
 
 #pragma once
+#include <stddef.h>
 
 /**
  * @brief malloc wrapper that aborts on out of memory

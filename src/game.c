@@ -346,6 +346,15 @@ void Game_PlayDemo(char *filename, int timer) {
     Demo_Uninit();
 }
 
+typedef enum {
+    GAME_STATE_STAGE_INIT,
+    GAME_STATE_STATUS_SCREEN_INIT,
+    GAME_STATE_STATUS_SCREEN,
+    GAME_STATE_STAGE_SCREEN_INIT,
+    GAME_STATE_STAGE_SCREEN,
+
+} GameState;
+
 static int Game_RunStage(int demoTimer) {
     // the last room number Lucia was in this stage
     Uint16 lastRoom = 0xffff;
