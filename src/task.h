@@ -72,6 +72,11 @@ void Task_AddChildTimed(void (*init)(void), void (*update)(void), int timer);
 void Task_Next(void);
 
 /**
+ * @brief Kills the current task and switches execution to its parent.
+ */
+void Task_Parent(void);
+
+/**
  * @brief Runs the current task's update function and modifies timers. Should be
  * run once per frame.
  * @param  

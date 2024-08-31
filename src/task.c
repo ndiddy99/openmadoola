@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
-#include "alloc.h"
 #include "constants.h"
 #include "platform.h"
 #include "task.h"
@@ -24,23 +23,24 @@
 typedef struct Task Task;
 
 struct Task {
+    Uint8 used;
     void (*init)(void);
     void (*update)(void);
+    Uint8 initialized;
     int timer;
-    int initialized;
     Task *next;
     Task *parent;
 };
-
+static Task taskPool[64] = { 0 };
 static Task *currentTask = NULL;
 
 static void Task_Free(Task *task) {
     while (task->next) {
         Task *temp = task->next->next;
-        free(task->next);
+        task->next->used = 0;
         task->next = temp;
     }
-    free(task);
+    task->used = 0;
 }
 
 static void Task_FreeAll(void) {
@@ -52,11 +52,23 @@ static void Task_FreeAll(void) {
 }
 
 static Task *Task_Create(void (*init)(void), void (*update)(void), int timer) {
-    Task *task = ommalloc(sizeof(Task));
+    Task *task = NULL;
+    for (int i = 0; i < ARRAY_LEN(taskPool); i++) {
+        if (!taskPool[i].used) {
+            task = &taskPool[i];
+            break;
+        }
+    }
+    if (!task) {
+        Platform_ShowError("Task pool exhausted");
+        return NULL;
+    }
+
+    task->used = 1;
     task->init = init;
     task->update = update;
-    task->timer = timer;
     task->initialized = 0;
+    task->timer = timer;
     task->next = NULL;
     task->parent = NULL;
     return task;
@@ -101,20 +113,27 @@ void Task_Next(void) {
     if (currentTask->next) {
         Task *temp = currentTask;
         currentTask = currentTask->next;
-        free(temp);
+        temp->used = 0;
     }
     else if (currentTask->parent) {
         Task *temp = currentTask;
         currentTask = currentTask->parent;
-        free(temp);
+        temp->used = 0;
     }
     else {
         Platform_ShowError("No task queued!");
     }
 }
 
+void Task_Parent(void) {
+    Task *temp = currentTask->parent;
+    Task_Free(currentTask);
+    currentTask = currentTask->parent;
+}
+
 void Task_Run(void) {
-    // handle "one-shot" tasks that queue a bunch of other tasks in their init function and then run Task_Next
+    // this is to allow tasks to spawn child tasks or switch tasks from inside
+    // their init functions
     Task *temp;
     do {
         temp = currentTask;
