@@ -35,20 +35,13 @@ Buffer *Buffer_Init(int allocSize) {
     return buf;
 }
 
-Buffer *Buffer_InitFromFile(char *filename) {
-    FILE *fp = File_Open(filename, "rb");
-    if (fp) {
-        fseek(fp, 0, SEEK_END);
-        int size = ftell(fp);
-        rewind(fp);
-        Buffer *buf = Buffer_Init(size);
-        Buffer_AddFromFile(buf, fp, size);
-        fclose(fp);
-        return buf;
-    }
-    else {
-        return NULL;
-    }
+Buffer *Buffer_InitFromFile(FILE *fp) {
+    fseek(fp, 0, SEEK_END);
+    int size = ftell(fp);
+    rewind(fp);
+    Buffer *buf = Buffer_Init(size);
+    Buffer_AddFromFile(buf, fp, size);
+    return buf;
 }
 
 void Buffer_Destroy(Buffer *buf) {

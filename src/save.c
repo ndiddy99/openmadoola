@@ -17,6 +17,7 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -113,7 +114,14 @@ void Save_Init(void) {
     char filename[20];
     for (int i = 0; i < NUM_FILES; i++) {
         snprintf(filename, sizeof(filename), "file%d.sav", i + 1);
-        files[i] = Buffer_InitFromFile(filename);
+        FILE *fp = File_Open(filename, "rb");
+        if (fp) {
+            files[i] = Buffer_InitFromFile(fp);
+            fclose(fp);
+        }
+        else {
+            files[i] = NULL;
+        }
     }
 }
 

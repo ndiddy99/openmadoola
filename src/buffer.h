@@ -35,11 +35,13 @@ typedef struct {
 Buffer *Buffer_Init(int allocSize);
 
 /**
- * @brief Creates a new buffer holding the contents of the provided file
- * @param filename File to load from
- * @returns pointer to new buffer, or NULL if we couldn't open the file
+ * @brief Creates a new buffer holding the contents of the provided file. fp will be
+ * at the end of the file and needs to be rewound if you want to read anything else
+ * from it.
+ * @param fp File to load from
+ * @returns pointer to new buffer
  */
-Buffer *Buffer_InitFromFile(char *filename);
+Buffer *Buffer_InitFromFile(FILE *fp);
 
 /**
  * @brief Frees all memory associated with a buffer

@@ -57,13 +57,13 @@ void Demo_Record(DemoData *data) {
 }
 
 int Demo_Playback(char *filename, DemoData *out) {
+    FILE *fp = File_OpenResource(filename, "rb");
+    if (!fp) { return 0; }
     if (!demoBuff) {
-        demoBuff = Buffer_InitFromFile(filename);
-        if (!demoBuff) { return 0; }
+        demoBuff = Buffer_InitFromFile(fp);
+        fclose(fp);
     }
     else {
-        FILE *fp = File_OpenResource(filename, "rb");
-        if (!fp) { return 0; }
         demoBuff->dataSize = 0;
         Buffer_AddFile(demoBuff, fp);
         fclose(fp);
