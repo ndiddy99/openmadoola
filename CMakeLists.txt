@@ -119,6 +119,8 @@ set(SOURCE_LIST
     "libs/blargg_apu/Nes_Oscs.cpp"
     "libs/blargg_apu/blargg_apu.cpp"
 
+    "libs/libco/libco.c"
+
     "libs/nanotime/nanotime.c"
 
     "libs/nes_ntsc/nes_ntsc.c"
@@ -210,6 +212,8 @@ set(HEADER_LIST
     "libs/blargg_apu/Nes_Apu.h"
     "libs/blargg_apu/Nes_Oscs.h"
 
+    "libs/libco/libco.h"
+
     "libs/nanotime/nanotime.h"
 
     "libs/nes_ntsc/nes_ntsc.h"
@@ -223,6 +227,7 @@ target_include_directories(openmadoola PRIVATE
     "src"
     "src/objects"
     "libs/blargg_apu"
+    "libs/libco"
     "libs/nanotime"
     "libs/nes_ntsc"
     ${PLATFORM_INCLUDE_DIRS}

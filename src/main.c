@@ -30,6 +30,8 @@
 #include "game.h"
 #include "soundtest.h"
 #include "system.h"
+#include "task.h"
+#include "title.h"
 #include "weapon.h"
 
 int main(int argc, char **argv) {
@@ -56,32 +58,37 @@ int main(int argc, char **argv) {
 
     if (!System_Init()) { return -1; }
 
-    if ((argc == 3) && (strcmp(argv[1], "-p") == 0)) {
-        SoundTest_RunStandalone(argv[2]);
-        return 0;
-    }
+    gameType = GAME_TYPE_ARCADE;
 
-    if ((argc == 3) && (strcmp(argv[1], "-d") == 0)) {
-        Game_PlayDemo(argv[2], NO_DEMO_TIMER);
-        return 0;
-    }
+    Task_Init(Title_Run);
+    System_GameLoop();
 
-    if ((argc == (8 + NUM_WEAPONS)) && (strcmp(argv[1], "-r") == 0)) {
-        int param = 2;
-        char *filename = argv[param++];
-        Uint8 type = (Uint8)atoi(argv[param++]);
-        Uint8 stage = (Uint8)atoi(argv[param++]) - 1;
-        Sint16 health = (Sint16)atoi(argv[param++]);
-        Sint16 magic = (Sint16)atoi(argv[param++]);
-        Uint8 boots = (Uint8)atoi(argv[param++]);
-        Uint8 weapons[NUM_WEAPONS];
-        for (int i = 0; i < NUM_WEAPONS; i++) {
-            weapons[i] = (Uint8)atoi(argv[param++]);
-        }
-        Game_RecordDemo(filename, type, stage, health, magic, boots, weapons);
-        return 0;
-    }
+    //if ((argc == 3) && (strcmp(argv[1], "-p") == 0)) {
+    //    SoundTest_RunStandalone(argv[2]);
+    //    return 0;
+    //}
 
-    Game_Run();
+    //if ((argc == 3) && (strcmp(argv[1], "-d") == 0)) {
+    //    Game_PlayDemo(argv[2], NO_DEMO_TIMER);
+    //    return 0;
+    //}
+
+    //if ((argc == (8 + NUM_WEAPONS)) && (strcmp(argv[1], "-r") == 0)) {
+    //    int param = 2;
+    //    char *filename = argv[param++];
+    //    Uint8 type = (Uint8)atoi(argv[param++]);
+    //    Uint8 stage = (Uint8)atoi(argv[param++]) - 1;
+    //    Sint16 health = (Sint16)atoi(argv[param++]);
+    //    Sint16 magic = (Sint16)atoi(argv[param++]);
+    //    Uint8 boots = (Uint8)atoi(argv[param++]);
+    //    Uint8 weapons[NUM_WEAPONS];
+    //    for (int i = 0; i < NUM_WEAPONS; i++) {
+    //        weapons[i] = (Uint8)atoi(argv[param++]);
+    //    }
+    //    Game_RecordDemo(filename, type, stage, health, magic, boots, weapons);
+    //    return 0;
+    //}
+
+    //Game_Run();
     return 0;
 }

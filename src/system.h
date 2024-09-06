@@ -36,3 +36,8 @@ void System_StartFrame(void);
  * engine and tells the platform code to end the frame.
  */
 void System_EndFrame(void);
+
+/**
+ * @brief Runs platform code and jumps to the current task.
+ */
+void System_GameLoop(void);

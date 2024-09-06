@@ -18,67 +18,11 @@
  */
 #pragma once
 
-/**
- * @brief Deletes any active tasks and sets the current task.
- * @param init Task initialization function (gets run immediately)
- * @param update Task update function (gets run each frame)
- */
-void Task_SetRoot(void (*init)(void), void (*update)(void));
-
-/**
- * @brief Deletes any active tasks and sets the current task.
- * @param init Task initialization function (gets run immediately)
- * @param update Task update function (gets run each frame)
- * @param timer number of frames to run the task before switching to the next task
- */
-void Task_SetRootTimed(void (*init)(void), void (*update)(void), int timer);
-
-/**
- * @brief Adds a task to the end of the current task's "next task" queue
- * @param init Task initialization function (gets run when task is switched to)
- * @param update Task update function (gets run each frame)
- */
-void Task_AddNext(void (*init)(void), void (*update)(void));
-
-/**
- * @brief Adds a task to the end of the current task's "next task" queue
- * @param init Task initialization function (gets run when task is switched to)
- * @param update Task update function (gets run each frame)
- * @param timer number of frames to run the task before switching to the next task
- */
-void Task_AddNextTimed(void (*init)(void), void (*update)(void), int timer);
-
-/**
- * @brief Sets the current task, making the previous task the current task's parent.
- * @param init Task initialization function (gets run immediately)
- * @param update Task update function (gets run each frame)
- */
-void Task_AddChild(void (*init)(void), void (*update)(void));
-
-/**
- * @brief Sets the current task, making the previous task the current task's parent.
- * @param init Task initialization function (gets run immediately)
- * @param update Task update function (gets run each frame)
- * @param timer number of frames to run the task before switching to the next task
- */
-void Task_AddChildTimed(void (*init)(void), void (*update)(void), int timer);
-
-/**
- * @brief Switches to the next task. The current task's queue gets processed in
- * first-to-last order. If there's no tasks in the queue, control returns to the
- * current task's parent task. If the current task doesn't have a parent task,
- * an error condition occurs.
- */
-void Task_Next(void);
-
-/**
- * @brief Kills the current task and switches execution to its parent.
- */
-void Task_Parent(void);
-
-/**
- * @brief Runs the current task's update function and modifies timers. Should be
- * run once per frame.
- * @param  
- */
+void Task_Init(void (*function)(void));
+void Task_Yield(void);
+void Task_Switch(void (*function)(void));
+void Task_Child(void (*function)(void), int timer);
+void Task_Parent(int returnCode);
+static void Task_SwitchToParent(void);
 void Task_Run(void);
+

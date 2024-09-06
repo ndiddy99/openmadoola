@@ -28,6 +28,7 @@
 #include "save.h"
 #include "sound.h"
 #include "system.h"
+#include "task.h"
 
 int System_Init(void) {
     // load assets
@@ -51,12 +52,20 @@ int System_Init(void) {
 }
 
 void System_StartFrame(void) {
-    Platform_StartFrame();
-    Graphics_StartFrame();
-    Joy_Update();
+
 }
 
 void System_EndFrame(void) {
-    Sound_Run();
-    Platform_EndFrame();
+
+}
+
+void System_GameLoop(void) {
+    while (1) {
+        Platform_StartFrame();
+        Graphics_StartFrame();
+        Joy_Update();
+        Task_Run();
+        Sound_Run();
+        Platform_EndFrame();
+    }
 }

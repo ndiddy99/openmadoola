@@ -16,157 +16,92 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include "constants.h"
+#include "libco.h"
 #include "platform.h"
 #include "task.h"
 
-typedef struct Task Task;
+static cothread_t systemTask;
+static cothread_t gameTask;
+static cothread_t nextTask;
+static cothread_t childTask;
+static cothread_t *currentTask;
+static int childTimer;
+static int childReturn;
+static int childReturnCode;
 
-struct Task {
-    Uint8 used;
-    void (*init)(void);
-    void (*update)(void);
-    Uint8 initialized;
-    int timer;
-    Task *next;
-    Task *parent;
-};
-static Task taskPool[64] = { 0 };
-static Task *currentTask = NULL;
 
-static void Task_Free(Task *task) {
-    while (task->next) {
-        Task *temp = task->next->next;
-        task->next->used = 0;
-        task->next = temp;
-    }
-    task->used = 0;
+#define TASK_STACK_SIZE (sizeof(void *) * 256 * 1024)
+
+void Task_Init(void (*function)(void)) {
+    systemTask = co_active();
+    gameTask = co_create(TASK_STACK_SIZE, function);
+    nextTask = NULL;
+    childTask = NULL;
+    currentTask = &gameTask;
+    childTimer = 0;
+    childReturn = 0;
+    childReturnCode = 0;
 }
 
-static void Task_FreeAll(void) {
-    while (currentTask) {
-        Task *temp = currentTask->parent;
-        Task_Free(currentTask);
-        currentTask = temp;
-    }
+void Task_Yield(void) {
+    assert(co_active() != systemTask);
+    co_switch(systemTask);
 }
 
-static Task *Task_Create(void (*init)(void), void (*update)(void), int timer) {
-    Task *task = NULL;
-    for (int i = 0; i < ARRAY_LEN(taskPool); i++) {
-        if (!taskPool[i].used) {
-            task = &taskPool[i];
-            break;
-        }
-    }
-    if (!task) {
-        Platform_ShowError("Task pool exhausted");
-        return NULL;
-    }
-
-    task->used = 1;
-    task->init = init;
-    task->update = update;
-    task->initialized = 0;
-    task->timer = timer;
-    task->next = NULL;
-    task->parent = NULL;
-    return task;
+void Task_Switch(void (*function)(void)) {
+    assert(co_active() != systemTask);
+    nextTask = co_create(TASK_STACK_SIZE, function);
+    Task_Yield();
 }
 
-void Task_SetRootTimed(void (*init)(void), void (*update)(void), int timer) {
-    Task_FreeAll();
-    currentTask = Task_Create(init, update, timer);
+void Task_Child(void (*function)(void), int timer) {
+    assert(co_active() == gameTask);
+    if (childTask) { co_delete(childTask); }
+    childTask = co_create(TASK_STACK_SIZE, function);
+    childTimer = timer;
+    currentTask = &childTask;
+    Task_Yield();
 }
 
-void Task_SetRoot(void (*init)(void), void (*update)(void)) {
-    Task_SetRootTimed(init, update, 0);
+void Task_Parent(int returnCode) {
+    assert(co_active() == childTask);
+    childReturn = 1;
+    childReturnCode = returnCode;
+    Task_Yield();
 }
 
-void Task_AddNextTimed(void (*init)(void), void (*update)(void), int timer) {
-    Task *task = currentTask;
-    while (task->next) {
-        task = task->next;
-    }
-    task->next = Task_Create(init, update, timer);
-    task->next->parent = task->parent;
-}
-
-void Task_AddNext(void (*init)(void), void (*update)(void)) {
-    Task_AddNextTimed(init, update, 0);
-}
-
-void Task_AddChildTimed(void (*init)(void), void (*update)(void), int timer) {
-    Task *temp = currentTask;
-    currentTask = Task_Create(init, update, timer);
-    currentTask->parent = temp;
-    if (currentTask->init) {
-        currentTask->init();
-    }
-}
-
-void Task_AddChild(void (*init)(void), void (*update)(void)) {
-    Task_AddChildTimed(init, update, 0);
-}
-
-void Task_Next(void) {
-    if (currentTask->next) {
-        Task *temp = currentTask;
-        currentTask = currentTask->next;
-        temp->used = 0;
-    }
-    else if (currentTask->parent) {
-        Task *temp = currentTask;
-        currentTask = currentTask->parent;
-        temp->used = 0;
-    }
-    else {
-        Platform_ShowError("No task queued!");
-    }
-}
-
-void Task_Parent(void) {
-    Task *temp = currentTask->parent;
-    Task_Free(currentTask);
-    currentTask = currentTask->parent;
+static void Task_SwitchToParent(void) {
+    co_delete(childTask);
+    childTask = NULL;
+    co_switch(gameTask);
+    currentTask = &gameTask;
 }
 
 void Task_Run(void) {
-    // this is to allow tasks to spawn child tasks or switch tasks from inside
-    // their init functions
-    Task *temp;
-    do {
-        temp = currentTask;
-        if (!currentTask->initialized && currentTask->init) {
-            currentTask->initialized = 1;
-            currentTask->init();
+    assert(co_active() == systemTask);
+    if (childTask) {
+        co_switch(childTask);
+        // if child wants to return
+        if (childReturn) {
+            Task_SwitchToParent();
         }
-    } while (temp != currentTask);
-
-    if (currentTask->update) {
-        currentTask->update();
-    }
-
-    // go up the task chain, decrementing timers as we go. if any task's timer
-    // hits zero, free all of its child tasks, make it the current task, and move
-    // to the next task.
-    Task *task = currentTask;
-    while (task) {
-        if (task->timer) {
-            task->timer--;
-            if (task->timer == 0) {
-                Task *temp = currentTask;
-                Task *parent;
-                while (temp != task) {
-                    parent = temp->parent;
-                    Task_Free(temp);
-                    temp = parent;
-                }
-                currentTask = task;
-                Task_Next();
-                break;
+        else if (childTimer) {
+            childTimer--;
+            // if child timed out, switch to parent
+            if (childTimer == 0) {
+                childReturnCode = 0;
+                Task_SwitchToParent();
             }
         }
-        task = task->parent;
+    }
+    else {
+        co_switch(gameTask);
+    }
+    
+    if (nextTask) {
+        co_delete(*currentTask);
+        *currentTask = nextTask;
     }
 }

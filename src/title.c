@@ -25,7 +25,7 @@
 #include "palette.h"
 #include "sound.h"
 #include "sprite.h"
-#include "system.h"
+#include "task.h"
 #include "textscroll.h"
 #include "title.h"
 
@@ -122,10 +122,9 @@ static int Title_ScreenOriginal(void) {
     Sound_Play(MUS_TITLE);
     BG_Scroll(BG_CENTERED_X, 0);
     while (1) {
-        System_StartFrame();
         BG_Draw();
-        System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
+        Task_Yield();
     }
 }
 
@@ -157,7 +156,6 @@ static int Title_AnimateIn(void) {
     Uint8 scrollDir = 0;
 
     while (scroll >= 2) {
-        System_StartFrame();
         scroll -= 2;
         scrollDir ^= 1;
         if (scrollDir) {
@@ -167,8 +165,8 @@ static int Title_AnimateIn(void) {
             BG_Scroll(BG_CENTERED_X - scroll, 0);
         }
         BG_Draw();
-        System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
+        Task_Yield();
     }
     BG_Scroll(BG_CENTERED_X, 0);
     return 0;
@@ -182,10 +180,9 @@ static int Title_ScreenPlus(void) {
         Sound_Play(MUS_TITLE);
     }
     while (++frames < 900) {
-        System_StartFrame();
         BG_Draw();
-        System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
+        Task_Yield();
     }
     return 0;
 }
@@ -193,7 +190,6 @@ static int Title_ScreenPlus(void) {
 static int Title_ScreenArcade(void) {
     int frames = 0;
     while (++frames < 200) {
-        System_StartFrame();
         int madoolaPaletteNum = (frames / 2) % 7;
         BG_SetPalette(1, titleCyclePals1 + madoolaPaletteNum * 4);
         // NOTE: this is most likely supposed to be "frames / 2" but I think
@@ -201,8 +197,8 @@ static int Title_ScreenArcade(void) {
         int startPaletteNum = (frames / 8) % 8;
         BG_SetPalette(3, titleCyclePals3 + startPaletteNum * 4);
         BG_Draw();
-        System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
+        Task_Yield();
     }
     BG_SetPalette(3, titleCyclePals3);
     return 0;
@@ -213,7 +209,6 @@ static int Title_AnimateOut(void) {
     Uint8 scrollDir = 0;
     
     while (scroll < 254) {
-        System_StartFrame();
         scroll += 2;
         scrollDir ^= 1;
         if (scrollDir) {
@@ -223,8 +218,8 @@ static int Title_AnimateOut(void) {
             BG_Scroll(BG_CENTERED_X - scroll, 0);
         }
         BG_Draw();
-        System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
+        Task_Yield();
     }
     return 0;
 }
@@ -245,10 +240,9 @@ static int Title_HighScoresInit(void) {
 static int Title_HighScores(void) {
     int frames = 0;
     while (++frames < 200) {
-        System_StartFrame();
         BG_Draw();
-        System_EndFrame();
         if (joyEdge & JOY_START) { return 1; }
+        Task_Yield();
     }
     return 0;
 }
@@ -289,7 +283,7 @@ static SequenceItem arcadeSequence[] = {
     Title_AnimateIn,
     Title_HighScores,
     Title_AnimateOut,
-    Title_Demo,
+    //Title_Demo,
 };
 
 void Title_DoSequence(SequenceItem *sequence, int len) {
