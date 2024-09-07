@@ -27,11 +27,10 @@
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 
-int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numItems, void (*draw)(void)) {
+void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numItems, void (*draw)(void)) {
     int cursor = 0;
-    int exitFlag = 0;
-    int returnVal;
     Sprite cursorSpr;
 
     Sound_Reset();
@@ -44,8 +43,7 @@ int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numI
         }
     }
 
-    while (!exitFlag) {
-        System_StartFrame();
+    while (1) {
         Sprite_ClearList();
         BG_Clear();
 
@@ -77,11 +75,10 @@ int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numI
             case ITEM_TYPE_NONE:
                 break;
 
-            case ITEM_TYPE_ABORT:
+            case ITEM_TYPE_TASK:
                 if (i == cursor) {
                     if (joyEdge & (JOY_A | JOY_START)) {
-                        exitFlag = 1;
-                        returnVal = items[i].num;
+                        Task_Switch(items[i].function);
                     }
                 }
                 BG_Print(menuX, currY, 0, "%s", items[i].text);
@@ -90,13 +87,9 @@ int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numI
             case ITEM_TYPE_LINK:
                 if (i == cursor) {
                     if (joyEdge & (JOY_A | JOY_START)) {
-                        BG_Draw();
-                        Sprite_EndFrame();
-                        System_EndFrame();
-                        items[i].link();
-                        System_StartFrame();
-                        Sprite_ClearList();
+                        items[i].function();
                         BG_Clear();
+                        Sprite_ClearList();
                     }
                 }
                 BG_Print(menuX, currY, 0, "%s", items[i].text);
@@ -141,7 +134,7 @@ int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numI
                         items[i].num = items[i].change(items[i].num + items[i].step);
                     }
                     if (joyEdge & (JOY_A | JOY_START)) {
-                        items[i].link();
+                        items[i].function();
                     }
                 }
                 BG_Print(menuX, currY, 0, "%s - %d -", items[i].text, items[i].num);
@@ -150,10 +143,8 @@ int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing,  MenuItem *items, int numI
             currY += spacing;
         }
 
-        BG_Draw();
-        Sprite_EndFrame();
-        System_EndFrame();
+        BG_Display();
+        Sprite_Display();
+        Task_Yield();
     }
-
-    return returnVal;
 }

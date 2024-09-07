@@ -21,6 +21,7 @@
 #include "bg.h"
 #include "constants.h"
 #include "joy.h"
+#include "mainmenu.h"
 #include "menu.h"
 #include "mml.h"
 #include "sound.h"
@@ -59,7 +60,7 @@ static void playSound(void) {
 
 static MenuItem items[] = {
     MENU_NUMSET("Sound", getSoundNum, setSoundNum, 1, playSound),
-    MENU_ABORT("Back", 0),
+    MENU_TASK("Back", MainMenu_Run),
 };
 
 static void SoundTest_Draw(void) {
@@ -102,7 +103,7 @@ void SoundTest_RunStandalone(char *mmlPath) {
         while (1) {
             System_StartFrame();
             BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
-            BG_Draw();
+            BG_Display();
             System_EndFrame();
             if (joyEdge & (JOY_A | JOY_B | JOY_SELECT | JOY_START)) {
                 Sound_Reset();

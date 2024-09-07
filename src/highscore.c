@@ -200,7 +200,7 @@ void HighScore_NameEntry(Uint32 score) {
             BG_PutChar(nameX + nameCursor, nameY, 1, highScoreCharset[charCursor]);
         }
 
-        BG_Draw();
+        BG_Display();
         System_EndFrame();
     }
 
@@ -219,7 +219,7 @@ void HighScore_NameEntry(Uint32 score) {
     frames = 300;
     while ((frames-- > 0)) {
         System_StartFrame();
-        BG_Draw();
+        BG_Display();
         System_EndFrame();
         if (joyEdge) { break; }
     }

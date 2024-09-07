@@ -215,7 +215,7 @@ void Sprite_SetDrawLargeAbs(Sprite *s, Object *o, Uint16 *tiles, Sint8 *offsets)
 }
 
 
-void Sprite_EndFrame() {
+void Sprite_Display() {
     for (int i = 0; i < MAX_SPRITES; i++) {
         // NOTE: I add 1 to the y positions because the NES draws sprites one line lower than the coordinate you provide
         switch (spriteList[i].size) {

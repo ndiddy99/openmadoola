@@ -22,6 +22,7 @@
 #include "game.h"
 #include "highscore.h"
 #include "joy.h"
+#include "mainmenu.h"
 #include "palette.h"
 #include "sound.h"
 #include "sprite.h"
@@ -122,7 +123,7 @@ static int Title_ScreenOriginal(void) {
     Sound_Play(MUS_TITLE);
     BG_Scroll(BG_CENTERED_X, 0);
     while (1) {
-        BG_Draw();
+        BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
     }
@@ -164,7 +165,7 @@ static int Title_AnimateIn(void) {
         else {
             BG_Scroll(BG_CENTERED_X - scroll, 0);
         }
-        BG_Draw();
+        BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
     }
@@ -180,7 +181,7 @@ static int Title_ScreenPlus(void) {
         Sound_Play(MUS_TITLE);
     }
     while (++frames < 900) {
-        BG_Draw();
+        BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
     }
@@ -196,7 +197,7 @@ static int Title_ScreenArcade(void) {
         // frames / 8 looks a LOT better
         int startPaletteNum = (frames / 8) % 8;
         BG_SetPalette(3, titleCyclePals3 + startPaletteNum * 4);
-        BG_Draw();
+        BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
     }
@@ -217,7 +218,7 @@ static int Title_AnimateOut(void) {
         else {
             BG_Scroll(BG_CENTERED_X - scroll, 0);
         }
-        BG_Draw();
+        BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
     }
@@ -240,7 +241,7 @@ static int Title_HighScoresInit(void) {
 static int Title_HighScores(void) {
     int frames = 0;
     while (++frames < 200) {
-        BG_Draw();
+        BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
     }
@@ -314,4 +315,5 @@ void Title_Run(void) {
         Title_DoSequence(arcadeSequence, ARRAY_LEN(arcadeSequence));
         break;
     }
+    Task_Switch(MainMenu_Run);
 }

@@ -31,7 +31,6 @@ static int childTimer;
 static int childReturn;
 static int childReturnCode;
 
-
 #define TASK_STACK_SIZE (sizeof(void *) * 256 * 1024)
 
 void Task_Init(void (*function)(void)) {
@@ -73,6 +72,7 @@ void Task_Parent(int returnCode) {
 }
 
 static void Task_SwitchToParent(void) {
+    assert(co_active() == systemTask);
     co_delete(childTask);
     childTask = NULL;
     co_switch(gameTask);
@@ -103,5 +103,6 @@ void Task_Run(void) {
     if (nextTask) {
         co_delete(*currentTask);
         *currentTask = nextTask;
+        nextTask = NULL;
     }
 }

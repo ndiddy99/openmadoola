@@ -110,7 +110,7 @@ void BG_Scroll(Uint32 x, Uint32 y) {
     yScroll = y;
 }
 
-void BG_Draw(void) {
+void BG_Display(void) {
     for (int y = 0; y < SCREEN_HEIGHT + TILE_HEIGHT; y += TILE_HEIGHT) {
         for (int x = 0; x < SCREEN_WIDTH + TILE_WIDTH; x += TILE_WIDTH) {
             int xPos = x - (xScroll % TILE_WIDTH);

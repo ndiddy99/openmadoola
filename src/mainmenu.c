@@ -21,8 +21,10 @@
 #include "constants.h"
 #include "menu.h"
 #include "options.h"
+#include "save.h"
 #include "soundtest.h"
 #include "sprite.h"
+#include "title.h"
 
 static Uint8 palette[] = {
     0x0F, 0x36, 0x26, 0x16,
@@ -36,14 +38,14 @@ static Uint8 palette[] = {
 };
 
 static MenuItem items[] = {
-    MENU_ABORT("Start Game", 1),
-    MENU_LINK("Options", Options_Run),
-    MENU_LINK("Sound Test", SoundTest_Run),
-    MENU_ABORT("Title Screen", 0),
+    MENU_TASK("Start Game", Save_Screen),
+    MENU_TASK("Options", Options_Run),
+    MENU_TASK("Sound Test", SoundTest_Run),
+    MENU_TASK("Title Screen", Title_Run),
 };
 
-int MainMenu_Run(void) {
+void MainMenu_Run(void) {
     BG_SetAllPalettes(palette);
     Sprite_SetAllPalettes(palette + 16);
-    return Menu_Run(10, 9, 3, items, ARRAY_LEN(items), NULL);
+    Menu_Run(10, 9, 3, items, ARRAY_LEN(items), NULL);
 }

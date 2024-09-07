@@ -265,8 +265,8 @@ int Save_Screen(void) {
             }
         }
 
-        BG_Draw();
-        Sprite_EndFrame();
+        BG_Display();
+        Sprite_Display();
         System_EndFrame();
 
         if (joyEdge & (JOY_A | JOY_START)) {
@@ -309,8 +309,8 @@ int Save_Screen(void) {
                 }
             }
             luciaX += 3;
-            BG_Draw();
-            Sprite_EndFrame();
+            BG_Display();
+            Sprite_Display();
             System_EndFrame();
             if (joyEdge & JOY_START) { break; }
         }

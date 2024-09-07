@@ -22,7 +22,7 @@
 
 typedef enum {
     ITEM_TYPE_NONE,
-    ITEM_TYPE_ABORT,
+    ITEM_TYPE_TASK,
     ITEM_TYPE_LINK,
     ITEM_TYPE_LIST,
     ITEM_TYPE_NUM,
@@ -39,18 +39,18 @@ typedef struct MenuItem {
     char **options;
     int (*init)(void);
     int (*change)(int);
-    void (*link)(void);
+    void (*function)(void);
 } MenuItem;
 
-#define MENU_ABORT(textParam, returnVal) \
-    {.type = ITEM_TYPE_ABORT, \
+#define MENU_TASK(textParam, taskParam) \
+    {.type = ITEM_TYPE_TASK, \
     .text = textParam, \
-    .num = returnVal}
+    .function = taskParam}
 
 #define MENU_LINK(textParam, linkParam) \
     {.type = ITEM_TYPE_LINK, \
     .text = textParam, \
-    .link = linkParam}
+    .function = linkParam}
 
 #define MENU_LIST(textParam, optionsParam, initParam, changeParam) \
     {.type = ITEM_TYPE_LIST, \
@@ -72,7 +72,7 @@ typedef struct MenuItem {
     .init = initParam, \
     .change = changeParam, \
     .step = stepParam, \
-    .link = setParam}
+    .function = setParam}
 /**
  * @brief Displays a menu screen
  * @param menuX display x position
@@ -81,6 +81,5 @@ typedef struct MenuItem {
  * @param items pointer to MenuItem array (see menu.h for MenuItem struct initialization macros)
  * @param numItems size of MenuItem array
  * @param draw optional function that gets run each frame
- * @returns return value set in the selected MENU_ABORT option
  */
-int Menu_Run(Uint16 menuX, Uint16 menuY, int spacing, MenuItem *items, int numItems, void (*draw)(void));
+void Menu_Run(Uint16 menuX, Uint16 menuY, int spacing, MenuItem *items, int numItems, void (*draw)(void));

@@ -25,12 +25,14 @@
 #include "highscore.h"
 #include "input.h"
 #include "joy.h"
+#include "mainmenu.h"
 #include "menu.h"
 #include "options.h"
 #include "platform.h"
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 
 static Uint8 palette[] = {
         0x0F, 0x36, 0x26, 0x16,
@@ -71,11 +73,8 @@ void Options_Map(void) {
     Input_SetOnPressFunc(Options_InputCallback);
     for (int i = 0; i < ARRAY_LEN(buttonNames); i++) {
         while (1) {
-            System_StartFrame();
             Sprite_ClearList();
             BG_Print(2, (i * 2) + 2, 0, "Press key for %s", buttonNames[i].name);
-            BG_Draw();
-            System_EndFrame();
             if (last != INPUT_INVALID) {
                 BG_Print(24, (i * 2) + 2, 0, "%s", Input_ButtonName(last));
                 if (mapType == KEYBOARD_CONTROLS) {
@@ -87,17 +86,13 @@ void Options_Map(void) {
                 last = INPUT_INVALID;
                 break;
             }
+            BG_Display();
+            Task_Yield();
         }
     }
     Input_SetOnPressFunc(NULL);
     // save key mappings to disk
     Joy_SaveMappings();
-    // wait a few frames so we don't accidentally re-trigger the map keys function
-    for (int i = 0; i < 3; i++) {
-        System_StartFrame();
-        BG_Draw();
-        System_EndFrame();
-    }
 }
 
 void controlsDraw(void) {
@@ -121,7 +116,7 @@ void controlsDraw(void) {
 
 static MenuItem controlsItems[] = {
     MENU_LINK("Map", Options_Map),
-    MENU_ABORT("Back", 0),
+    MENU_TASK("Back", Options_Run),
 };
 
 static char *boolOptions[] = {"OFF", "ON"};
@@ -136,12 +131,12 @@ static int ntscCB(int num) {
     return Platform_SetNTSC(num);
 }
 
-static void keyboardLink(void) {
+static void keyboardTask(void) {
     mapType = KEYBOARD_CONTROLS;
     Menu_Run(12, 24, 2, controlsItems, ARRAY_LEN(controlsItems), controlsDraw);
 }
 
-static void gamepadLink(void) {
+static void gamepadTask(void) {
     mapType = GAMEPAD_CONTROLS;
     Menu_Run(12, 24, 2, controlsItems, ARRAY_LEN(controlsItems), controlsDraw);
 }
@@ -159,9 +154,14 @@ static int gameTypeCB(int num) {
     return num;
 }
 
+static void doHighScoreReset(void) {
+    HighScore_ResetScores();
+    Task_Switch(Options_Run);
+}
+
 static MenuItem highScoreItems[] = {
-    MENU_ABORT("Reset", 1),
-    MENU_ABORT("Back", 0),
+    MENU_TASK("Reset", doHighScoreReset),
+    MENU_TASK("Back", Options_Run),
 };
 
 static void highScoreResetDraw(void) {
@@ -169,10 +169,8 @@ static void highScoreResetDraw(void) {
     BG_Print(4, 6, 0, "Are you sure you want to\n\nreset the arcade mode\n\nhigh score table?");
 }
 
-static void highScoreResetLink(void) {
-    if (Menu_Run(12, 14, 2, highScoreItems, ARRAY_LEN(highScoreItems), highScoreResetDraw)) {
-        HighScore_ResetScores();
-    }
+static void highScoreResetTask(void) {
+    Menu_Run(12, 14, 2, highScoreItems, ARRAY_LEN(highScoreItems), highScoreResetDraw);
 }
 
 static MenuItem optionsItems[] = {
@@ -180,11 +178,11 @@ static MenuItem optionsItems[] = {
     MENU_NUM("Window scale", Platform_GetVideoScale, Platform_SetVideoScale, 1),
     MENU_LIST("NTSC filter", boolOptions, Platform_GetNTSC, ntscCB),
     MENU_NUM("Volume", Sound_GetVolume, Sound_SetVolume, 5),
-    MENU_LINK("Keyboard controls", keyboardLink),
-    MENU_LINK("Gamepad controls", gamepadLink),
+    MENU_TASK("Keyboard controls", keyboardTask),
+    MENU_TASK("Gamepad controls", gamepadTask),
     MENU_LIST("Game type", gameTypeOptions, gameTypeInit, gameTypeCB),
-    MENU_LINK("Reset high scores", highScoreResetLink),
-    MENU_ABORT("Back", 0),
+    MENU_TASK("Reset high scores", highScoreResetTask),
+    MENU_TASK("Back", MainMenu_Run),
 };
 
 void Options_Draw(void) {

@@ -23,6 +23,5 @@ void Task_Yield(void);
 void Task_Switch(void (*function)(void));
 void Task_Child(void (*function)(void), int timer);
 void Task_Parent(int returnCode);
-static void Task_SwitchToParent(void);
 void Task_Run(void);
 

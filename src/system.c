@@ -17,6 +17,7 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include "db.h"
 #include "game.h"
 #include "highscore.h"
@@ -52,11 +53,11 @@ int System_Init(void) {
 }
 
 void System_StartFrame(void) {
-
+    assert(0);
 }
 
 void System_EndFrame(void) {
-
+    assert(0);
 }
 
 void System_GameLoop(void) {

@@ -133,4 +133,4 @@ void Sprite_SetDrawLargeAbs(Sprite *s, Object *o, Uint16 *tiles, Sint8 *offsets)
 /**
  * @brief Draws all the sprites in the sprite list, should be run at the end of each frame
 */
-void Sprite_EndFrame(void);
+void Sprite_Display(void);

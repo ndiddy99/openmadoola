@@ -419,7 +419,7 @@ mainGameLoop:
         HUD_Weapon();
     }
     Map_Draw();
-    Sprite_EndFrame();
+    Sprite_Display();
     System_EndFrame();
     gameFrames++;
     Game_HandlePaletteShifting();

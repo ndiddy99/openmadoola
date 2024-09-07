@@ -69,8 +69,8 @@ static Uint16 *TextScroll_PrintTiles(Uint16 *tiles) {
 static int TextScroll_WaitFrames(int frames) {
     for (int i = 0; i < frames; i++) {
         System_StartFrame();
-        BG_Draw();
-        Sprite_EndFrame();
+        BG_Display();
+        Sprite_Display();
         System_EndFrame();
         if (canSkip && (joyEdge & JOY_START)) { return 1; }
     }

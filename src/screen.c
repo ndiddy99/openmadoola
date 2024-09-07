@@ -119,8 +119,8 @@ int Screen_Status(void) {
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {
         System_StartFrame();
-        BG_Draw();
-        Sprite_EndFrame();
+        BG_Display();
+        Sprite_Display();
         System_EndFrame();
         if (joyEdge & JOY_START) {
             return 1;
@@ -149,7 +149,7 @@ int Screen_Stage(void) {
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {
         System_StartFrame();
-        BG_Draw();
+        BG_Display();
         System_EndFrame();
         if (joyEdge & JOY_START) {
             return 1;
@@ -172,7 +172,7 @@ void Screen_GameOver(void) {
     // wait 4 seconds
     for (int i = 0; i < 240; i++) {
         System_StartFrame();
-        BG_Draw();
+        BG_Display();
         System_EndFrame();
     }
 }
@@ -199,7 +199,7 @@ void Screen_Keyword(void) {
     BG_Print(9, 14, 0, "THE KEYWORD IS");
     for (int i = 0; i < 150; i++) {
         System_StartFrame();
-        BG_Draw();
+        BG_Display();
         System_EndFrame();
     }
     // --- show the keyword (neko dayo~) for 1 second ---
@@ -212,7 +212,7 @@ void Screen_Keyword(void) {
     }
     for (int i = 0; i < 60; i++) {
         System_StartFrame();
-        BG_Draw();
+        BG_Display();
         System_EndFrame();
     }
 }

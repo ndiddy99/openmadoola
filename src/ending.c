@@ -83,8 +83,8 @@ static void Ending_Animation(void) {
 static void Ending_WaitFrames(int count) {
     for (int i = 0; i < count; i++) {
         System_StartFrame();
-        BG_Draw();
-        Sprite_EndFrame();
+        BG_Display();
+        Sprite_Display();
         System_EndFrame();
         gameFrames++;
     }

@@ -113,4 +113,4 @@ void BG_Scroll(Uint32 x, Uint32 y);
 /**
  * @brief Draws the background to the screen. Should be run once per frame
 */
-void BG_Draw(void);
+void BG_Display(void);
