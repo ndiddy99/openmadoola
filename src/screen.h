@@ -1,5 +1,5 @@
 /* screen.h: Title, status, stage screens
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -21,15 +21,13 @@
 
 /**
  * @brief Draws the status screen, runs for 3 seconds or until the user presses start.
- * @returns 1 if the user pressed start, 0 if the user waited for 3 seconds.
 */
-int Screen_Status(void);
+void Screen_Status(void);
 
 /**
  * @brief Draws the stage screen, runs for 3 seconds or until the user presses start.
- * @returns 1 if the user pressed start, 0 if the user waited for 3 seconds.
 */
-int Screen_Stage(void);
+void Screen_Stage(void);
 
 /**
  * @brief Draws the game over screen, runs for 4 seconds.

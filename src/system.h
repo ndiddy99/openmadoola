@@ -26,18 +26,6 @@
 int System_Init(void);
 
 /**
- * @brief Should be run by "user code" at the start of each frame. Tells the
- * platform & graphics code to start the frame and reads input.
- */
-void System_StartFrame(void);
-
-/**
- * @brief Should be run by "user code" at the end of each frame. Runs the sound
- * engine and tells the platform code to end the frame.
- */
-void System_EndFrame(void);
-
-/**
  * @brief Runs platform code and jumps to the current task.
  */
 void System_GameLoop(void);

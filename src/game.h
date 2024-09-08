@@ -18,7 +18,6 @@
  */
 
 #pragma once
-#include <stdnoreturn.h>
 #include "constants.h"
 
 #define GAME_TYPE_ORIGINAL 0
@@ -38,9 +37,19 @@ extern Uint8 bossDefeated[16];
 extern Uint8 gameFrames;
 
 /**
- * @brief Initializes the title screen, game, etc and runs the game loop.
-*/
-noreturn void Game_Run(void);
+ * @brief Loads game-specific settings from disk.
+ */
+void Game_LoadSettings(void);
+
+/**
+ * @brief Starts a new game.
+ */
+void Game_NewGame(void);
+
+/**
+ * @brief Runs a game without initializing the state. Should only be run after loading a save file.
+ */
+void Game_LoadGame(void);
 
 /**
  * @brief Records a stage demo.
@@ -54,11 +63,10 @@ noreturn void Game_Run(void);
  */
 void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels);
 
-#define NO_DEMO_TIMER 0
 /**
  * @brief Plays back a stage demo.
  * @param filename demo file to load
- * @param demoTimer how many frames to play the demo for
+ * @param timer how many frames to play the demo for
  */
 void Game_PlayDemo(char *filename, int timer);
 

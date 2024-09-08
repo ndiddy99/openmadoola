@@ -37,6 +37,7 @@ int System_Init(void) {
     if (!Rom_LoadChr("font.bin", 4096)) { return 0; }
     if (!Palette_Init())                { return 0; }
     DB_Init();
+    Game_LoadSettings();
 
     // initialize platform code
     if (!Platform_Init()) { return 0; }
@@ -50,14 +51,6 @@ int System_Init(void) {
     RNG_Seed();
     Rom_GetMapData(&mapData);
     return 1;
-}
-
-void System_StartFrame(void) {
-    assert(0);
-}
-
-void System_EndFrame(void) {
-    assert(0);
 }
 
 void System_GameLoop(void) {

@@ -25,6 +25,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 #include "textscroll.h"
 
 static Sprite *luciaSprites[3];
@@ -82,10 +83,9 @@ static void Ending_Animation(void) {
 
 static void Ending_WaitFrames(int count) {
     for (int i = 0; i < count; i++) {
-        System_StartFrame();
         BG_Display();
         Sprite_Display();
-        System_EndFrame();
+        Task_Yield();
         gameFrames++;
     }
 }

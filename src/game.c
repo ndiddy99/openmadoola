@@ -17,7 +17,6 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdnoreturn.h>
 #include <string.h>
 
 #include "camera.h"
@@ -45,6 +44,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 #include "title.h"
 #include "weapon.h"
 
@@ -71,27 +71,79 @@ Uint8 spritePalettes[16] = {
     0x00, 0x00, 0x27, 0x37,
 };
 
-static Uint8 itemSpawnYOffsets[] = {
-    0x09, 0x0B, 0x09, 0x0B,
-};
-
+static void Game_InitRoomVars(Object *lucia);
+static void Game_SpawnFountain(SpawnInfo *info);
+static void Game_InitNewGame(void);
+static void Game_InitCommon(void);
+static void Game_InitDemo(DemoData *data);
+static void Game_Run(void);
+static int Game_RunStage(void);
 static void Game_HandleWeaponSwitch(void);
 static void Game_HandlePause(void);
-static void Game_SpawnFountain(SpawnInfo *info);
-static void Game_HandleRoomChange(void);
 static void Game_SetRoom(Uint8 roomNum);
 static void Game_HandlePaletteShifting(void);
+static void Game_HandleRoomChange(void);
 
 typedef enum {
     STAGE_EXIT_NEXTSTAGE,
     STAGE_EXIT_DIED,
     STAGE_EXIT_WON,
     STAGE_EXIT_RESET,
-    STAGE_EXIT_TIMER,
 } GameRunStageExit;
-static int Game_RunStage(int timer);
+static int Game_RunStage(void);
 
-static void Game_InitRoomVars(Object *o) {
+void Game_LoadSettings(void) {
+    // initialize game type
+    DBEntry *entry = DB_Find("gametype");
+    if (entry) {
+        gameType = entry->data[0];
+    }
+    else {
+        gameType = GAME_TYPE_PLUS;
+    }
+}
+
+void Game_NewGame(void) {
+    Game_InitNewGame();
+    Save_SaveFile();
+    Game_InitCommon();
+    RNG_Seed();
+    Game_Run();
+}
+
+void Game_LoadGame(void) {
+    health = 1000;
+    Game_InitCommon();
+    RNG_Seed();
+    Game_Run();
+}
+
+static void Game_InitNewGame(void) {
+    health = 1000;
+    maxHealth = 1000;
+    maxMagic = 1000;
+    highestReachedStage = 0;
+
+    // initialize boots and weapon levels
+    bootsLevel = 0;
+    memset(weaponLevels, 0, NUM_WEAPONS);
+    weaponLevels[WEAPON_SWORD] = 1;
+    Item_InitCollected();
+    memset(bossDefeated, 0, sizeof(bossDefeated));
+    stage = 0;
+    orbCollected = 0;
+    keywordDisplay = 0;
+}
+
+static void Game_InitCommon(void) {
+    score = 0;
+    lives = 2;
+    paused = 0;
+    currentWeapon = WEAPON_SWORD;
+}
+
+static Uint8 itemSpawnYOffsets[] = {0x09, 0x0B, 0x09, 0x0B};
+static void Game_InitRoomVars(Object *lucia) {
     // arcade mode has room 0's bg color replaced by room 1's
     if ((currRoom == 0) && (gameType == GAME_TYPE_ARCADE)) {
         Map_LoadPalettes(1);
@@ -105,8 +157,8 @@ static void Game_InitRoomVars(Object *o) {
     Weapon_Init();
 
     // set up the camera
-    cameraX.f.h = o->x.f.h & 0x70;
-    cameraY.f.h = (o->y.f.h & 0x70) + 1;
+    cameraX.f.h = lucia->x.f.h & 0x70;
+    cameraY.f.h = (lucia->y.f.h & 0x70) + 1;
     cameraX.f.l = 0;
     cameraY.f.l = 0;
 
@@ -114,18 +166,18 @@ static void Game_InitRoomVars(Object *o) {
     luciaHurtPoints = 0;
     roomChangeTimer = 0;
     attackTimer = 0;
-    o->direction = 0;
+    lucia->direction = 0;
     flashTimer = 0;
 
     SpawnInfo info;
-    Map_GetSpawnInfo(o, &info);
+    Map_GetSpawnInfo(lucia, &info);
 
     // if we're in an item room and the item hasn't been collected, spawn it
-    if ((info.type == SPAWN_TYPE_ITEM) && (!Item_Collected(o))) {
+    if ((info.type == SPAWN_TYPE_ITEM) && (!Item_Collected(lucia))) {
         objects[9].type = OBJ_ITEM;
         objects[9].hp = info.enemy - ITEM_FLAG;
-        objects[9].x.f.h = (o->x.f.h & 0x70) | 7;
-        objects[9].y.f.h = (o->y.f.h & 0x70) | itemSpawnYOffsets[o->y.f.h >> 5];
+        objects[9].x.f.h = (lucia->x.f.h & 0x70) | 7;
+        objects[9].y.f.h = (lucia->y.f.h & 0x70) | itemSpawnYOffsets[lucia->y.f.h >> 5];
         objects[9].x.f.l = 0x80;
         objects[9].y.f.l = 0x80;
         objects[9].ySpeed = 0;
@@ -157,35 +209,14 @@ static void Game_InitRoomVars(Object *o) {
         }
     }
 
-    o->type = OBJ_LUCIA_NORMAL;
-    Camera_SetXY(o);
-    Object_InitCollision(o);
+    lucia->type = OBJ_LUCIA_NORMAL;
+    Camera_SetXY(lucia);
+    Object_InitCollision(lucia);
 }
 
-static Sint8 fountainXTbl[] = {
-    0x39,
-    0x29,
-    0x59,
-    0x79,
-    0x29,
-    0x59,
-    0x79,
-};
-
-static Sint8 fountainYTbl[] = {
-    0x0A,
-    0x1A,
-    0x1A,
-    0x1A,
-    0x26,
-    0x26,
-    0x26,
-};
-
-static Uint8 fountainPalette[] = {
-    0x26, 0x03, 0x31, 0x21,
-};
-
+static Sint8 fountainXTbl[] = {0x39, 0x29, 0x59, 0x79, 0x29, 0x59, 0x79};
+static Sint8 fountainYTbl[] = {0x0A, 0x1A, 0x1A, 0x1A, 0x26, 0x26, 0x26};
+static Uint8 fountainPalette[] = {0x26, 0x03, 0x31, 0x21};
 static void Game_SpawnFountain(SpawnInfo *info) {
     Uint8 offset = (info->enemy & 0x7) - 1;
     objects[9].x.f.h = fountainXTbl[offset];
@@ -194,72 +225,9 @@ static void Game_SpawnFountain(SpawnInfo *info) {
     Sprite_SetPalette(2, fountainPalette);
 }
 
-static void Game_InitNewGame(void) {
-    health = 1000;
-    maxHealth = 1000;
-    maxMagic = 1000;
-    highestReachedStage = 0;
-
-    // initialize boots and weapon levels
-    bootsLevel = 0;
-    memset(weaponLevels, 0, NUM_WEAPONS);
-    weaponLevels[WEAPON_SWORD] = 1;
-    Item_InitCollected();
-    memset(bossDefeated, 0, sizeof(bossDefeated));
-    stage = 0;
-    orbCollected = 0;
-    keywordDisplay = 0;
-}
-
-static void Game_InitCommon(void) {
-    score = 0;
-    lives = 2;
-    paused = 0;
-    currentWeapon = WEAPON_SWORD;
-}
-
-noreturn void Game_Run(void) {
-    // initialize game type
-    DBEntry *entry = DB_Find("gametype");
-    if (entry) {
-        gameType = entry->data[0];
-    }
-    else {
-        gameType = GAME_TYPE_PLUS;
-    }
-
-startGameCode:
-    Title_Run();
-
-showMainMenu:
-    if (MainMenu_Run() == 0) {
-        goto startGameCode;
-    }
-
-showSaveScreen:
-    switch (Save_Screen()) {
-    // return to main menu
-    case SAVE_SCREEN_BACK:
-        goto showMainMenu;
-
-    // new game (initialize game state)
-    case SAVE_SCREEN_NEWGAME:
-        Game_InitNewGame();
-        Save_SaveFile();
-        break;
-
-    // player loaded a game
-    case SAVE_SCREEN_LOADGAME:
-        // stage number got set by the save screen so we don't need to set it here
-        health = 1000;
-        break;
-    }
-
-    Game_InitCommon();
-    RNG_Seed();
-
+static void Game_Run(void) {
     while (1) {
-        switch (Game_RunStage(NO_DEMO_TIMER)) {
+        switch (Game_RunStage()) {
         case STAGE_EXIT_NEXTSTAGE:
             stage++;
             stage &= 0xf;
@@ -277,7 +245,7 @@ showSaveScreen:
                     Save_SaveFile();
                     Screen_GameOver();
                     HighScore_NameEntry(score);
-                    goto startGameCode;
+                    Task_Switch(Title_Run);
                 }
                 else {
                     health = 1000;
@@ -286,7 +254,7 @@ showSaveScreen:
             else {
                 Save_SaveFile();
                 Screen_GameOver();
-                goto showSaveScreen;
+                Task_Switch(Save_Screen);
             }
             break;
 
@@ -296,12 +264,43 @@ showSaveScreen:
             if (gameType == GAME_TYPE_ARCADE) {
                 HighScore_NameEntry(score);
             }
-            goto startGameCode;
+            Task_Switch(Title_Run);
+            break;
 
         case STAGE_EXIT_RESET:
-            goto startGameCode;
+            Task_Switch(Title_Run);
+            break;
         }
     }
+}
+
+void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
+    DemoData data;
+    data.rngVal = rngVal;
+    data.gameFrames = gameFrames;
+    data.gameType = _gameType;
+    data.stage = _stage;
+    data.health = _health;
+    data.magic = _magic;
+    data.bootsLevel = _bootsLevel;
+    memcpy(data.weaponLevels, _weaponLevels, sizeof(data.weaponLevels));
+    Game_InitDemo(&data);
+    Demo_Record(&data);
+    Game_RunStage();
+    Demo_Save(filename);
+}
+
+void Game_PlayDemo(char *filename, int timer) {
+    DemoData data;
+    if (!Demo_Playback(filename, &data)) {
+        Platform_ShowError("Couldn't open demo file %s.", filename);
+        return;
+    };
+    Game_InitDemo(&data);
+    rngVal = data.rngVal;
+    gameFrames = data.gameFrames;
+    Task_Child(Game_RunStage, timer);
+    Demo_Uninit();
 }
 
 static void Game_InitDemo(DemoData *data) {
@@ -317,45 +316,7 @@ static void Game_InitDemo(DemoData *data) {
     memcpy(weaponLevels, data->weaponLevels, sizeof(weaponLevels));
 }
 
-void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
-    DemoData data;
-    data.rngVal = rngVal;
-    data.gameFrames = gameFrames;
-    data.gameType = _gameType;
-    data.stage = _stage;
-    data.health = _health;
-    data.magic = _magic;
-    data.bootsLevel = _bootsLevel;
-    memcpy(data.weaponLevels, _weaponLevels, sizeof(data.weaponLevels));
-    Game_InitDemo(&data);
-    Demo_Record(&data);
-    Game_RunStage(NO_DEMO_TIMER);
-    Demo_Save(filename);
-}
-
-void Game_PlayDemo(char *filename, int timer) {
-    DemoData data;
-    if (!Demo_Playback(filename, &data)) {
-        Platform_ShowError("Couldn't open demo file %s.", filename);
-        return;
-    };
-    Game_InitDemo(&data);
-    rngVal = data.rngVal;
-    gameFrames = data.gameFrames;
-    Game_RunStage(timer);
-    Demo_Uninit();
-}
-
-typedef enum {
-    GAME_STATE_STAGE_INIT,
-    GAME_STATE_STATUS_SCREEN_INIT,
-    GAME_STATE_STATUS_SCREEN,
-    GAME_STATE_STAGE_SCREEN_INIT,
-    GAME_STATE_STAGE_SCREEN,
-
-} GameState;
-
-static int Game_RunStage(int demoTimer) {
+static int Game_RunStage(void) {
     // the last room number Lucia was in this stage
     Uint16 lastRoom = 0xffff;
 
@@ -389,93 +350,86 @@ initRoom:
     }
     lastRoom = currRoom;
 
-mainGameLoop:
-    System_StartFrame();
-    Game_HandlePause();
-    if (!paused) {
-        Sprite_ClearList();
-        switch (gameType) {
-        case GAME_TYPE_ORIGINAL:
-            HUD_DisplayOriginal(health, magic);
-            break;
+    while (1) {
+        gameFrames++;
+        Game_HandlePaletteShifting();
+        Task_Yield();
+        Game_HandlePause();
+        if (!paused) {
+            Sprite_ClearList();
+            switch (gameType) {
+            case GAME_TYPE_ORIGINAL:
+                HUD_DisplayOriginal(health, magic);
+                break;
 
-        case GAME_TYPE_PLUS:
-            Game_HandleWeaponSwitch();
-            HUD_DisplayPlus(health, magic);
-            break;
+            case GAME_TYPE_PLUS:
+                Game_HandleWeaponSwitch();
+                HUD_DisplayPlus(health, magic);
+                break;
 
-        case GAME_TYPE_ARCADE:
-            Game_HandleWeaponSwitch();
-            HUD_DisplayArcade(health, magic, score);
-            break;
-        }
-        RNG_Get(); // update RNG once per frame
-        Weapon_Process();
-        Object_ListRun();
-        Enemy_Spawn();
-        Game_HandleRoomChange();
-    }
-    else {
-        HUD_Weapon();
-    }
-    Map_Draw();
-    Sprite_Display();
-    System_EndFrame();
-    gameFrames++;
-    Game_HandlePaletteShifting();
-
-    // --- soft reset code (NOTE: not in original game) ---
-    if ((joy & SOFT_RESET) == SOFT_RESET) {
-        return STAGE_EXIT_RESET;
-    }
-
-    // --- handle keyword screen ---
-    if (keywordDisplay > 0) {
-        Screen_Keyword();
-        // mark keyword as shown
-        keywordDisplay = -1;
-        // despawn yokko-chan
-        Object_DeleteRange(9);
-        // force music to play
-        lastRoom = 0xffff;
-        goto initRoom;
-    }
-
-    // --- handle demo timer ---
-    if (demoTimer != NO_DEMO_TIMER) {
-        demoTimer--;
-        if (demoTimer == 0) {
-            return STAGE_EXIT_TIMER;
-        }
-    }
-
-    // --- handle doors ---
-    if (roomChangeTimer != 1) { goto mainGameLoop; }
-    if (objects[0].type == OBJ_LUCIA_WARP_DOOR) {
-        int switchRoom = Map_Door(&objects[0]);
-        if (switchRoom == DOOR_ENDING) {
-            if (darutosKilled) {
-                return STAGE_EXIT_WON;
+            case GAME_TYPE_ARCADE:
+                Game_HandleWeaponSwitch();
+                HUD_DisplayArcade(health, magic, score);
+                break;
             }
-            // put Lucia back where she was if she tried to enter the ending
-            // door without killing Darutos
-            else {
-                Game_SetRoom(currRoom);
-            }
-        }
-        else if (switchRoom == DOOR_INVALID) {
-            Game_SetRoom(currRoom);
+            RNG_Get(); // update RNG once per frame
+            Weapon_Process();
+            Object_ListRun();
+            Enemy_Spawn();
+            Game_HandleRoomChange();
         }
         else {
-            Game_SetRoom(switchRoom);
+            HUD_Weapon();
         }
-        goto initRoom;
-    }
-    else if (objects[0].type == OBJ_LUCIA_LVL_END_DOOR) {
-        return STAGE_EXIT_NEXTSTAGE;
-    }
-    else {
-        return STAGE_EXIT_DIED;
+        Map_Draw();
+        Sprite_Display();
+
+        // --- soft reset code (NOTE: not in original game) ---
+        if ((joy & SOFT_RESET) == SOFT_RESET) {
+            return STAGE_EXIT_RESET;
+        }
+
+        // --- handle keyword screen ---
+        if (keywordDisplay > 0) {
+            Screen_Keyword();
+            // mark keyword as shown
+            keywordDisplay = -1;
+            // despawn yokko-chan
+            Object_DeleteRange(9);
+            // force music to play
+            lastRoom = 0xffff;
+            goto initRoom;
+        }
+
+        // --- handle doors ---
+        if (roomChangeTimer == 1) {
+            if (objects[0].type == OBJ_LUCIA_WARP_DOOR) {
+                int switchRoom = Map_Door(&objects[0]);
+                if (switchRoom == DOOR_ENDING) {
+                    if (darutosKilled) {
+                        return STAGE_EXIT_WON;
+                    }
+                    // put Lucia back where she was if she tried to enter the ending
+                    // door without killing Darutos
+                    else {
+                        Game_SetRoom(currRoom);
+                    }
+                }
+                else if (switchRoom == DOOR_INVALID) {
+                    Game_SetRoom(currRoom);
+                }
+                else {
+                    Game_SetRoom(switchRoom);
+                }
+                goto initRoom;
+            }
+            else if (objects[0].type == OBJ_LUCIA_LVL_END_DOOR) {
+                return STAGE_EXIT_NEXTSTAGE;
+            }
+            else {
+                return STAGE_EXIT_DIED;
+            }
+        }
     }
 }
 

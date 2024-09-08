@@ -23,6 +23,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 #include "textscroll.h"
 
 #define TEXT_BASE 0x800
@@ -68,10 +69,9 @@ static Uint16 *TextScroll_PrintTiles(Uint16 *tiles) {
 
 static int TextScroll_WaitFrames(int frames) {
     for (int i = 0; i < frames; i++) {
-        System_StartFrame();
         BG_Display();
         Sprite_Display();
-        System_EndFrame();
+        Task_Yield();
         if (canSkip && (joyEdge & JOY_START)) { return 1; }
     }
     return 0;

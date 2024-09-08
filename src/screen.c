@@ -31,6 +31,7 @@
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 #include "textscroll.h"
 #include "weapon.h"
 
@@ -85,7 +86,7 @@ static void Screen_StatusIcon(Uint16 x, Uint16 y, Uint16 tile, Uint8 palette, Ui
     }
 }
 
-int Screen_Status(void) {
+void Screen_Status(void) {
     BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetAllPalettes(statusPalette);
@@ -118,22 +119,20 @@ int Screen_Status(void) {
 
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {
-        System_StartFrame();
         BG_Display();
         Sprite_Display();
-        System_EndFrame();
+        Task_Yield();
         if (joyEdge & JOY_START) {
-            return 1;
+            return;
         }
     }
-    return 0;
 }
 
 static Uint8 stagePalette[] = {
     0x0F, 0x2C, 0x2B, 0x2B,
 };
 
-int Screen_Stage(void) {
+void Screen_Stage(void) {
     BG_Clear();
     BG_Scroll(BG_CENTERED_X, 0);
     BG_SetPalette(0, stagePalette);
@@ -148,14 +147,12 @@ int Screen_Stage(void) {
 
     // wait 3 seconds, or until user presses start
     for (int i = 0; i < 180; i++) {
-        System_StartFrame();
         BG_Display();
-        System_EndFrame();
+        Task_Yield();
         if (joyEdge & JOY_START) {
-            return 1;
+            return;
         }
     }
-    return 0;
 }
 
 void Screen_GameOver(void) {
@@ -171,9 +168,8 @@ void Screen_GameOver(void) {
 
     // wait 4 seconds
     for (int i = 0; i < 240; i++) {
-        System_StartFrame();
         BG_Display();
-        System_EndFrame();
+        Task_Yield();
     }
 }
 
@@ -198,9 +194,8 @@ void Screen_Keyword(void) {
     // --- show "THE KEYWORD IS" for 2.5 seconds ---
     BG_Print(9, 14, 0, "THE KEYWORD IS");
     for (int i = 0; i < 150; i++) {
-        System_StartFrame();
         BG_Display();
-        System_EndFrame();
+        Task_Yield();
     }
     // --- show the keyword (neko dayo~) for 1 second ---
     BG_Clear();
@@ -211,8 +206,7 @@ void Screen_Keyword(void) {
         row = Screen_WriteTiles(row);
     }
     for (int i = 0; i < 60; i++) {
-        System_StartFrame();
         BG_Display();
-        System_EndFrame();
+        Task_Yield();
     }
 }

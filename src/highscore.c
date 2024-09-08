@@ -149,7 +149,6 @@ void HighScore_NameEntry(Uint32 score) {
     int exitFlag = 0;
     while (!exitFlag) {
         frames++;
-        System_StartFrame();
         // start immediately ends the high score entry
         if (joyEdge & JOY_START) { exitFlag = 1; }
         // letter selection
@@ -201,7 +200,7 @@ void HighScore_NameEntry(Uint32 score) {
         }
 
         BG_Display();
-        System_EndFrame();
+        Task_Yield();
     }
 
     // if player is content to remain anonymous
@@ -218,9 +217,8 @@ void HighScore_NameEntry(Uint32 score) {
     // wait on the high score screen for a few seconds
     frames = 300;
     while ((frames-- > 0)) {
-        System_StartFrame();
         BG_Display();
-        System_EndFrame();
+        Task_Yield();
         if (joyEdge) { break; }
     }
     Sound_Reset();

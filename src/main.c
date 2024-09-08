@@ -58,8 +58,6 @@ int main(int argc, char **argv) {
 
     if (!System_Init()) { return -1; }
 
-    gameType = GAME_TYPE_ARCADE;
-
     Task_Init(Title_Run);
     System_GameLoop();
 

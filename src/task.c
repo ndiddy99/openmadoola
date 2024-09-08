@@ -24,24 +24,41 @@
 
 static cothread_t systemTask;
 static cothread_t gameTask;
-static cothread_t nextTask;
+static void (*nextFunction)(void);
 static cothread_t childTask;
-static cothread_t *currentTask;
 static int childTimer;
 static int childReturn;
 static int childReturnCode;
 
 #define TASK_STACK_SIZE (sizeof(void *) * 256 * 1024)
+static Uint8 gameStack[TASK_STACK_SIZE];
+static Uint8 childStack[TASK_STACK_SIZE];
+static int canDerive = 0;
 
 void Task_Init(void (*function)(void)) {
     systemTask = co_active();
-    gameTask = co_create(TASK_STACK_SIZE, function);
-    nextTask = NULL;
+    // some libco backends don't support using the provided memory instead of allocating new memory
+    if ((gameTask = co_derive(gameStack, TASK_STACK_SIZE, function))) {
+        canDerive = 1;
+    }
+    else {
+        gameTask = gameTask = co_create(TASK_STACK_SIZE, function);
+    }
+    nextFunction = NULL;
     childTask = NULL;
-    currentTask = &gameTask;
     childTimer = 0;
     childReturn = 0;
     childReturnCode = 0;
+}
+
+static void Task_SwitchCothreadFunction(cothread_t *cothread, Uint8 *stack, void (*function)(void)) {
+    if (canDerive) {
+        *cothread = co_derive(stack, TASK_STACK_SIZE, function);
+    }
+    else {
+        if (*cothread) { co_delete(*cothread); }
+        *cothread = co_create(TASK_STACK_SIZE, function);
+    }
 }
 
 void Task_Yield(void) {
@@ -51,16 +68,14 @@ void Task_Yield(void) {
 
 void Task_Switch(void (*function)(void)) {
     assert(co_active() != systemTask);
-    nextTask = co_create(TASK_STACK_SIZE, function);
+    nextFunction = function;
     Task_Yield();
 }
 
 void Task_Child(void (*function)(void), int timer) {
     assert(co_active() == gameTask);
-    if (childTask) { co_delete(childTask); }
-    childTask = co_create(TASK_STACK_SIZE, function);
+    Task_SwitchCothreadFunction(&childTask, childStack, function);
     childTimer = timer;
-    currentTask = &childTask;
     Task_Yield();
 }
 
@@ -71,12 +86,17 @@ void Task_Parent(int returnCode) {
     Task_Yield();
 }
 
+int Task_GetChildReturnCode(void) {
+    return childReturnCode;
+}
+
 static void Task_SwitchToParent(void) {
     assert(co_active() == systemTask);
-    co_delete(childTask);
+    if (!canDerive) {
+        co_delete(childTask);
+    }
     childTask = NULL;
     co_switch(gameTask);
-    currentTask = &gameTask;
 }
 
 void Task_Run(void) {
@@ -86,23 +106,29 @@ void Task_Run(void) {
         // if child wants to return
         if (childReturn) {
             Task_SwitchToParent();
+            return;
         }
-        else if (childTimer) {
+        if (childTimer) {
             childTimer--;
             // if child timed out, switch to parent
             if (childTimer == 0) {
                 childReturnCode = 0;
                 Task_SwitchToParent();
+                return;
             }
+        }
+        if (nextFunction) {
+            Task_SwitchCothreadFunction(&childTask, childStack, nextFunction);
+            nextFunction = NULL;
+            return;
         }
     }
     else {
         co_switch(gameTask);
-    }
-    
-    if (nextTask) {
-        co_delete(*currentTask);
-        *currentTask = nextTask;
-        nextTask = NULL;
+        if (nextFunction) {
+            Task_SwitchCothreadFunction(&gameTask, gameStack, nextFunction);
+            nextFunction = NULL;
+            return;
+        }
     }
 }

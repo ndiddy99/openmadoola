@@ -50,7 +50,5 @@ int Save_Deserialize(Uint8 *data);
 
 /**
  * @brief Displays the save file screen.
- * @returns 0 if the user wanted to return to the main menu, 1 if the user
- * started a new game, 2 if the user loaded a game
  */
-int Save_Screen(void);
+void Save_Screen(void);

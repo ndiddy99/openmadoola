@@ -28,6 +28,7 @@
 #include "soundtest.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 
 static Uint8 palette[] = {
     0x0F, 0x36, 0x26, 0x16,
@@ -101,10 +102,9 @@ void SoundTest_RunStandalone(char *mmlPath) {
         Sound_Reset();
         Sound_Play(0);
         while (1) {
-            System_StartFrame();
             BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
             BG_Display();
-            System_EndFrame();
+            Task_Yield();
             if (joyEdge & (JOY_A | JOY_B | JOY_SELECT | JOY_START)) {
                 Sound_Reset();
                 Sound_Play(0);

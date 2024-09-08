@@ -30,11 +30,13 @@
 #include "item.h"
 #include "joy.h"
 #include "lucia.h"
+#include "mainmenu.h"
 #include "platform.h"
 #include "save.h"
 #include "sound.h"
 #include "sprite.h"
 #include "system.h"
+#include "task.h"
 #include "util.h"
 #include "weapon.h"
 
@@ -169,7 +171,7 @@ static Uint16 luciaRunTiles[] = {
 #define LUCIA_X_PX 48
 #define LUCIA_Y_PX (SAVE_Y_PX - 16)
 
-int Save_Screen(void) {
+void Save_Screen(void) {
     int erase = 0;
     int cursor = currFile;
     int stages[NUM_FILES];
@@ -190,7 +192,6 @@ int Save_Screen(void) {
     }
 
     while (1) {
-        System_StartFrame();
         Sprite_ClearList();
 
         // cursor movement (with wraparound)
@@ -267,7 +268,7 @@ int Save_Screen(void) {
 
         BG_Display();
         Sprite_Display();
-        System_EndFrame();
+        Task_Yield();
 
         if (joyEdge & (JOY_A | JOY_START)) {
             // toggle normal/erase mode
@@ -277,7 +278,7 @@ int Save_Screen(void) {
             }
             // return to main menu
             else if (cursor == MAIN_MENU_INDEX) {
-                return SAVE_SCREEN_BACK;
+                Task_Switch(MainMenu_Run);
             }
             // selected a file to erase
             else if (erase) {
@@ -296,7 +297,7 @@ int Save_Screen(void) {
         Sint16 luciaX = LUCIA_X_PX;
         int frames = 0;
         while (luciaX < 256) {
-            System_StartFrame();
+            if (joyEdge & JOY_START) { break; }
             Sprite_ClearList();
             Sprite_Draw(&cursorSpr, NULL);
             frames++;
@@ -311,13 +312,12 @@ int Save_Screen(void) {
             luciaX += 3;
             BG_Display();
             Sprite_Display();
-            System_EndFrame();
-            if (joyEdge & JOY_START) { break; }
+            Task_Yield();
         }
 
         Save_Deserialize(files[cursor]->data);
         stage = stages[cursor];
-        return SAVE_SCREEN_LOADGAME;
+        Task_Switch(Game_LoadGame);
     }
-    return SAVE_SCREEN_NEWGAME;
+    Task_Switch(Game_NewGame);
 }

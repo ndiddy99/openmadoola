@@ -251,7 +251,7 @@ static int Title_HighScores(void) {
 static int Title_Demo(void) {
     Sprite_ClearList();
     Sound_Mute();
-    Game_PlayDemo("stage1.dem", 840);
+    Game_PlayDemo("stage1.dem", 1200);
     Sound_Reset();
     Sound_Unmute();
     Sprite_ClearList();
@@ -284,7 +284,7 @@ static SequenceItem arcadeSequence[] = {
     Title_AnimateIn,
     Title_HighScores,
     Title_AnimateOut,
-    //Title_Demo,
+    Title_Demo,
 };
 
 void Title_DoSequence(SequenceItem *sequence, int len) {
