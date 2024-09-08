@@ -19,4 +19,7 @@
 
 #pragma once
 
+/**
+ * @brief Displays title screen
+ */
 void Title_Run(void);

@@ -19,6 +19,7 @@
 
 #include "bg.h"
 #include "constants.h"
+#include "demo.h"
 #include "game.h"
 #include "highscore.h"
 #include "joy.h"
@@ -124,8 +125,8 @@ static int Title_ScreenOriginal(void) {
     BG_Scroll(BG_CENTERED_X, 0);
     while (1) {
         BG_Display();
-        if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
+        if (joyEdge & JOY_START) { return 1; }
     }
 }
 
@@ -166,8 +167,8 @@ static int Title_AnimateIn(void) {
             BG_Scroll(BG_CENTERED_X - scroll, 0);
         }
         BG_Display();
-        if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
+        if (joyEdge & JOY_START) { return 1; }
     }
     BG_Scroll(BG_CENTERED_X, 0);
     return 0;
@@ -198,8 +199,8 @@ static int Title_ScreenArcade(void) {
         int startPaletteNum = (frames / 8) % 8;
         BG_SetPalette(3, titleCyclePals3 + startPaletteNum * 4);
         BG_Display();
-        if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
+        if (joyEdge & JOY_START) { return 1; }
     }
     BG_SetPalette(3, titleCyclePals3);
     return 0;
@@ -219,8 +220,8 @@ static int Title_AnimateOut(void) {
             BG_Scroll(BG_CENTERED_X - scroll, 0);
         }
         BG_Display();
-        if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
+        if (joyEdge & JOY_START) { return 1; }
     }
     return 0;
 }
@@ -242,20 +243,25 @@ static int Title_HighScores(void) {
     int frames = 0;
     while (++frames < 200) {
         BG_Display();
-        if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
+        if (joyEdge & JOY_START) { return 1; }
     }
     return 0;
+}
+
+static void Title_DemoTask(void) {
+    Game_PlayDemo("stage1.dem");
 }
 
 static int Title_Demo(void) {
     Sprite_ClearList();
     Sound_Mute();
-    Game_PlayDemo("stage1.dem", 1200);
+    Task_Child(Title_DemoTask, 1200, 1);
+    Demo_Uninit();
     Sound_Reset();
     Sound_Unmute();
     Sprite_ClearList();
-    return 0;
+    return Task_WasChildSkipped();
 }
 
 typedef int (*SequenceItem)(void);

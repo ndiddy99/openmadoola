@@ -29,6 +29,8 @@
 Uint32 joy;
 Uint32 joyEdge;
 Uint8 joyDir;
+Uint32 joyRaw;
+Uint32 joyEdgeRaw;
 
 static int keyMappings[] = {
     INPUT_KEY_D,
@@ -135,24 +137,27 @@ void Joy_Init(void) {
 
 void Joy_Update(void) {
     Uint32 joyLast = joy;
-    joy = 0;
+    Uint32 joyLastRaw = joyRaw;
+
+    joyRaw = 0;
+    Uint32 mask = 1;
+    for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
+        if (inputState[keyMappings[i]]) { joyRaw |= mask; }
+        if (inputState[gamepadMappings[i]]) { joyRaw |= mask; }
+        mask <<= 1;
+    }
 
     if (Demo_Playing()) {
         joy = Demo_GetInput();
     }
     else {
-        Uint32 mask = 1;
-        for (int i = 0; i < ARRAY_LEN(keyMappings); i++) {
-            if (inputState[keyMappings[i]]) { joy |= mask; }
-            if (inputState[gamepadMappings[i]]) { joy |= mask; }
-            mask <<= 1;
-        }
-
+        joy = joyRaw;
         if (Demo_Recording()) {
             Demo_RecordInput(joy);
         }
     }
 
     joyEdge = (~joyLast) & joy;
+    joyEdgeRaw = (~joyLastRaw) & joyRaw;
     joyDir = direction_table[joy & 0xf];
 }

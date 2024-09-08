@@ -21,7 +21,7 @@
 void Task_Init(void (*function)(void));
 void Task_Yield(void);
 void Task_Switch(void (*function)(void));
-void Task_Child(void (*function)(void), int timer);
-void Task_Parent(int returnCode);
+void Task_Child(void (*function)(void), int timer, int skippable);
+void Task_Parent(void);
 void Task_Run(void);
 

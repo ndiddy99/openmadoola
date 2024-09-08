@@ -19,6 +19,7 @@
 #include <assert.h>
 #include "constants.h"
 #include "libco.h"
+#include "joy.h"
 #include "platform.h"
 #include "task.h"
 
@@ -28,7 +29,8 @@ static void (*nextFunction)(void);
 static cothread_t childTask;
 static int childTimer;
 static int childReturn;
-static int childReturnCode;
+static int childSkippable;
+static int childSkipped;
 
 #define TASK_STACK_SIZE (sizeof(void *) * 256 * 1024)
 static Uint8 gameStack[TASK_STACK_SIZE];
@@ -42,13 +44,14 @@ void Task_Init(void (*function)(void)) {
         canDerive = 1;
     }
     else {
-        gameTask = gameTask = co_create(TASK_STACK_SIZE, function);
+        gameTask = co_create(TASK_STACK_SIZE, function);
     }
     nextFunction = NULL;
     childTask = NULL;
     childTimer = 0;
     childReturn = 0;
-    childReturnCode = 0;
+    childSkippable = 0;
+    childSkipped = 0;
 }
 
 static void Task_SwitchCothreadFunction(cothread_t *cothread, Uint8 *stack, void (*function)(void)) {
@@ -72,48 +75,52 @@ void Task_Switch(void (*function)(void)) {
     Task_Yield();
 }
 
-void Task_Child(void (*function)(void), int timer) {
+void Task_Child(void (*function)(void), int timer, int skippable) {
     assert(co_active() == gameTask);
     Task_SwitchCothreadFunction(&childTask, childStack, function);
     childTimer = timer;
+    childSkippable = skippable;
     Task_Yield();
 }
 
-void Task_Parent(int returnCode) {
+void Task_Parent(void) {
     assert(co_active() == childTask);
     childReturn = 1;
-    childReturnCode = returnCode;
     Task_Yield();
 }
 
-int Task_GetChildReturnCode(void) {
-    return childReturnCode;
+int Task_WasChildSkipped(void) {
+    return childSkipped;
 }
 
-static void Task_SwitchToParent(void) {
+static void Task_SwitchToParent(int skipped) {
     assert(co_active() == systemTask);
+    childSkipped = skipped;
     if (!canDerive) {
         co_delete(childTask);
     }
     childTask = NULL;
-    co_switch(gameTask);
 }
 
 void Task_Run(void) {
     assert(co_active() == systemTask);
     if (childTask) {
         co_switch(childTask);
+        // if task was skipped
+        if (childSkippable && (joyRaw & JOY_START)) {
+            Task_SwitchToParent(1);
+            return;
+        }
         // if child wants to return
         if (childReturn) {
-            Task_SwitchToParent();
+            Task_SwitchToParent(0);
             return;
         }
         if (childTimer) {
             childTimer--;
             // if child timed out, switch to parent
             if (childTimer == 0) {
-                childReturnCode = 0;
-                Task_SwitchToParent();
+                Task_SwitchToParent(0);
                 return;
             }
         }

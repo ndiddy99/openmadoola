@@ -27,6 +27,8 @@
 #include "joy.h"
 #include "sound.h"
 #include "system.h"
+#include "task.h"
+#include "title.h"
 #include "util.h"
 
 #define NAME_SIZE 6
@@ -36,6 +38,14 @@ typedef struct {
 } HighScore;
 
 #define NUM_SCORES 8
+// Kenji Sada (main programmer of The Wing of Madoola and sole programmer of the
+// arcade port) put credits in the high score table if you read the names
+// vertically.
+// MOROTTAR: Naohisa Morota (Sound)
+// SIMOMURA: Character graphics
+// SYUGIURA: Kazuyuki Sugiura (BG graphics & map design)
+// ATSUSHII: Atsushi Sakai (Sub-programmer)
+// NAKAGAWA: Sub-programmer
 static HighScore defaultScores[NUM_SCORES] = {
     {.name = "MSSAN", .score = 400000},
     {.name = "OIYTA", .score = 350000},

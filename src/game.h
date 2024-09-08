@@ -66,9 +66,8 @@ void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _heal
 /**
  * @brief Plays back a stage demo.
  * @param filename demo file to load
- * @param timer how many frames to play the demo for
  */
-void Game_PlayDemo(char *filename, int timer);
+void Game_PlayDemo(char *filename);
 
 /**
  * @brief Plays the song associated with the current room.

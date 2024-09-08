@@ -24,6 +24,7 @@
 #include "file.h"
 #include "lucia.h"
 #include "save.h"
+#include "task.h"
 #include "util.h"
 #include "weapon.h"
 
@@ -89,6 +90,9 @@ int Demo_Playback(char *filename, DemoData *out) {
 void Demo_Uninit(void) {
     recording = 0;
     playing = 0;
+    // wait a frame so the demo input->joypad input transition doesn't cause any
+    // false button presses
+    Task_Yield();
 }
 
 int Demo_Recording(void) {

@@ -297,7 +297,6 @@ void Save_Screen(void) {
         Sint16 luciaX = LUCIA_X_PX;
         int frames = 0;
         while (luciaX < 256) {
-            if (joyEdge & JOY_START) { break; }
             Sprite_ClearList();
             Sprite_Draw(&cursorSpr, NULL);
             frames++;
@@ -313,6 +312,7 @@ void Save_Screen(void) {
             BG_Display();
             Sprite_Display();
             Task_Yield();
+            if (joyEdge & JOY_START) { break; }
         }
 
         Save_Deserialize(files[cursor]->data);

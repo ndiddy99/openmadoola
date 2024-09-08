@@ -290,7 +290,7 @@ void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _heal
     Demo_Save(filename);
 }
 
-void Game_PlayDemo(char *filename, int timer) {
+void Game_PlayDemo(char *filename) {
     DemoData data;
     if (!Demo_Playback(filename, &data)) {
         Platform_ShowError("Couldn't open demo file %s.", filename);
@@ -299,7 +299,7 @@ void Game_PlayDemo(char *filename, int timer) {
     Game_InitDemo(&data);
     rngVal = data.rngVal;
     gameFrames = data.gameFrames;
-    Task_Child(Game_RunStage, timer);
+    Game_RunStage();
     Demo_Uninit();
 }
 
@@ -349,6 +349,7 @@ initRoom:
         Game_PlayRoomSong();
     }
     lastRoom = currRoom;
+
 
     while (1) {
         gameFrames++;

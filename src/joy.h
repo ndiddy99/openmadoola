@@ -40,6 +40,9 @@ extern Uint32 joyEdge;
 //     |  
 // 6   5   4
 extern Uint8 joyDir;
+// currently pressed buttons on actual controller, even if demo's playing
+extern Uint32 joyRaw;
+extern Uint32 joyEdgeRaw;
 
 /**
  * @brief Maps a keyboard key to a joypad button
