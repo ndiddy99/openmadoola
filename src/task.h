@@ -18,10 +18,45 @@
  */
 #pragma once
 
+/**
+ * @brief Sets up the task subsystem. Should be run before any other Task functions.
+ * @param function First function to assign a task to.
+ */
 void Task_Init(void (*function)(void));
-void Task_Yield(void);
-void Task_Switch(void (*function)(void));
-void Task_Child(void (*function)(void), int timer, int skippable);
-void Task_Parent(void);
-void Task_Run(void);
 
+/**
+ * @brief Switches from the current task to the "system" task. The equivalent of waiting for
+ * vblank on the NES.
+ */
+void Task_Yield(void);
+
+/**
+ * @brief Kills the current task and replaces it with the provided function starting next frame.
+ * @param function Function to replace the current task with
+ */
+void Task_Switch(void (*function)(void));
+
+/**
+ * @brief Spawns a new child task. This must only be run from the "main game" task. Nested child
+ * tasks are not supported. When the child task ends, execution will return to where the game task
+ * left off.
+ * @param function Function that the task runs
+ * @param timer How many frames to run the child task for, 0 = no timer
+ * @param skippable 1 = pressing start kills the task and returns to the parent
+ */
+void Task_Child(void (*function)(void), int timer, int skippable);
+
+/**
+ * @brief If a child task calls this, it'll get killed and the game task resumes.
+ */
+void Task_Parent(void);
+
+/**
+ * @returns 1 if the last run child task was skipped, 0 otherwise 
+ */
+int Task_WasChildSkipped(void);
+
+/**
+ * @brief Runs the current active task until it yields. Should be run once per frame.
+ */
+void Task_Run(void);
