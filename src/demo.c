@@ -29,6 +29,7 @@
 #include "weapon.h"
 
 static Buffer *demoBuff = NULL;
+static Buffer *recordFilename = NULL;
 static int recording = 0;
 static int playing = 0;
 static Uint32 lastInput;
@@ -36,13 +37,17 @@ static Uint8 frameCount;
 static int first;
 static int cursor;
 
-void Demo_Record(DemoData *data) {
+void Demo_Record(char *filename, DemoData *data) {
     if (!demoBuff) {
         demoBuff = Buffer_Init(8192);
     }
     else {
         demoBuff->dataSize = 0;
     }
+    if (recordFilename) {
+        Buffer_Destroy(recordFilename);
+    }
+    recordFilename = Buffer_InitFromString(filename);
     first = 1;
     recording = 1;
     playing = 0;
@@ -136,8 +141,8 @@ Uint32 Demo_GetInput(void) {
     return joy;
 }
 
-void Demo_Save(char *filename) {
+void Demo_Save(void) {
     if (!recording) { return; }
     recording = 0;
-    Buffer_WriteToFile(demoBuff, filename);
+    Buffer_WriteToFile(demoBuff, recordFilename->data);
 }

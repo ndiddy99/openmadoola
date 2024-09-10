@@ -47,7 +47,8 @@ void Task_Switch(void (*function)(void));
 void Task_Child(void (*function)(void), int timer, int skippable);
 
 /**
- * @brief If a child task calls this, it'll get killed and the game task resumes.
+ * @brief If a child task calls this, it'll get killed. On the next frame, the game task will resume
+ * execution from where it spawned the child task.
  */
 void Task_Parent(void);
 

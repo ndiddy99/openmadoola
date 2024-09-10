@@ -274,7 +274,7 @@ static void Game_Run(void) {
     }
 }
 
-void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
+void Game_RecordDemoInit(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
     DemoData data;
     data.rngVal = rngVal;
     data.gameFrames = gameFrames;
@@ -285,9 +285,13 @@ void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _heal
     data.bootsLevel = _bootsLevel;
     memcpy(data.weaponLevels, _weaponLevels, sizeof(data.weaponLevels));
     Game_InitDemo(&data);
-    Demo_Record(&data);
+    Demo_Record(filename, &data);
+}
+
+void Game_RecordDemoTask(void) {
     Game_RunStage();
-    Demo_Save(filename);
+    Demo_Save();
+    Platform_Quit();
 }
 
 void Game_PlayDemo(char *filename) {

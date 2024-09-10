@@ -44,6 +44,13 @@ Buffer *Buffer_Init(int allocSize);
 Buffer *Buffer_InitFromFile(FILE *fp);
 
 /**
+ * @brief Creates a new buffer holding the contents of the provided string.
+ * @param str String to load from
+ * @returns pointer to new buffer
+ */
+Buffer *Buffer_InitFromString(char *str);
+
+/**
  * @brief Frees all memory associated with a buffer
  * @param buf The buffer to destroy
  */

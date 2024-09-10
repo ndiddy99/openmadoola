@@ -24,7 +24,13 @@
 void SoundTest_Run(void);
 
 /**
- * @brief Compiles and plays the given MML file
- * @param mmlFilename MML file to play
+ * @brief Compiles the given MML file
+ * @param mmlPath MML file to play
+ * @returns 1 if the file compiled successfully, 0 otherwise
  */
-void SoundTest_RunStandalone(char *mmlPath);
+int SoundTest_RunStandaloneInit(char *mmlPath);
+
+/**
+ * @brief Plays an MML file. Needs to be run as a task after SoundTest_RunStandaloneInit
+ */
+void SoundTest_RunStandaloneTask(void);

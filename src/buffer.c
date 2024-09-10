@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "alloc.h"
 #include "buffer.h"
@@ -41,6 +42,17 @@ Buffer *Buffer_InitFromFile(FILE *fp) {
     rewind(fp);
     Buffer *buf = Buffer_Init(size);
     Buffer_AddFromFile(buf, fp, size);
+    return buf;
+}
+
+Buffer *Buffer_InitFromString(char *str) {
+    int strSize = (int)strlen(str) + 1;
+    Buffer *buf = Buffer_Init(strSize);
+    while (*str) {
+        Buffer_Add(buf, *str);
+        str++;
+    }
+    Buffer_Add(buf, 0);
     return buf;
 }
 

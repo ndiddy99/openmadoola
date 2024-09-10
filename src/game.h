@@ -52,7 +52,7 @@ void Game_NewGame(void);
 void Game_LoadGame(void);
 
 /**
- * @brief Records a stage demo.
+ * @brief Gets ready to record a demo.
  * @param filename what to save the demo as
  * @param _gameType game type number
  * @param _stage stage number
@@ -61,7 +61,12 @@ void Game_LoadGame(void);
  * @param _bootsLevel boots level
  * @param _weaponLevels weapon levels (must have size NUM_WEAPONS)
  */
-void Game_RecordDemo(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels);
+void Game_RecordDemoInit(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels);
+
+/**
+ * @brief Plays a stage and records the demo. Should only be run (as a task) after Game_RecordDemoInit.
+ */
+void Game_RecordDemoTask(void);
 
 /**
  * @brief Plays back a stage demo.

@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <string.h>
 
 #include "bg.h"
@@ -42,6 +43,7 @@ static Uint8 palette[] = {
 };
 
 static int soundNum;
+static int standaloneInitialized = 0;
 
 static int getSoundNum(void) {
     return soundNum;
@@ -77,7 +79,7 @@ void SoundTest_Run(void) {
     Sound_Reset();
 }
 
-void SoundTest_RunStandalone(char *mmlPath) {
+int SoundTest_RunStandaloneInit(char *mmlPath) {
     if (MML_Compile(mmlPath, &sounds[0])) {
         BG_Clear();
         BG_SetAllPalettes(palette);
@@ -99,16 +101,23 @@ void SoundTest_RunStandalone(char *mmlPath) {
             mmlFilename = mmlPath;
         }
         BG_Print(3, 8, 0, "%s", mmlFilename);
-        Sound_Reset();
-        Sound_Play(0);
-        while (1) {
-            BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
-            BG_Display();
-            Task_Yield();
-            if (joyEdge & (JOY_A | JOY_B | JOY_SELECT | JOY_START)) {
-                Sound_Reset();
-                Sound_Play(0);
-            }
+        standaloneInitialized = 1;
+        return 1;
+    }
+    return 0;
+}
+
+void SoundTest_RunStandaloneTask(void) {
+    assert(standaloneInitialized);
+    Sound_Reset();
+    Sound_Play(0);
+    while (1) {
+        BG_Print(3, 13, 0, "%s", Sound_GetDebugText(soundNum));
+        BG_Display();
+        Task_Yield();
+        if (joyEdge & (JOY_A | JOY_B | JOY_SELECT | JOY_START)) {
+            Sound_Reset();
+            Sound_Play(0);
         }
     }
 }
