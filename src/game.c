@@ -136,6 +136,7 @@ static void Game_InitNewGame(void) {
 }
 
 static void Game_InitCommon(void) {
+    Rom_GetMapData(&mapData);
     score = 0;
     lives = 2;
     paused = 0;

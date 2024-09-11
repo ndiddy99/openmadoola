@@ -49,7 +49,6 @@ int System_Init(void) {
     HighScore_Init();
     Joy_Init();
     RNG_Seed();
-    Rom_GetMapData(&mapData);
     return 1;
 }
 
