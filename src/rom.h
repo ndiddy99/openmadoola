@@ -43,7 +43,13 @@ int Rom_Load(void);
 int Rom_LoadChr(char *filename, int size);
 
 /**
- * @brief initializes a MapData struct with map data from the ROM image
+ * @brief allocates a MapData struct and fills it with map data from the ROM image
 */
-void Rom_GetMapData(MapData *data);
+MapData *Rom_GetMapData(void);
+
+/**
+ * @brief allocates a MapData struct and fills it with map data from the arcade ROM
+ * (still uses the console ROM, patches the level data to match the arcade version)
+ */
+MapData *Rom_GetMapDataArcade(void);
 

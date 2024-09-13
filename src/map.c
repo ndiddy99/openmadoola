@@ -26,11 +26,23 @@
 #include "object.h"
 #include "palette.h"
 
-MapData mapData;
+MapData *mapData;
 Uint16 mapMetatiles[MAP_HEIGHT_METATILES * MAP_WIDTH_METATILES];
 Uint8 currRoom = 0xff;
 static Uint16 scrollX;
 static Uint16 scrollY;
+
+void Map_FreeData(MapData *data) {
+    for (int i = 0; i < data->numTilesets; i++) {
+        free(data->tilesets[i].metatiles);
+    }
+    free(data->tilesets);
+    free(data->chunks);
+    free(data->screens);
+    free(data->warpDoors);
+    free(data);
+}
+
 
 void Map_Init(Uint8 roomNum) {
     if (roomNum == currRoom) { return; }
@@ -40,13 +52,13 @@ void Map_Init(Uint8 roomNum) {
     // decompress the room's metatiles
     for (int screenY = 0; screenY < 8; screenY++) {
         for (int screenX = 0; screenX < 8; screenX++) {
-            int screenNum = mapData.rooms[roomNum].screenNums[(screenY) * 8 + screenX];
+            int screenNum = mapData->rooms[roomNum].screenNums[(screenY) * 8 + screenX];
             for (int chunkY = 0; chunkY < 4; chunkY++) {
                 for (int chunkX = 0; chunkX < 4; chunkX++) {
-                    int chunkNum = mapData.screens[screenNum][chunkY * 4 + chunkX];
+                    int chunkNum = mapData->screens[screenNum][chunkY * 4 + chunkX];
                     for (int metatileY = 0; metatileY < 4; metatileY++) {
                         for (int metatileX = 0; metatileX < 4; metatileX++) {
-                            Uint16 metatileNum = mapData.chunks[chunkNum][metatileY * 4 + metatileX];
+                            Uint16 metatileNum = mapData->chunks[chunkNum][metatileY * 4 + metatileX];
                             int xPos = (screenX * 16) + (chunkX * 4) + metatileX;
                             int yPos = (screenY * 16) + (chunkY * 4) + metatileY;
                             mapMetatiles[yPos * 128 + xPos] = metatileNum;
@@ -62,7 +74,7 @@ void Map_Init(Uint8 roomNum) {
 }
 
 void Map_LoadPalettes(Uint8 roomNum) {
-    memcpy(colorPalette, mapData.rooms[roomNum].palette, sizeof(mapData.rooms[roomNum].palette));
+    memcpy(colorPalette, mapData->rooms[roomNum].palette, sizeof(mapData->rooms[roomNum].palette));
 }
 
 Uint16 Map_GetMetatile(Object *o) {
@@ -75,7 +87,7 @@ void Map_GetSpawnInfo(Object *o, SpawnInfo *info) {
     // upper 3 bits = y coords
     offset |= (((Uint8)o->y.f.h) >> 1) & 0x38;
 
-    *info = mapData.rooms[currRoom].spawns[offset];
+    *info = mapData->rooms[currRoom].spawns[offset];
 }
 
 Uint16 Map_CheckX(Object *o) {
@@ -242,12 +254,13 @@ int Map_Door(Object *o) {
     Uint8 chunkAlignedX = o->x.f.h & 0xfc;
     Uint8 chunkAlignedY = o->y.f.h & 0xfc;
 
-    for (int i = 0; i < mapData.numWarpDoors; i++) {
-        Uint8 chunkAlignedDoorX = mapData.warpDoors[i].xPos & 0xfc;
-        Uint8 chunkAlignedDoorY = mapData.warpDoors[i].yPos & 0xfc;
-        if ((mapData.warpDoors[i].roomNum == currRoom) &&
+    for (int i = 0; i < mapData->numWarpDoors; i++) {
+        Uint8 chunkAlignedDoorX = mapData->warpDoors[i].xPos & 0xfc;
+        Uint8 chunkAlignedDoorY = mapData->warpDoors[i].yPos & 0xfc;
+        if ((mapData->warpDoors[i].roomNum == currRoom) &&
             (chunkAlignedDoorX == chunkAlignedX) &&
-            (chunkAlignedDoorY == chunkAlignedY)) {
+            (chunkAlignedDoorY == chunkAlignedY))
+        {
                 // ending door
                 if (i == 0) {
                     return DOOR_ENDING;
@@ -255,9 +268,9 @@ int Map_Door(Object *o) {
                 int doorIndex = i ^ 1;
                 o->x.f.l = 0x80;
                 o->y.f.l = 0x80;
-                o->x.f.h = mapData.warpDoors[doorIndex].xPos;
-                o->y.f.h = mapData.warpDoors[doorIndex].yPos;
-                return mapData.warpDoors[doorIndex].roomNum;
+                o->x.f.h = mapData->warpDoors[doorIndex].xPos;
+                o->y.f.h = mapData->warpDoors[doorIndex].yPos;
+                return mapData->warpDoors[doorIndex].roomNum;
         }
     }
 
@@ -270,7 +283,7 @@ void Map_SetPos(Uint16 x, Uint16 y) {
 }
 
 void Map_Draw(void) {
-    Uint16 tileset = mapData.rooms[currRoom].tileset;
+    Uint16 tileset = mapData->rooms[currRoom].tileset;
 
     for (int y = 0; y < SCREEN_HEIGHT + METATILE_SIZE; y += METATILE_SIZE) {
         for (int x = 0; x < SCREEN_WIDTH + METATILE_SIZE; x += METATILE_SIZE) {
@@ -280,7 +293,7 @@ void Map_Draw(void) {
             int xTile = (((x + scrollX) / METATILE_SIZE) % MAP_WIDTH_METATILES);
             int yTile = (((y + scrollY) / METATILE_SIZE) % MAP_WIDTH_METATILES);
 
-            Metatile *metatile = &mapData.tilesets[tileset].metatiles[mapMetatiles[yTile * MAP_WIDTH_METATILES + xTile]];
+            Metatile *metatile = &mapData->tilesets[tileset].metatiles[mapMetatiles[yTile * MAP_WIDTH_METATILES + xTile]];
             Graphics_DrawTile(xPos + 0, yPos + 0, metatile->tiles[0], metatile->palnum, 0);
             Graphics_DrawTile(xPos + 8, yPos + 0, metatile->tiles[1], metatile->palnum, 0);
             Graphics_DrawTile(xPos + 0, yPos + 8, metatile->tiles[2], metatile->palnum, 0);

@@ -90,8 +90,8 @@ void Enemy_Spawn(void) {
 
         // limit spawning objects for boss areas
         if (bossActive) {
-            info.enemy = mapData.stages[stage].bossObj;
-            info.count = MIN(numBossObjs, mapData.stages[stage].bossSpawnCount);
+            info.enemy = mapData->stages[stage].bossObj;
+            info.count = MIN(numBossObjs, mapData->stages[stage].bossSpawnCount);
         }
 
         // get the object slot

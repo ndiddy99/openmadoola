@@ -17,6 +17,7 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "camera.h"
@@ -136,7 +137,15 @@ static void Game_InitNewGame(void) {
 }
 
 static void Game_InitCommon(void) {
-    Rom_GetMapData(&mapData);
+    if (mapData) {
+        Map_FreeData(mapData);
+    }
+    if (gameType == GAME_TYPE_ARCADE) {
+        mapData = Rom_GetMapDataArcade();
+    }
+    else {
+        mapData = Rom_GetMapData();
+    }
     score = 0;
     lives = 2;
     paused = 0;
@@ -145,13 +154,7 @@ static void Game_InitCommon(void) {
 
 static Uint8 itemSpawnYOffsets[] = {0x09, 0x0B, 0x09, 0x0B};
 static void Game_InitRoomVars(Object *lucia) {
-    // arcade mode has room 0's bg color replaced by room 1's
-    if ((currRoom == 0) && (gameType == GAME_TYPE_ARCADE)) {
-        Map_LoadPalettes(1);
-    }
-    else {
-        Map_LoadPalettes(currRoom);
-    }
+    Map_LoadPalettes(currRoom);
     // load sprite palettes
     Sprite_SetAllPalettes(spritePalettes);
     // clear all weapon objects
@@ -189,7 +192,7 @@ static void Game_InitRoomVars(Object *lucia) {
     else if (currRoom == 6) {
         if (!bossDefeated[stage]) {
             bossActive = 1;
-            numBossObjs = mapData.stages[stage].bossObjCount;
+            numBossObjs = mapData->stages[stage].bossObjCount;
         }
     }
 
@@ -275,6 +278,7 @@ static void Game_Run(void) {
     }
 }
 
+static Uint8 recordDemoInitialized = 0;
 void Game_RecordDemoInit(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _health, Sint16 _magic, Uint8 _bootsLevel, Uint8 *_weaponLevels) {
     DemoData data;
     data.rngVal = rngVal;
@@ -287,11 +291,14 @@ void Game_RecordDemoInit(char *filename, Uint8 _gameType, Uint8 _stage, Sint16 _
     memcpy(data.weaponLevels, _weaponLevels, sizeof(data.weaponLevels));
     Game_InitDemo(&data);
     Demo_Record(filename, &data);
+    recordDemoInitialized = 1;
 }
 
 void Game_RecordDemoTask(void) {
+    assert(recordDemoInitialized);
     Game_RunStage();
     Demo_Save();
+    recordDemoInitialized = 0;
     Platform_Quit();
 }
 
@@ -342,9 +349,9 @@ static int Game_RunStage(void) {
     // set up lucia's position and the room number
     Object *lucia = &objects[0];
     memset(lucia, 0, sizeof(Object));
-    lucia->x = mapData.stages[stage].xPos;
-    lucia->y = mapData.stages[stage].yPos;
-    Game_SetRoom(mapData.stages[stage].roomNum);
+    lucia->x = mapData->stages[stage].xPos;
+    lucia->y = mapData->stages[stage].yPos;
+    Game_SetRoom(mapData->stages[stage].roomNum);
     hasWing = 0;
     darutosKilled = 0;
 
@@ -441,7 +448,7 @@ initRoom:
 
 void Game_PlayRoomSong(void) {
     Sound_Reset();
-    Uint8 song = mapData.rooms[currRoom].song;
+    Uint8 song = mapData->rooms[currRoom].song;
     // are we in stage 16's room?
     if (currRoom == 14) {
         // don't play any music if darutos has been killed
@@ -575,13 +582,13 @@ static Uint16 *Game_GetDoorMetatiles(void) {
 }
 
 static void Game_SetMetatileTiles(Uint16 num, Uint16 tl, Uint16 tr, Uint16 bl, Uint16 br) {
-    Uint16 tileset = mapData.rooms[currRoom].tileset;
+    Uint16 tileset = mapData->rooms[currRoom].tileset;
     Uint16 base = tilesetBases[tileset];
 
-    mapData.tilesets[tileset].metatiles[num].tiles[0] = tl + base;
-    mapData.tilesets[tileset].metatiles[num].tiles[1] = tr + base;
-    mapData.tilesets[tileset].metatiles[num].tiles[2] = bl + base;
-    mapData.tilesets[tileset].metatiles[num].tiles[3] = br + base;
+    mapData->tilesets[tileset].metatiles[num].tiles[0] = tl + base;
+    mapData->tilesets[tileset].metatiles[num].tiles[1] = tr + base;
+    mapData->tilesets[tileset].metatiles[num].tiles[2] = bl + base;
+    mapData->tilesets[tileset].metatiles[num].tiles[3] = br + base;
 }
 
 static void Game_LeftDoorMidOpen(void) {

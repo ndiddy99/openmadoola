@@ -89,7 +89,13 @@ void Camera_LuciaScroll(Object *o) {
     // only worry about y scrolling if we are able to scroll the y axis
     if (scrollMode == SCROLL_MODE_FREE) {
         // if we should scroll the screen vertically (at a scroll boundary or using the wing of madoola)
-        if (((o->y.v - cameraY.v) < 0x300) || ((o->y.v - cameraY.v) >= SCROLL_OFFSET_Y) || usingWing || !((o->type == OBJ_LUCIA_AIR) || (o->type == OBJ_LUCIA_AIR_LOCKED))) {
+        if (((o->y.v - cameraY.v) < 0x300) || 
+            ((o->y.v - cameraY.v) >= SCROLL_OFFSET_Y) || 
+            usingWing || 
+            // NOTE: the arcade version has this condition removed, I keep it because
+            // removing it makes the camera movement worse IMO
+            !((o->type == OBJ_LUCIA_AIR) || (o->type == OBJ_LUCIA_AIR_LOCKED)))
+        {
             cameraYBound.v = o->y.v - SCROLL_OFFSET_Y;
 
             if (cameraY.v < cameraYBound.v) {

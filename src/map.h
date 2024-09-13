@@ -58,15 +58,6 @@ typedef struct {
 } Room;
 
 typedef struct {
-    // chunk aligned x position (divided by 16)
-    Uint8 xPos;
-    // chunk aligned y position (divided by 16)
-    Uint8 yPos;
-    // room number
-    Uint8 roomNum;
-} WarpDoor;
-
-typedef struct {
     // Lucia spawn x
     Fixed16 xPos;
     // Lucia spawn y
@@ -82,6 +73,15 @@ typedef struct {
 } StageInfo;
 
 typedef struct {
+    // chunk aligned x position (divided by 16)
+    Uint8 xPos;
+    // chunk aligned y position (divided by 16)
+    Uint8 yPos;
+    // room number
+    Uint8 roomNum;
+} WarpDoor;
+
+typedef struct {
     Uint16 numTilesets;
     Tileset *tilesets;
     Uint16 numChunks;
@@ -95,7 +95,7 @@ typedef struct {
 } MapData;
 
 // map data
-extern MapData mapData;
+extern MapData *mapData;
 
 // current room number
 extern Uint8 currRoom;
@@ -111,6 +111,12 @@ extern Uint8 currRoom;
 // anything below this is either solid ground or a ladder
 #define MAP_LADDER (0x24)
 extern Uint16 mapMetatiles[MAP_HEIGHT_METATILES * MAP_WIDTH_METATILES];
+
+/**
+ * @brief Frees a heap-allocated MapData struct
+ * @param data struct to free
+ */
+void Map_FreeData(MapData *data);
 
 /**
  * @brief Loads a room from the map data

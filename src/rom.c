@@ -148,7 +148,8 @@ static int init_tileset(MapData *data, int num, int length, Uint16 base, int pal
     return rom_offset;
 }
 
-void Rom_GetMapData(MapData *data) {
+MapData *Rom_GetMapData(void) {
+    MapData *data = ommalloc(sizeof(MapData));
     // position in the PRG ROM
     int cursor = 0;
 
@@ -270,4 +271,25 @@ void Rom_GetMapData(MapData *data) {
         data->warpDoors[i].yPos = prgRom[WARP_DOOR_Y_TBL + i];
         data->warpDoors[i].roomNum = prgRom[WARP_DOOR_ROOM_TBL + i];
     }
+    return data;
+}
+
+MapData *Rom_GetMapDataArcade(void) {
+    MapData *data = Rom_GetMapData();
+    // room 0's palette is changed to be the same as room 1's
+    memcpy(data->rooms[0].palette, data->rooms[1].palette, sizeof(data->rooms[0].palette));
+    // erase room 3's boss door
+    data->screens[0x49][1] = 0x41;
+    data->screens[0x49][5] = 0x44;
+    // move room 3's boss door to the bottom of the room
+    data->rooms[3].screenNums[56] = 0x31;
+    // modify door table to reflect the moved door
+    data->warpDoors[66].xPos = 5;
+    data->warpDoors[66].yPos = 119;
+
+    // NOTE: the arcade version also changed one of room 5's screens but it
+    // looks really bad so I decided not to do that change here. If you want to
+    // see it, uncomment this line:
+    // data->rooms[5].screenNums[7] = 0x1f;
+    return data;
 }
