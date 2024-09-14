@@ -278,6 +278,24 @@ MapData *Rom_GetMapDataArcade(void) {
     MapData *data = Rom_GetMapData();
     // room 0's palette is changed to be the same as room 1's
     memcpy(data->rooms[0].palette, data->rooms[1].palette, sizeof(data->rooms[0].palette));
+    // room 11's palette is changed
+    Uint8 room11Pal[16] = {
+        0x0f, 0x0a, 0x16, 0x09,
+        0x0f, 0x0c, 0x1c, 0x0c,
+        0x0f, 0x1c, 0x32, 0x12,
+        0x0f, 0x28, 0x07, 0x0f,
+    };
+    memcpy(data->rooms[11].palette, room11Pal, sizeof(room11Pal));
+    // room 8's palette is changed
+    data->rooms[8].palette[2] = 0x16;
+    // room 14's palette is changed
+    Uint8 room14Pal[16] = {
+        0x0f, 0x37, 0x00, 0x0f,
+        0x0f, 0x09, 0x0f, 0x08,
+        0x0f, 0x1b, 0x32, 0x00,
+        0x0f, 0x20, 0x10, 0x00,
+    };
+    memcpy(data->rooms[14].palette, room14Pal, sizeof(room14Pal));
     // erase room 3's boss door
     data->screens[0x49][1] = 0x41;
     data->screens[0x49][5] = 0x44;
