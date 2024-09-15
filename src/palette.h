@@ -21,17 +21,9 @@
 #include "constants.h"
 #include "graphics.h"
 
-// maps each of the 64 NES colors to an ARGB color
-extern Uint32 nesToRGB[64];
 // first 4: background next 4: sprites
 extern Uint8 colorPalette[PALETTE_SIZE * 8];
 extern Uint8 flashTimer;
-
-/**
- * @brief Loads the NES palette file from disk. Should be run before drawing any graphics.
- * @returns nonzero on success, zero on failure
-*/
-int Palette_Init(void);
 
 /**
  * @brief Sets up the color palette. Should be run at the start of each frame.

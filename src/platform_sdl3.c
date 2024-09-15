@@ -30,6 +30,10 @@
 #include "palette.h"
 #include "platform.h"
 
+// SDL stopped publishing test versions of SDL3 so I can't test with this until
+// SDL3 comes out.
+#error Not currently supported, please use SDL2 for now.
+
 // --- video stuff ---
 static Uint8 frameStarted = 0;
 static Uint8 scale = 3;

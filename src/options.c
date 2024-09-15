@@ -149,6 +149,12 @@ static int gameTypeCB(int num) {
     if (num < 0) { num = ARRAY_LEN(gameTypeOptions) - 1; }
     if (num >= ARRAY_LEN(gameTypeOptions)) { num = 0; }
     gameType = num;
+    if (gameType == GAME_TYPE_ARCADE) {
+        Platform_SetPaletteType(PALETTE_TYPE_2C04);
+    }
+    else {
+        Platform_SetPaletteType(PALETTE_TYPE_NES);
+    }
     DB_Set("gametype", &gameType, 1);
     DB_Save();
     return num;

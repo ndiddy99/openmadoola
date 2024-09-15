@@ -35,7 +35,6 @@ int System_Init(void) {
     // load assets
     if (!Rom_Load())                    { return 0; }
     if (!Rom_LoadChr("font.bin", 4096)) { return 0; }
-    if (!Palette_Init())                { return 0; }
     DB_Init();
     Game_LoadSettings();
 

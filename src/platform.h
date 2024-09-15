@@ -101,6 +101,15 @@ int Platform_SetNTSC(int requested);
  */
 int Platform_GetNTSC(void);
 
+#define PALETTE_TYPE_NES 0
+#define PALETTE_TYPE_2C04 1
+
+/**
+ * @brief Sets the palette type to use.
+ * @param type either PALETTE_TYPE_NES or PALETTE_TYPE_2C04
+ */
+void Platform_SetPaletteType(Uint8 type);
+
 /**
  * @brief Queues the given audio samples to play
  * @param samples The buffer of samples to queue

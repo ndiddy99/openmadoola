@@ -23,11 +23,12 @@
 
 #include "constants.h"
 #include "db.h"
+#include "file.h"
+#include "game.h"
 #include "graphics.h"
 #include "input.h"
 #include "nanotime.h"
 #include "nes_ntsc.h"
-#include "palette.h"
 #include "platform.h"
 
 // --- video stuff ---
@@ -46,11 +47,21 @@ static SDL_Texture *drawTexture;
 static SDL_Texture *scaleTexture;
 static int vsync;
 static nanotime_step_data stepData;
+static nes_ntsc_setup_t ntscSetup;
 static nes_ntsc_t ntsc;
 static Uint8 ntscEnabled = 0;
 
 // --- audio stuff ---
 static SDL_AudioDeviceID audioDevice;
+
+// --- palette stuff ---
+#define NUM_COLORS 64
+// these are in ARGB 32bpp format that SDL likes
+static Uint32 nesPalette[NUM_COLORS];
+static Uint32 arcadePalette[NUM_COLORS];
+// this is in RGB format that nes_ntsc likes
+static Uint8 arcadePaletteNTSC[NUM_COLORS * 3];
+static Uint8 paletteType;
 
 // --- controller stuff ---
 static const int gamepadMap[] = {
@@ -110,12 +121,13 @@ static int Platform_InitVideo(void) {
         return 0;
     }
     nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
-    nes_ntsc_setup_t setup = nes_ntsc_composite;
-    setup.saturation = -0.1;
+    ntscSetup = nes_ntsc_composite;
+    ntscSetup.saturation = -0.1;
     // Sony CXA2025AS decoder matrix
     float matrix[6] = { 1.630f, 0.317f, -0.378f, -0.466f, -1.089f, 1.677f };
-    setup.decoder_matrix = matrix;
-    nes_ntsc_init(&ntsc, &setup);
+    ntscSetup.decoder_matrix = matrix;
+    ntscSetup.base_palette = (paletteType == PALETTE_TYPE_2C04) ? arcadePaletteNTSC : NULL;
+    nes_ntsc_init(&ntsc, &ntscSetup);
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     int drawWidth;
@@ -188,9 +200,10 @@ void Platform_EndFrame(void) {
         // skip past buffer around framebuffer
         int srcOffset = (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
         int dstOffset = 0;
+        Uint32 *rgbPalette = (paletteType == PALETTE_TYPE_NES) ? nesPalette : arcadePalette;
         for (int y = 0; y < SCREEN_HEIGHT; y++) {
             for (int x = 0; x < SCREEN_WIDTH; x++) {
-                rgbFramebuffer[dstOffset++] = nesToRGB[framebuffer[srcOffset++]];
+                rgbFramebuffer[dstOffset++] = rgbPalette[framebuffer[srcOffset++]];
             }
             srcOffset += (TILE_WIDTH * 2);
         }
@@ -225,6 +238,7 @@ void Platform_ShowError(char *fmt, ...) {
     va_start(args, fmt);
     vsnprintf(buff, sizeof(buff), fmt, args);
     va_end(args);
+    fprintf(stderr, "%s\n", buff);
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", buff, window);
 }
 
@@ -336,6 +350,21 @@ int Platform_GetNTSC(void) {
     return ntscEnabled;
 }
 
+void Platform_SetPaletteType(Uint8 type) {
+    if (paletteType != type) {
+        paletteType = type;
+        if (paletteType == PALETTE_TYPE_NES) {
+            ntscSetup.base_palette = NULL;
+            nes_ntsc_init(&ntsc, &ntscSetup);
+        }
+        // arcade
+        else {
+            ntscSetup.base_palette = arcadePaletteNTSC;
+            nes_ntsc_init(&ntsc, &ntscSetup);
+        }
+    }
+}
+
 static int Platform_InitAudio(void) {
     SDL_AudioSpec spec = { 0 };
     spec.freq = 44100;
@@ -362,6 +391,35 @@ int Platform_GetQueuedSamples(void) {
     return (int)SDL_GetQueuedAudioSize(audioDevice) / sizeof(Sint16);
 }
 
+static int Platform_LoadPalette(char *filename, Uint32 *out, Uint8 *outNtsc) {
+    FILE *fp = File_OpenResource(filename, "rb");
+    if (!fp) {
+        Platform_ShowError("Couldn't open %s", filename);
+        return 0;
+    }
+
+    for (int i = 0; i < NUM_COLORS; i++) {
+        Uint8 r = fgetc(fp);
+        Uint8 g = fgetc(fp);
+        Uint8 b = fgetc(fp);
+
+        out[i] = ((Uint32)0xFF << 24) | ((Uint32)r << 16) | ((Uint32)g << 8) | (Uint32)b;
+        if (outNtsc) {
+            outNtsc[(i * 3) + 0] = r;
+            outNtsc[(i * 3) + 1] = g;
+            outNtsc[(i * 3) + 2] = b;
+        }
+    }
+    fclose(fp);
+    return 1;
+}
+
+static int Platform_InitPalettes(void) {
+    if (!Platform_LoadPalette("nes.pal", nesPalette, NULL)) { return 0; }
+    if (!Platform_LoadPalette("2c04.pal", arcadePalette, arcadePaletteNTSC)) { return 0; }
+    return 1;
+}
+
 static SDL_GameController *Platform_FindController(void) {
     for (int i = 0; i < SDL_NumJoysticks(); i++) {
         if (SDL_IsGameController(i)) {
@@ -381,6 +439,8 @@ int Platform_Init(void) {
     if (entry) { scale = entry->data[0]; }
     entry = DB_Find("ntsc");
     if (entry) { ntscEnabled = entry->data[0]; }
+    paletteType = (gameType == GAME_TYPE_ARCADE) ? PALETTE_TYPE_2C04 : PALETTE_TYPE_NES;
+    if (!Platform_InitPalettes()) { return 0; }
     if (!Platform_InitVideo()) { return 0; }
     if (!Platform_InitAudio()) { return 0; }
     controller = Platform_FindController();
