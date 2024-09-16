@@ -39,37 +39,38 @@
 #define BUFFERED_FRAMES 3
 
 static const char *soundFilenames[NUM_SOUNDS] = {
-    [MUS_TITLE] = "mus_title.mml",
-    [MUS_ENDING] = "mus_ending.mml",
-    [MUS_START] = "mus_start.mml",
-    [MUS_CLEAR] = "mus_clear.mml",
-    [MUS_BOSS] = "mus_boss.mml",
-    [MUS_ITEM] = "mus_item.mml",
-    [MUS_GAME_OVER] = "mus_game_over.mml",
-    [MUS_CAVE] = "mus_cave.mml",
-    [MUS_FOREST] = "mus_forest.mml",
-    [SFX_PERASKULL] = "sfx_peraskull.mml",
-    [SFX_FIREBALL] = "sfx_fireball.mml",
-    [MUS_CASTLE] = "mus_castle.mml",
-    [SFX_SWORD] = "sfx_sword.mml",
-    [SFX_MENU] = "sfx_menu.mml",
-    [SFX_LUCIA_HIT] = "sfx_lucia_hit.mml",
-    [SFX_BOMB] = "sfx_bomb.mml",
-    [SFX_JUMP] = "sfx_jump.mml",
-    [SFX_ENEMY_HIT] = "sfx_enemy_hit.mml",
-    [SFX_BOMB_SPLIT] = "sfx_bomb_split.mml",
-    [SFX_SHIELD_BALL] = "sfx_shield_ball.mml",
-    [SFX_NOMAJI] = "sfx_nomaji.mml",
-    [SFX_BOUND_BALL] = "sfx_bound_ball.mml",
-    [SFX_YOKKO_CHAN] = "sfx_yokko_chan.mml",
-    [SFX_ENEMY_KILL] = "sfx_enemy_kill.mml",
-    [SFX_ITEM] = "sfx_item.mml",
-    [SFX_BOSS_KILL] = "sfx_boss_kill.mml",
-    [SFX_PAUSE] = "sfx_pause.mml",
-    [SFX_SELECT] = "sfx_select.mml",
-    [SFX_FLAME_SWORD] = "sfx_flame_sword.mml",
-    [SFX_NYURU] = "sfx_nyuru.mml",
-    [SFX_JOYRAIMA] = "sfx_joyraima.mml",
+    [MUS_TITLE]       = "mml/mus_title.mml",
+    [MUS_ENDING]      = "mml/mus_ending.mml",
+    [MUS_START]       = "mml/mus_start.mml",
+    [MUS_CLEAR]       = "mml/mus_clear.mml",
+    [MUS_BOSS]        = "mml/mus_boss.mml",
+    [MUS_ITEM]        = "mml/mus_item.mml",
+    [MUS_GAME_OVER]   = "mml/mus_game_over.mml",
+    [MUS_CAVE]        = "mml/mus_cave.mml",
+    [MUS_FOREST]      = "mml/mus_forest.mml",
+    [SFX_PERASKULL]   = "mml/sfx_peraskull.mml",
+    [SFX_FIREBALL]    = "mml/sfx_fireball.mml",
+    [MUS_CASTLE]      = "mml/mus_castle.mml",
+    [SFX_SWORD]       = "mml/sfx_sword.mml",
+    [SFX_MENU]        = "mml/sfx_menu.mml",
+    [SFX_LUCIA_HIT]   = "mml/sfx_lucia_hit.mml",
+    [SFX_BOMB]        = "mml/sfx_bomb.mml",
+    [SFX_JUMP]        = "mml/sfx_jump.mml",
+    [SFX_ENEMY_HIT]   = "mml/sfx_enemy_hit.mml",
+    [SFX_BOMB_SPLIT]  = "mml/sfx_bomb_split.mml",
+    [SFX_SHIELD_BALL] = "mml/sfx_shield_ball.mml",
+    [SFX_NOMAJI]      = "mml/sfx_nomaji.mml",
+    [SFX_BOUND_BALL]  = "mml/sfx_bound_ball.mml",
+    [SFX_YOKKO_CHAN]  = "mml/sfx_yokko_chan.mml",
+    [SFX_ENEMY_KILL]  = "mml/sfx_enemy_kill.mml",
+    [SFX_ITEM]        = "mml/sfx_item.mml",
+    [SFX_BOSS_KILL]   = "mml/sfx_boss_kill.mml",
+    [SFX_PAUSE]       = "mml/sfx_pause.mml",
+    [SFX_SELECT]      = "mml/sfx_select.mml",
+    [SFX_FLAME_SWORD] = "mml/sfx_flame_sword.mml",
+    [SFX_NYURU]       = "mml/sfx_nyuru.mml",
+    [SFX_JOYRAIMA]    = "mml/sfx_joyraima.mml",
+    [MUS_BOSS_ARCADE] = "mml/mus_boss_arcade.mml",
 };
 
 Sound sounds[NUM_SOUNDS];
@@ -159,7 +160,7 @@ int Sound_Init(void) {
 
     // load sound data from the ROM
     Uint8 *src = chrRom + CHR_ROM_SOUND;
-    for (int i = 0; i < NUM_SOUNDS; i++) {
+    for (int i = 0; i < NUM_ROM_SOUNDS; i++) {
         // override the sound with MML file if one is available
         if (MML_Compile(soundFilenames[i], &sounds[i])) {
             // skip past the sound definition in the ROM
@@ -192,6 +193,13 @@ int Sound_Init(void) {
         if (i == 0) { src = chrRom + CHR_ROM_SOUND + 0x20; }
         // after loading title screen and ending music, switch to PRG ROM
         if (i == 1) { src = prgRom + PRG_ROM_SOUND; }
+    }
+    for (int i = NUM_ROM_SOUNDS; i < NUM_SOUNDS; i++) {
+        // these sounds aren't in the ROM, so if the MML is missing or broken we have to abort
+        if (!MML_Compile(soundFilenames[i], &sounds[i])) {
+            Platform_ShowError("Error compiling %s", soundFilenames[i]);
+            Platform_Quit();
+        }
     }
     return 1;
 }

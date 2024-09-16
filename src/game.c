@@ -461,14 +461,24 @@ void Game_PlayRoomSong(void) {
         }
         // otherwise play the boss room theme
         else {
-            Sound_Play(MUS_BOSS);
+            if (gameType == GAME_TYPE_ARCADE) {
+                Sound_Play(MUS_BOSS_ARCADE);
+            }
+            else {
+                Sound_Play(MUS_BOSS);
+            }
         }
     }
     // if we're in the boss room, play the boss music if the boss hasn't been
     // killed, and the item room music if it has been
     else if (song == MUS_BOSS) {
         if (bossActive) {
-            Sound_Play(MUS_BOSS);
+            if (gameType == GAME_TYPE_ARCADE) {
+                Sound_Play(MUS_BOSS_ARCADE);
+            }
+            else {
+                Sound_Play(MUS_BOSS);
+            }
         }
         else {
             Sound_Play(MUS_ITEM);

@@ -1,0 +1,21 @@
+; VS. The Wings of Madoola - Boss theme
+; by marklincadet
+
+A1 ; music apu
+
+; Instrument parameters
+I0 C0 R0:5f R1:88 ; instrument 0: apu channel 0 (pulse 1)
+I1 C3 R0:00 R1:00 ; instrument 1: apu channel 3 (noise)
+I2 C2 R0:ff R1:00 ; instrument 2: apu channel 2 (triangle)
+I3 C1 R0:8f R1:00 ; instrument 3: apu channe1 1 (pulse 2)
+
+; Noise patches
+N4 N6
+
+t12 ; 16th note takes 12 frames (75 bpm)
+l8 ; default to eighth note
+
+I0 o1 L b4f#4.a>c<b>d4c#4<aa#4.
+I1 N4 N6 L n0,16 n0,16 n1
+I2 o4 [r1]4 L b4f#4.a>c<b>d4c#4<aa#4.
+I3 o3 [r1]8 L b4f#4.a>c<b>d4c#4<aa#4.
