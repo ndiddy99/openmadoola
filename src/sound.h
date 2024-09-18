@@ -53,6 +53,7 @@ typedef enum {
     SFX_JOYRAIMA    = 30,
     NUM_ROM_SOUNDS  = 31,
     MUS_BOSS_ARCADE = 31,
+    SFX_LUCIA_DEAD,
     NUM_SOUNDS,
 } SOUND_NUM;
 

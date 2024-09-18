@@ -71,6 +71,7 @@ static const char *soundFilenames[NUM_SOUNDS] = {
     [SFX_NYURU]       = "mml/sfx_nyuru.mml",
     [SFX_JOYRAIMA]    = "mml/sfx_joyraima.mml",
     [MUS_BOSS_ARCADE] = "mml/mus_boss_arcade.mml",
+    [SFX_LUCIA_DEAD]  = "mml/sfx_lucia_dead.mml"
 };
 
 Sound sounds[NUM_SOUNDS];

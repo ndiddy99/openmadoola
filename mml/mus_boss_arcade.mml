@@ -1,5 +1,5 @@
-; VS. The Wings of Madoola - Boss theme
-; by marklincadet
+; The Wings of Madoola (VS. System) - Boss theme
+; recreation by marklincadet
 
 A1 ; music apu
 
@@ -16,6 +16,6 @@ t12 ; 16th note takes 12 frames (75 bpm)
 l8 ; default to eighth note
 
 I0 o1 L b4f#4.a>c<b>d4c#4<aa#4.
-I1 N4 N6 L n0,16 n0,16 n1
+I1 L n0,16 n0,16 n1
 I2 o4 [r1]4 L b4f#4.a>c<b>d4c#4<aa#4.
 I3 o3 [r1]8 L b4f#4.a>c<b>d4c#4<aa#4.

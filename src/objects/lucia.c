@@ -435,8 +435,10 @@ static void Lucia_Draw(Object *o, int frame) {
         roomChangeTimer = 150;
         o->type = OBJ_LUCIA_DYING;
         Sound_Reset();
-        // TODO play arcade lucia dead sound here
-        if (gameType != GAME_TYPE_ARCADE) {
+        if (gameType == GAME_TYPE_ARCADE) {
+            Sound_Play(SFX_LUCIA_DEAD);
+        }
+        else {
             Sound_Play(MUS_GAME_OVER);
             Sound_Play(SFX_LUCIA_HIT);
         }
