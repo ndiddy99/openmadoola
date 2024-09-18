@@ -7,6 +7,7 @@ You can also play MML files outside of the game by launching OpenMadoola with th
 ## Example files
 If you composed anything and want it added here, feel free to submit a pull request.
 
+- [doraemon.mml](doraemon.mml) - Doraemon: Giga Zombie no Gyakushuu (FC) - Underground Maze (cover by marklincadet)
 - [precure.mml](precure.mml) - Futari Wa Pretty Cure (Sega Pico) - Title (cover by marklincadet)
 - [sunset.mml](sunset.mml) - marklincadet - Running from the Sunset
 
