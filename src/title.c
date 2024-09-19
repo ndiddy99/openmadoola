@@ -250,9 +250,9 @@ static int Title_HighScores(void) {
 }
 
 static char *demoFiles[] = {
-    "stage1.dem",
-    "stage3.dem",
-    "stage5.dem",
+    "demo/stage1.dem",
+    "demo/stage3.dem",
+    "demo/stage5.dem",
 };
 static int demoCursor = 0;
 
