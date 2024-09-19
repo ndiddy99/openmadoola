@@ -249,14 +249,25 @@ static int Title_HighScores(void) {
     return 0;
 }
 
+static char *demoFiles[] = {
+    "stage1.dem",
+    "stage3.dem",
+    "stage5.dem",
+};
+static int demoCursor = 0;
+
 static void Title_DemoTask(void) {
-    Game_PlayDemo("stage1.dem");
+    Game_PlayDemo(demoFiles[demoCursor]);
 }
 
 static int Title_Demo(void) {
     Sprite_ClearList();
     Sound_Mute();
     Task_Child(Title_DemoTask, 1200, 1);
+    demoCursor++;
+    if (demoCursor >= ARRAY_LEN(demoFiles)) {
+        demoCursor = 0;
+    }
     Demo_Uninit();
     Sound_Reset();
     Sound_Unmute();

@@ -89,6 +89,8 @@ int Demo_Playback(char *filename, DemoData *out) {
     memcpy(out->weaponLevels, demoBuff->data + cursor, sizeof(out->weaponLevels));
     cursor += sizeof(weaponLevels);
     frameCount = demoBuff->data[cursor];
+    // get first button press ready
+    Task_Yield();
     return 1;
 }
 

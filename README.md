@@ -6,7 +6,7 @@ Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
 
 ## Usage
 
-In order to function, OpenMadoola requires the font.bin, 2c04.pal, and nes.pal data files and the mml directory from this repository. It also requires a Wing of Madoola ROM image. The ROM image can either be a standard NES ROM file named "madoola.nes" or the "sharedassets0.assets" file from [Sunsoft is Back! Retro Game Selection](https://store.steampowered.com/app/2821290/SUNSOFT_is_Back/) on Steam. OpenMadoola reads all the graphics and level data from the ROM image, and will refuse to start if it is not present.
+In order to function, OpenMadoola requires the font.bin, 2c04.pal, nes.pal, stage1.dem, stage3.dem, and stage5.dem data files as well as the mml directory from this repository. It also requires a Wing of Madoola ROM image. The ROM image can either be a standard NES ROM file named "madoola.nes" or the "sharedassets0.assets" file from [Sunsoft is Back! Retro Game Selection](https://store.steampowered.com/app/2821290/SUNSOFT_is_Back/) on Steam. OpenMadoola reads all the graphics and level data from the ROM image, and will refuse to start if it is not present.
 
 If you don't have an original cartridge or don't want to deal with dumping it, I would recommend buying the collection on Steam rather than downloading a ROM off the internet. It's only $13 and has a nice interface with high-quality scans of the manual as well as some concept art. It also shows Sunsoft that there's interest in their legacy IP. To retrieve the "sharedassets0.assets" file, go to your Steam library, right click the Sunsoft collection, and click "Manage->Browse local files". It will be in the "SUNSOFT is Back! Retro Game Selection_Data" directory.
 
