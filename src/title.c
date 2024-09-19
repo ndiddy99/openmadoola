@@ -99,7 +99,8 @@ static char introText[] = {
     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 };
 
-static int musicPlaying = 0;
+static int musicPlaying;
+static int demoCursor;
 
 static void Title_DrawMadoolaGraphic(int x, int y) {
     for (int yCursor = 0; yCursor < 6; yCursor++) {
@@ -254,7 +255,6 @@ static char *demoFiles[] = {
     "demo/stage3.dem",
     "demo/stage5.dem",
 };
-static int demoCursor = 0;
 
 static void Title_DemoTask(void) {
     Game_PlayDemo(demoFiles[demoCursor]);
@@ -315,6 +315,7 @@ void Title_DoSequence(SequenceItem *sequence, int len) {
 void Title_Run(void) {
     flashTimer = 0;
     musicPlaying = 0;
+    demoCursor = 0;
     BG_Clear();
     Sprite_ClearList();
     Sound_Reset();
