@@ -144,6 +144,12 @@ void HighScore_NameEntry(Uint32 score) {
     memcpy(scores[scoreNum].name, "     ", NAME_SIZE);
 
     BG_Clear();
+    // delay is to add space in between the game over music and the high score
+    // music
+    for (int i = 0; i < 60; i++) {
+        BG_Display();
+        Task_Yield();
+    }
     BG_Print(6, 3, 0, "CONGRATULATIONS, YOU\n\nGOT A HIGH SCORE.");
     int scoreTableY = 8;
     HighScore_Print(6, scoreTableY);
