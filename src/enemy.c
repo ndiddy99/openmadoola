@@ -17,6 +17,7 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "darutos.h"
 #include "game.h"
 #include "camera.h"
 #include "lucia.h"
@@ -71,7 +72,9 @@ void Enemy_Spawn(void) {
         // don't spawn enemies if lucia is in the last stage and has collected
         // the wing of madoola
         if (hasWing && (currRoom == 14)) {
-            return;
+            if (gameType != GAME_TYPE_ARCADE) { return; }
+            // arcade mode starts spawning enemies again after darutos is killed
+            else if (!darutosKilled) { return; }
         }
 
         Object temp = { 0 };

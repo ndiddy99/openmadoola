@@ -278,14 +278,21 @@ MapData *Rom_GetMapDataArcade(void) {
     MapData *data = Rom_GetMapData();
     // room 0's palette is changed to be the same as room 1's
     memcpy(data->rooms[0].palette, data->rooms[1].palette, sizeof(data->rooms[0].palette));
-    // room 11's palette is changed
-    Uint8 room11Pal[16] = {
-        0x0f, 0x0a, 0x06, 0x09,
-        0x0f, 0x0c, 0x1c, 0x0c,
-        0x0f, 0x1c, 0x32, 0x12,
-        0x0f, 0x28, 0x07, 0x0f,
-    };
-    memcpy(data->rooms[11].palette, room11Pal, sizeof(room11Pal));
+
+    // erase room 3's boss door
+    data->screens[0x49][1] = 0x41;
+    data->screens[0x49][5] = 0x44;
+    // move room 3's boss door to the bottom of the room
+    data->rooms[3].screenNums[56] = 0x31;
+    // modify door table to reflect the moved door
+    data->warpDoors[66].xPos = 5;
+    data->warpDoors[66].yPos = 119;
+
+    // NOTE: the arcade version  changed one of room 5's screens but it looks
+    // really bad so I decided not to do that change here. If you want to see
+    // it, uncomment this line:
+    // data->rooms[5].screenNums[7] = 0x1f;
+
     // room 8's palette is changed
     Uint8 room8Pal[16] = {
         // 0x1e was added on the 2c04 ppu (not actually there on a real 2c04
@@ -296,6 +303,16 @@ MapData *Rom_GetMapDataArcade(void) {
         0x0f, 0x24, 0x13, 0x0c,
     };
     memcpy(data->rooms[8].palette, room8Pal, sizeof(room8Pal));
+
+    // room 11's palette is changed
+    Uint8 room11Pal[16] = {
+        0x0f, 0x0a, 0x06, 0x09,
+        0x0f, 0x0c, 0x1c, 0x0c,
+        0x0f, 0x1c, 0x32, 0x12,
+        0x0f, 0x28, 0x07, 0x0f,
+    };
+    memcpy(data->rooms[11].palette, room11Pal, sizeof(room11Pal));
+
     // room 14's palette is changed
     Uint8 room14Pal[16] = {
         0x0f, 0x28, 0x00, 0x0f,
@@ -305,18 +322,9 @@ MapData *Rom_GetMapDataArcade(void) {
         0x0f, 0x20, 0x10, 0x00,
     };
     memcpy(data->rooms[14].palette, room14Pal, sizeof(room14Pal));
-    // erase room 3's boss door
-    data->screens[0x49][1] = 0x41;
-    data->screens[0x49][5] = 0x44;
-    // move room 3's boss door to the bottom of the room
-    data->rooms[3].screenNums[56] = 0x31;
-    // modify door table to reflect the moved door
-    data->warpDoors[66].xPos = 5;
-    data->warpDoors[66].yPos = 119;
-
-    // NOTE: the arcade version also changed one of room 5's screens but it
-    // looks really bad so I decided not to do that change here. If you want to
-    // see it, uncomment this line:
-    // data->rooms[5].screenNums[7] = 0x1f;
+    // don't spawn enemies around ending door (necessary due to changed spawning
+    // behavior after darutos is killed)
+    data->rooms[14].spawns[2].count = 0;
+    data->rooms[14].spawns[4].count = 0;
     return data;
 }
