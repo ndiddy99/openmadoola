@@ -1,4 +1,4 @@
-/* nishiga.h: Bound ball object code
+/* nishiga.h: Nishiga object code
  * Copyright (c) 2023 Nathan Misner
  *
  * This file is part of OpenMadoola.
