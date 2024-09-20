@@ -10,13 +10,12 @@
   use this library only as a *last resort*
 */
 
+#define _POSIX_C_SOURCE 200112L
 #define LIBCO_C
 #include "libco.h"
 #include "settings.h"
 #include "valgrind.h"
 
-#define _BSD_SOURCE
-#define _XOPEN_SOURCE 500
 #include <stdlib.h>
 #include <ucontext.h>
 
@@ -33,8 +32,9 @@ cothread_t co_active(void) {
 }
 
 cothread_t co_derive(void* memory, unsigned int heapsize, void (*coentry)(void)) {
+  ucontext_t* thread;
   if(!co_running) co_running = &co_primary;
-  ucontext_t* thread = (ucontext_t*)memory;
+  thread = (ucontext_t*)memory;
   memory = (unsigned char*)memory + sizeof(ucontext_t);
   heapsize -= sizeof(ucontext_t);
   if(thread) {
@@ -51,8 +51,9 @@ cothread_t co_derive(void* memory, unsigned int heapsize, void (*coentry)(void))
 }
 
 cothread_t co_create(unsigned int heapsize, void (*coentry)(void)) {
+  ucontext_t* thread;
   if(!co_running) co_running = &co_primary;
-  ucontext_t* thread = (ucontext_t*)malloc(sizeof(ucontext_t));
+  thread = (ucontext_t*)malloc(sizeof(ucontext_t));
   if(thread) {
     if((!getcontext(thread) && !(thread->uc_stack.ss_sp = 0)) && (thread->uc_stack.ss_sp = malloc(heapsize))) {
       thread->uc_link = co_running;
