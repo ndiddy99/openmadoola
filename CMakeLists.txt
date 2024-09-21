@@ -6,6 +6,9 @@ set(PLATFORM_LIST SDL2 SDL3)
 set(ACTIVE_PLATFORM SDL2 CACHE STRING "Default platform is SDL2")
 set_property(CACHE ACTIVE_PLATFORM PROPERTY STRINGS ${PLATFORM_LIST})
 
+set(SANITIZE OFF CACHE BOOL "Compile with asan/ubsan (gcc/clang only)")
+set_property(CACHE SANITIZE PROPERTY VALUE)
+
 if(ACTIVE_PLATFORM STREQUAL SDL2)
     # use vendored sdl2 lib on msvc
     if(MSVC)
@@ -242,7 +245,12 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST} ${HEADER_LIST
 if(MSVC)
     target_compile_options(openmadoola PRIVATE /W3)
 else()
-    target_compile_options(openmadoola PRIVATE -Wall -Wvla -Wformat=2 ${PLATFORM_CFLAGS_OTHER})
+    set(GCC_CFLAGS -Wall -Wvla -Wformat=2)
+    if(SANITIZE)
+        set(GCC_CFLAGS ${GCC_CFLAGS} -fsanitize=address,undefined)
+        target_link_options(openmadoola PRIVATE -fsanitize=address,undefined)
+    endif()
+    target_compile_options(openmadoola PRIVATE ${GCC_CFLAGS} ${PLATFORM_CFLAGS_OTHER})
 endif()
 
 # language versions

@@ -146,5 +146,5 @@ Uint32 Demo_GetInput(void) {
 void Demo_Save(void) {
     if (!recording) { return; }
     recording = 0;
-    Buffer_WriteToFile(demoBuff, recordFilename->data);
+    Buffer_WriteToFile(demoBuff, (char *)recordFilename->data);
 }
