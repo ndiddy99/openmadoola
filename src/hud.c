@@ -88,7 +88,7 @@ void HUD_DisplayPlus(Sint16 health, Sint16 magic) {
 }
 
 void HUD_DisplayArcade(Sint16 health, Sint16 magic, Uint32 score) {
-    HUD_ShowScore(score, 16, 24, 1);
+    HUD_ShowScore(score, 16, 23, 1);
     HUD_ShowNum(health, SCREEN_WIDTH - 60, SCREEN_HEIGHT - 65, 3, 0);
     HUD_ShowNum(magic, SCREEN_WIDTH - 60, SCREEN_HEIGHT - 41, 0, 0);
     HUD_WeaponInit(SCREEN_WIDTH - 68, SCREEN_HEIGHT - 41);

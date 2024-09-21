@@ -102,7 +102,7 @@ static char introText[] = {
 static int musicPlaying;
 static int demoCursor;
 
-static void Title_DrawMadoolaGraphic(int x, int y) {
+static void Title_DrawMadoolaLogo(int x, int y) {
     for (int yCursor = 0; yCursor < 6; yCursor++) {
         for (int xCursor = 0; xCursor < 20; xCursor++) {
             BG_SetTile(x + xCursor, y + yCursor, 1, madoolaTiles[yCursor * 20 + xCursor]);
@@ -120,7 +120,7 @@ static int Title_ScreenOriginal(void) {
     BG_Clear();
     BG_SetAllPalettes(titlePalette);
     BG_Print(6, 6, 1, "THE WING OF");
-    Title_DrawMadoolaGraphic(6, 8);
+    Title_DrawMadoolaLogo(6, 8);
     Title_DrawCopyrightText(6, 19);
     Sound_Play(MUS_TITLE);
     BG_Scroll(BG_CENTERED_X, 0);
@@ -135,7 +135,7 @@ static int Title_PlusInit(void) {
     BG_Clear();
     BG_SetAllPalettes(titlePalette);
     BG_Print(6, 6, 1, "The Wings of");
-    Title_DrawMadoolaGraphic(6, 8);
+    Title_DrawMadoolaLogo(6, 8);
     Title_DrawCopyrightText(6, 19);
     return 0;
 }
@@ -143,14 +143,14 @@ static int Title_PlusInit(void) {
 static int Title_ArcadeInit(void) {
     BG_Clear();
     BG_SetAllPalettes(titlePaletteArcade);
-    BG_Print(5, 2, 0, "SCORE");
-    BG_Print(5, 4, 2, "%08u", HighScore_GetLastScore());
-    BG_Print(19, 2, 0, "HIGH-SCORE");
-    BG_Print(19, 4, 2, "%08u", HighScore_GetTopScore());
-    BG_Print(7, 8, 1, "The Wings of");
-    Title_DrawMadoolaGraphic(7, 10);
-    BG_Print(6, 18, 3, "- PRESS START BUTTON -");
-    Title_DrawCopyrightText(6, 20);
+    BG_Print(4, 2, 0, "SCORE");
+    BG_Print(4, 4, 2, "%08u", HighScore_GetLastScore());
+    BG_Print(18, 2, 0, "HIGH-SCORE");
+    BG_Print(18, 4, 2, "%08u", HighScore_GetTopScore());
+    BG_Print(6, 8, 1, "The Wings of");
+    Title_DrawMadoolaLogo(6, 10);
+    BG_Print(5, 18, 3, "- PRESS START BUTTON -");
+    Title_DrawCopyrightText(5, 20);
     return 0;
 }
 
@@ -177,12 +177,11 @@ static int Title_AnimateIn(void) {
 
 
 static int Title_ScreenPlus(void) {
-    int frames = 0;
     if (!musicPlaying) {
         musicPlaying = 1;
         Sound_Play(MUS_TITLE);
     }
-    while (++frames < 900) {
+    for (int frames = 0; frames < 900; frames++) {
         BG_Display();
         if (joyEdge & JOY_START) { return 1; }
         Task_Yield();
@@ -191,10 +190,9 @@ static int Title_ScreenPlus(void) {
 }
 
 static int Title_ScreenArcade(void) {
-    int frames = 0;
-    while (++frames < 200) {
-        int madoolaPaletteNum = (frames / 2) % 7;
-        BG_SetPalette(1, titleCyclePals1 + madoolaPaletteNum * 4);
+    for (int frames = 0; frames < 200; frames++) {
+        int logoPaletteNum = (frames / 2) % 7;
+        BG_SetPalette(1, titleCyclePals1 + logoPaletteNum * 4);
         // NOTE: this is most likely supposed to be "frames / 2" but I think
         // frames / 8 looks a LOT better
         int startPaletteNum = (frames / 8) % 8;
@@ -241,8 +239,7 @@ static int Title_HighScoresInit(void) {
 }
 
 static int Title_HighScores(void) {
-    int frames = 0;
-    while (++frames < 200) {
+    for (int frames = 0; frames < 200; frames++) {
         BG_Display();
         Task_Yield();
         if (joyEdge & JOY_START) { return 1; }
