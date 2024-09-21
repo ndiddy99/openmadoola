@@ -6,8 +6,7 @@ set(PLATFORM_LIST SDL2 SDL3)
 set(ACTIVE_PLATFORM SDL2 CACHE STRING "Default platform is SDL2")
 set_property(CACHE ACTIVE_PLATFORM PROPERTY STRINGS ${PLATFORM_LIST})
 
-set(SANITIZE OFF CACHE BOOL "Compile with asan/ubsan (gcc/clang only)")
-set_property(CACHE SANITIZE PROPERTY VALUE)
+option(SANITIZE "Compile with asan/ubsan (gcc/clang only)" OFF)
 
 if(ACTIVE_PLATFORM STREQUAL SDL2)
     # use vendored sdl2 lib on msvc
