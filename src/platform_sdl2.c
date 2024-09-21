@@ -47,7 +47,6 @@ static SDL_Texture *drawTexture;
 static SDL_Texture *scaleTexture;
 static int vsync;
 static nanotime_step_data stepData;
-static nes_ntsc_setup_t ntscSetup;
 static nes_ntsc_t ntsc;
 static Uint8 ntscEnabled = 0;
 
@@ -121,14 +120,7 @@ static int Platform_InitVideo(void) {
         return 0;
     }
     nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
-    ntscSetup = nes_ntsc_composite;
-    ntscSetup.saturation = -0.1;
-    // Sony CXA2025AS decoder matrix
-    float matrix[6] = { 1.630f, 0.317f, -0.378f, -0.466f, -1.089f, 1.677f };
-    ntscSetup.decoder_matrix = matrix;
-    ntscSetup.base_palette = (paletteType == PALETTE_TYPE_2C04) ? arcadePaletteNTSC : NULL;
-    nes_ntsc_init(&ntsc, &ntscSetup);
-
+    // set up textures
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     int drawWidth;
     if (ntscEnabled) {
@@ -319,6 +311,16 @@ int Platform_GetFullscreen(void) {
     return fullscreen;
 }
 
+static void Platform_InitNTSC(void) {
+    nes_ntsc_setup_t ntscSetup = nes_ntsc_composite;
+    ntscSetup.saturation = -0.1;
+    // Sony CXA2025AS decoder matrix
+    float matrix[6] = { 1.630f, 0.317f, -0.378f, -0.466f, -1.089f, 1.677f };
+    ntscSetup.decoder_matrix = matrix;
+    ntscSetup.base_palette = (paletteType == PALETTE_TYPE_2C04) ? arcadePaletteNTSC : NULL;
+    nes_ntsc_init(&ntsc, &ntscSetup);
+}
+
 int Platform_SetNTSC(int requested) {
     if (requested != ntscEnabled) {
         ntscEnabled = requested;
@@ -353,15 +355,7 @@ int Platform_GetNTSC(void) {
 void Platform_SetPaletteType(Uint8 type) {
     if (paletteType != type) {
         paletteType = type;
-        if (paletteType == PALETTE_TYPE_NES) {
-            ntscSetup.base_palette = NULL;
-            nes_ntsc_init(&ntsc, &ntscSetup);
-        }
-        // arcade
-        else {
-            ntscSetup.base_palette = arcadePaletteNTSC;
-            nes_ntsc_init(&ntsc, &ntscSetup);
-        }
+        Platform_InitNTSC();
     }
 }
 
@@ -441,6 +435,7 @@ int Platform_Init(void) {
     if (entry) { ntscEnabled = entry->data[0]; }
     paletteType = (gameType == GAME_TYPE_ARCADE) ? PALETTE_TYPE_2C04 : PALETTE_TYPE_NES;
     if (!Platform_InitPalettes()) { return 0; }
+    Platform_InitNTSC();
     if (!Platform_InitVideo()) { return 0; }
     if (!Platform_InitAudio()) { return 0; }
     controller = Platform_FindController();
