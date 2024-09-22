@@ -1,33 +1,34 @@
 ; Doraemon: Giga Zombie no Gyakushuu (FC) - Underground Maze
 ; Composed by Takashi Kutsukake
 ; Cover by marklincadet
+; v1.0: 18/04/2024, v1.1: 22/09/2024
 
 A1 ; music APU
 
 ; Instrument parameters
 I0 C0 R0:44 R1:00 ; instrument 0: apu channe1 0 (pulse 1)
-; APU Register 1 value:  44  -> 01000100
+; APU Register 0 value:  44  -> 01000100
 ;   Pulse width          1   -> 01......
 ;   Length counter halt  OFF -> ..0.....
 ;   Constant volume flag OFF -> ...0....
 ;   Envelope value       4   -> ....0100
 I1 C1 R0:82 R1:00 ; instrument 1: apu channel 1 (pulse 2)
-; APU Register 1 value:  82  -> 10000010
+; APU Register 0 value:  82  -> 10000010
 ;   Pulse width          2   -> 10......
 ;   Length counter halt  OFF -> ..0.....
 ;   Constant volume flag OFF -> ...0....
 ;   Envelope value       2   -> ....0010
 I2 C2 R0:1c R1:00 ; instrument 2: apu channel 2 (triangle)
-; APU Register 1 value:  1c  -> 00001111
+; APU Register 0 value:  1c  -> 00001111
 ;   Length counter halt  OFF -> 0.......
 ;   Counter reload value 28  -> .0011100
-; APU Register 1 value:  5c  -> 00010111
+; APU Register 0 value:  5c  -> 00010111
 ;   Length counter halt  OFF -> 0.......
 ;   Counter reload value 92  -> .1011100
 I3 C3 R0:00 R1:00 ; instrument 3: apu channel 3 (noise)
 
 ; Noise patches
-N6 N6f N3
+N3 N6
 
 t8 ; 16th note takes 8 frames (112 bpm)
 l16 ; default to 16th note
@@ -35,8 +36,8 @@ l16 ; default to 16th note
 I0 o3 L c#d#ef#8ed#ef#g#8f#ef#g#b8ag#8.ff#g# araf#g#ag#rg#ef#g#f#ed#e8c#d#c#cf#ed# c#d#ef#8ed#ef#g#8f#ef#g#b8ag#8.ff#g# araf#g#ag#rg#ef#g#f#ed#c#8cc#4e8
 I1 o2 L [g#]16[g#]6ab >c#d#e<ab>c#<b>c#d#<g#abag#f#g#8eg#a#g#ag#f# [g#]16[g#]6ab >c#d#e<ab>c#<b>c#d#<g#abag#f#g#8f#e8. R0:44 >d#8f#8
 I2 o3 L c#8[c#]4d#8[d#]4e8[e]4f8f[c#]3 [f#]4rf#[e]4re[d#]3c#8c#c<g#>cd#<a>d# c#8[c#]4d#8[d#]4e8[e]4f8f[c#]3 [f#]4rf#[e]4re[d#]3<g#8g#> R0:5c c#8. R0:1c <[b]3
-I3    L [n2,8. n0,8.]7 n2,8. [n0]3
+I3    L [n0,8. n1,8.]7 n0,8. [n1]3
 
 I0 g#8c#8e8f#8<b8>d#8f#8<b8>d#8e8<a#8>c#8 e8<a8>c#8d#8<a8>c8d#8<g#8b8>d8<b8a8 >c#8<e8a8>c#8<f#8a#8>d#8<f#8b8>d#8<g#8>c8 e8<g#8>c#8[f#8]3[g#8c#8c#8]2
-I1 e8g#8c#8d#8f#8<b8>d#8f#8<b8>c#8e8<a#8> c#8e8<a8>c8d#8<a8b8>d#8<g#8>c#8<g#8b8 a8>c#8<e8a#8>c#8<f#8b8>d#8<f#8>c8d#8<g#8 >c#8e8<g#8>d8a8a8f#8<a#8>f#8f#8c8d#
+I1 e8g#8c#8d#8f#8<b8>d#8f#8<b8>c#8e8<a#8> c#8e8<a8>c8d#8<a8b8>d#8<g#8>c#8<g#8b8 a8>c#8<e8a#8>c#8<f#8b8>d#8<f#8>c8d#8<g#8 >c#8e8<g#8>d8a8a8f#8<a#8>f#8f#8c8d# R0:82
 I2 a8[a]5raa8ag#8[g#]4g8gg8g f#8[f#]4f8ff8fe8[e]4g#8g#efg# a8[a]4a#8a#a#8a#b8[b]4>c8cc8cc#8[c#]4d8dd8dd#8[d#]4<g#8g#g#a#>c

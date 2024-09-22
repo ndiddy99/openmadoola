@@ -10,6 +10,7 @@ If you composed anything and want it added here, feel free to submit a pull requ
 - [doraemon.mml](doraemon.mml) - Doraemon: Giga Zombie no Gyakushuu (FC) - Underground Maze (cover by marklincadet)
 - [precure.mml](precure.mml) - Futari Wa Pretty Cure (Sega Pico) - Title (cover by marklincadet)
 - [sunset.mml](sunset.mml) - marklincadet - Running from the Sunset
+- [spy.mml](spy.mml) - Spy vs. Spy (NES) - Main Theme (cover by marklincadet)
 
 ## OpenMadoola MML format
 | Command           | Description                                                                                                                                                                             | Example                                               |

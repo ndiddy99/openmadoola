@@ -1,24 +1,41 @@
 ; Running from the Sunset
 ; by marklincadet
+; V1.0: 15/04/2024, v1.5: 22/09/2024
 
 A1 ; music APU
 
 ; Instrument parameters
-I0 C2 R0:20 R1:00 ; instrument 0: apu channel 2 (triangle)
+I0 C2 R0:ff R1:00 ; instrument 0: apu channel 2 (triangle)
+; APU Register 0 value:  ff  -> 11111111
+;   Length counter halt  ON  -> 1.......
+;   Counter reload value 127 -> .1111111
+; APU Register 0 value:  10  -> 00010000
+;   Length counter halt  OFF -> 0.......
+;   Counter reload value 16  -> .0010000
 I1 C1 R0:cf R1:00 ; instrument 1: apu channel 1 (pulse 2)
+; APU Register 0 value:  cf  -> 11001111
+;   Pulse width          3   -> 11......
+;   Length counter halt  OFF -> ..0.....
+;   Constant volume flag OFF -> ...0....
+;   Envelope value       15  -> ....1111
 I2 C0 R0:8f R1:00 ; instrument 2: apu channel 0 (pulse 1)
+; APU Register 0 value:  8f  -> 10001111
+;   Pulse width          2   -> 10......
+;   Length counter halt  OFF -> ..0.....
+;   Constant volume flag OFF -> ...0....
+;   Envelope value       15  -> ....1111
 
 t5 ; 16th note takes 5 frames (180 bpm)
-l16 ; default to 16th note
+l8 ; default to eighth note
 
-I0 o4 L [<a8r8a8r8>a8.r<a8 g8.rg8>c8r8d4c4< f8r8f8r8>f8.r<d8 g8.rg8r8b8.rb8>c8.r]2
-I1 o4 L [c8r8c8r4.c8<b4>c8 <b8>c8<b8>c8<b8>c8 <a8r8a8r4.>c8<b4>c8 <b8>c8<b8>c8<b8a8>]2
-I2 o4 L [e8r8e8r4.e8d4e8 d8e8d8e8d8e8 c8r8c8r4.e8d4e8 d8e8d8e8d8c8]2
+I0 o4 L [<arar>a8.r16<a g8.r16g>crd4c4< frfr>f8.r16<d g8.r16grb8.r16b>c8.r16]2
+I1 o4 L [crcr4.c<b4>c <b>c<b>c<b>c <arar4.>c<b4>c <b>c<b>c<ba>]2
+I2 o4 L [erer4.ed4e dedede crcr4.ed4e dededc]2
 
-I0 [cr]8<[br]8[ar]8[gr]8 [fr]4[br]2>[cr]2<[gr]4[br]2>[cr]2 [er]8[dr]8 [cr]8<[br]8[ar]8[gr]8 [fr]4[br]2>[cr]2<[gr]4[br]2>[cr]2 [er]8[dr]8
+I0 R0:10 [c]8<[b]8[a]8[g]8 [f]4[b]2>[c]2<[g]4[b]2>[c]2 [e]8[d]8 [c]8<[b]8[a]8[g]8 [f]4[b]2>[c]2<[g]4[b]2>[c]2 [e]8[d]8
 I1 [r1]16
-I2 r4a8r8a8g8f8g4d4<b4>c8d8e8 r4erererf8ere4c4<g8.rg8b8>c8 r4c8<grgrgr>d4r4ererf4e4 r4f8e8d8c4d8r4d8e8d8c8<b8>c8 r4>c8<b8g8e8a8g4a8g8a8g8f8e4 r4d8g8e8c8d8e8a8g8a8g8>c8<b8a8g8 r4f2c8d8r4c8d8e8g8a8b8 >c1<b1
+I2 r[ra]2gfg4d4<b4>cde r4[e16r16]3fe16r16e4c4<g8.r16gb>c r4c<[g16r16]3>d4r4[e16r16]2f4e4 r4fedc4dr4dedc<b>c r4>c<bgeag4[ag]2fe4 r4dgecde[ag]2>c<bag r4f2cdr4cdegab >c1<b1
 
-I0 [cr]8<[br]8[ar]8[gr]8 [fr]8[dr]8[cr]8<[br]4>[cr]2<brar
-I1 r4erererere4r4drdrdrdrd4 r4crcrcr<brar>g1r8 e2r8erererg4f4e4d4 e1.r2
-I2 r4ararbrbr>c4r4<grgrbrbr>c4 <r4ergrgrfrer>d1r8 c2r8<a8b8>c8e4d4c4<b4 >c1.r2
+I0 [c]8<[b]8[a]8[g]8 [f]8[d]8[c]8<[b]4>[c]2<ba R0:ff
+I1 r4[e16r16]4e4r4[d16r16]4d4 r4[c16r16]3<b16r16a16r16>g1r e2r[e16r16]3g4f4e4d4 e1.r2
+I2 r4[a16r16]2[b16r16]2>c4r4<[g16r16]2[b16r16]2>c4 <r4e16r16[g16r16]2f16r16e16r16>d1r c2r<ab>ce4d4c4<b4 >c1.r2

@@ -1,0 +1,31 @@
+; Spy vs. Spy (NES) - Main Theme
+; Composed by Nick Scarim, arranged by Hiroyuki Masuno
+; Cover by marklincadet
+; v1.0: 17/04/2024
+
+A1 ; music APU
+
+; Instrument parameters
+I0 C0 R0:8f R1:00 ; instrument 0: apu channel 0 (pulse 1)
+; APU Register 0 value:  8f  -> 10001111
+;   Pulse width          2   -> 10......
+;   Length counter halt  OFF -> ..0.....
+;   Constant volume flag OFF -> ...0....
+;   Envelope value       15  -> ....1111
+I1 C1 R0:4f R1:00 ; instrument 1: apu channel 1 (pulse 2)
+; APU Register 0 value:  4f  -> 01001111
+;   Pulse width          1   -> 01......
+;   Length counter halt  OFF -> ..0.....
+;   Constant volume flag OFF -> ...0....
+;   Envelope value       15  -> ....1111
+I2 C2 R0:20 R1:00 ; instrument 2: apu channel 2 (triangle)
+; APU Register 0 value:  20  -> 00100000
+;   Length counter halt  OFF -> 0.......
+;   Counter reload value 32  -> .0100000
+
+t5 ; 16th note takes 5 frames (180 bpm)
+l8 ; default to 8th note
+
+I0 o4 L >e2.<b4>c#2.e4<a2.bag#1e1^1f#4a2f#4g#1 <c#eg#bc#er4 c#eg#>c#<c#er4 c#eg#bc#er4 c#eg#br2>
+I1 o3 L [c#eg#bc#er4 <a>c#ea<a>c#r4 <f#a>c#f#<f#a>r4 <g#b>d#g#<g#b>d#f#]2 c#eg#bc#er4 <a>c#ea<a>c#r4 <f#a>c#f#<f#a>r4 [<g#b>d#g#]2
+I2 o3 L c#2c#2 a2a2 f#2f#2 g#2g#2
