@@ -25,13 +25,11 @@
 #include "sprite.h"
 #include "weapon.h"
 
-static Sint8 shieldBallPosTbl[] = {
-    0x00, 0x08, 0x0F, 0x16, 0x1C, 0x21, 0x25, 0x27,
-    0x28, 0x27, 0x25, 0x21, 0x1C, 0x16, 0x0F, 0x08,
-    0x00, 0x06, 0x0C, 0x12, 0x17, 0x1B, 0x1E, 0x1F,
-    0x20, 0x1F, 0x1E, 0x1B, 0x17, 0x12, 0x0C, 0x06,
-    0x00, 0x05, 0x09, 0x0D, 0x11, 0x14, 0x16, 0x18,
-    0x18, 0x18, 0x16, 0x14, 0x11, 0x0D, 0x09, 0x05,
+// contains half of 3 different sine curves (other half is mirrored by ShieldBall_Sin)
+static Sint8 sinTbl[] = {
+    0x00, 0x08, 0x0F, 0x16, 0x1C, 0x21, 0x25, 0x27, 0x28, 0x27, 0x25, 0x21, 0x1C, 0x16, 0x0F, 0x08,
+    0x00, 0x06, 0x0C, 0x12, 0x17, 0x1B, 0x1E, 0x1F, 0x20, 0x1F, 0x1E, 0x1B, 0x17, 0x12, 0x0C, 0x06,
+    0x00, 0x05, 0x09, 0x0D, 0x11, 0x14, 0x16, 0x18, 0x18, 0x18, 0x16, 0x14, 0x11, 0x0D, 0x09, 0x05,
 };
 
 static Sint8 shieldBallOffsetTbl[] = {
@@ -43,19 +41,24 @@ static Sint8 ShieldBall_GetOffset(Uint8 num) {
     return shieldBallOffsetTbl[index] + num;
 }
 
-static Sint8 ShieldBall_GetY(Uint8 index) {
+static Sint8 ShieldBall_Sin(Uint8 index) {
     index &= 31;
     if (index < 15) {
-        return shieldBallPosTbl[ShieldBall_GetOffset(index)];
+        return sinTbl[ShieldBall_GetOffset(index)];
     }
     else {
         index &= 15;
-        return -shieldBallPosTbl[ShieldBall_GetOffset(index)];
+        return -sinTbl[ShieldBall_GetOffset(index)];
     }
 }
 
-static Sint8 ShieldBall_GetX(Uint8 index) {
-    return ShieldBall_GetY(index + 8);
+static Sint8 ShieldBall_Cos(Uint8 index) {
+    if (gameType == GAME_TYPE_ARCADE) {
+        return ShieldBall_Sin(index + (gameFrames / 2));
+    }
+    else {
+        return ShieldBall_Sin(index + 8);
+    }
 }
 
 void ShieldBall_Obj(Object *o) {
@@ -72,8 +75,8 @@ void ShieldBall_Obj(Object *o) {
     Sprite spr = { 0 };
     spr.size = SPRITE_8X16;
 
-    spr.x = ShieldBall_GetX(posOffset) + luciaSpriteX;
-    spr.y = ShieldBall_GetY(posOffset) + luciaSpriteY - 8;
+    spr.x = ShieldBall_Cos(posOffset) + luciaSpriteX;
+    spr.y = ShieldBall_Sin(posOffset) + luciaSpriteY - 8;
     spr.tile = 0x62;
     spr.palette = ((gameFrames >> 1) + currObjectIndex) & 3;
     Sprite_Draw(&spr, NULL);
