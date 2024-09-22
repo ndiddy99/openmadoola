@@ -147,7 +147,7 @@ static void Game_InitCommon(void) {
         mapData = Rom_GetMapData();
     }
     score = 0;
-    lives = 2;
+    lives = 3;
     paused = 0;
     currentWeapon = WEAPON_SWORD;
 }
@@ -245,7 +245,7 @@ static void Game_Run(void) {
         case STAGE_EXIT_DIED:
             if (gameType == GAME_TYPE_ARCADE) {
                 lives--;
-                if (lives < 0) {
+                if (lives < 1) {
                     Save_SaveFile();
                     Screen_GameOver();
                     HighScore_NameEntry(score);
