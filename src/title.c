@@ -151,7 +151,7 @@ static int Title_ArcadeInit(void) {
     BG_Print(6, 8, 1, "The Wings of");
     Title_DrawMadoolaLogo(6, 10);
     BG_Print(5, 18, 3, "- PRESS START BUTTON -");
-    Title_DrawTitleText(5, 20);
+    Title_DrawTitleText(6, 20);
     return 0;
 }
 
