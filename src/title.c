@@ -110,10 +110,11 @@ static void Title_DrawMadoolaLogo(int x, int y) {
     }
 }
 
-static void Title_DrawCopyrightText(int x, int y) {
+static void Title_DrawTitleText(int x, int y) {
     BG_Print(x, y + 0, 0, "OpenMadoola " OPENMADOOLA_VERSION);
     BG_Print(x, y + 2, 0, "infochunk.com/madoola");
-    BG_Print(x, y + 4, 0, "Assets @ 1986 SUNSOFT");
+    BG_Print(x, y + 4, 0, "Not licensed or");
+    BG_Print(x, y + 6, 0, "endorsed by SUNSOFT");
 }
 
 static int Title_ScreenOriginal(void) {
@@ -121,7 +122,7 @@ static int Title_ScreenOriginal(void) {
     BG_SetAllPalettes(titlePalette);
     BG_Print(6, 6, 1, "THE WING OF");
     Title_DrawMadoolaLogo(6, 8);
-    Title_DrawCopyrightText(6, 19);
+    Title_DrawTitleText(6, 19);
     Sound_Play(MUS_TITLE);
     BG_Scroll(BG_CENTERED_X, 0);
     while (1) {
@@ -136,7 +137,7 @@ static int Title_PlusInit(void) {
     BG_SetAllPalettes(titlePalette);
     BG_Print(6, 6, 1, "The Wings of");
     Title_DrawMadoolaLogo(6, 8);
-    Title_DrawCopyrightText(6, 19);
+    Title_DrawTitleText(6, 19);
     return 0;
 }
 
@@ -150,7 +151,7 @@ static int Title_ArcadeInit(void) {
     BG_Print(6, 8, 1, "The Wings of");
     Title_DrawMadoolaLogo(6, 10);
     BG_Print(5, 18, 3, "- PRESS START BUTTON -");
-    Title_DrawCopyrightText(5, 20);
+    Title_DrawTitleText(5, 20);
     return 0;
 }
 
