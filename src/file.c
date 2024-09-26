@@ -63,10 +63,10 @@ Uint32 File_ReadUint32BE(FILE *fp) {
 
 #ifdef OM_UNIX
 static void checkBuffSize(int size) {
-    if (!filenameBuff) { filenameBuff = malloc(filenameBuffLen); }
+    if (!filenameBuff) { filenameBuff = ommalloc(filenameBuffLen); }
     if (size > filenameBuffLen) {
         filenameBuffLen = size;
-        filenameBuff = realloc(filenameBuff, filenameBuffLen);
+        filenameBuff = omrealloc(filenameBuff, filenameBuffLen);
     }
 }
 #endif
@@ -110,7 +110,7 @@ FILE *File_OpenResource(const char *filename, const char *mode) {
     if (!resourceDirs[0]) {
         char *homedir = getenv("HOME");
         if (homedir) {
-            resourceDirs[0] = malloc(strlen(homedir) + 1 + strlen(OM_HOMEDIR) + 2);
+            resourceDirs[0] = ommalloc(strlen(homedir) + 1 + strlen(OM_HOMEDIR) + 2);
             strcpy(resourceDirs[0], homedir);
             strcat(resourceDirs[0], "/");
             strcat(resourceDirs[0], OM_HOMEDIR);
