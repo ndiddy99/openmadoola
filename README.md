@@ -42,7 +42,7 @@ You can change the controls in the options menu. Pressing A+B+Select+Start while
 
 ### Game types
 
-Also in the options menu, you'll find a "game type" setting. The "Original" game type tries to simulate the original NES game but with important bugfixes, while the "Plus" game type (the default) includes additional fixes for more minor bugs as well as tweaks that I think improve the game.
+Also in the options menu, you'll find a "game type" setting. The "Original" game type tries to simulate the original NES game but with important bugfixes, while the "Plus" game type (the default) includes additional fixes for more minor bugs as well as tweaks that I think improve the game. The "Arcade" game type is a recreation of the VS. System port.
 
 #### Changes for both game types
 - Game runs without NES hardware limitations (no slowdown, no sprite flicker, no garbage on the edge of the screen)
@@ -62,6 +62,16 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Darutos gets drawn even when he's only partially visible, making him easier to see
 - Fixed a bug where the orb you get at the end of a level wasn't animated correctly
 - Fixed a bug where Nipata would get stuck if it spawned in a narrow gap
+
+#### Arcade-exclusive Changes
+For a list of the all the changes I'm aware of between the console and arcade versions, see [here](https://www.infochunk.com/madoola/arcade.html). Here's a list of the changes between the real arcade version and the OpenMadoola version:
+- Anything related to inserting coins isn't here. The continue system is the same as the other game types.
+- There's collision in the attract mode. I added a couple other stages to the attract mode as opposed to just having Stage 1 to add some variety.
+- Lucia starts with 3 lives instead of 2. This may have originally been a DIP switch though.
+- Because OpenMadoola has a start/select button, none of the control changes have been ported over.
+- I didn't add the Stage 5 change because it seems like a mistake.
+- I didn't add the camera change because I like the camera from the console version (which centers Lucia when she's on solid ground) more than the arcade version (which only moves up/down when Lucia is at the edge of the screen).
+- The high score entry screen is made up because there's no public footage of it.
 
 ## Build Instructions
 
