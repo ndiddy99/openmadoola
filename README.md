@@ -63,7 +63,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Fixed a bug where the orb you get at the end of a level wasn't animated correctly
 - Fixed a bug where Nipata would get stuck if it spawned in a narrow gap
 
-#### Arcade-exclusive Changes
+#### Arcade-exclusive changes
 For a list of the all the changes I'm aware of between the console and arcade versions, see [here](https://www.infochunk.com/madoola/arcade.html). Here's a list of the changes between the real arcade version and the OpenMadoola version:
 - Anything related to inserting coins isn't here. The continue system is the same as the other game types.
 - There's collision in the attract mode. I added a couple other stages to the attract mode as opposed to just having Stage 1 to add some variety.
@@ -72,6 +72,7 @@ For a list of the all the changes I'm aware of between the console and arcade ve
 - I didn't add the Stage 5 change because it seems like a mistake.
 - I didn't add the camera change because I like the camera from the console version (which centers Lucia when she's on solid ground) more than the arcade version (which only moves up/down when Lucia is at the edge of the screen).
 - The high score entry screen is made up because there's no public footage of it.
+- The game over screen doesn't play after you beat the game.
 
 ## Build Instructions
 
