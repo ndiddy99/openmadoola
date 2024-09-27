@@ -1,5 +1,5 @@
 /* yokkochan.c: Yokko-chan object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -28,7 +28,7 @@
 
 void YokkoChan_InitObj(Object *o) {
     // don't spawn if keyword has already been displayed
-    if (keywordDisplay) {
+    if ((gameType != GAME_TYPE_ARCADE) && keywordDisplay) {
         o->type = OBJ_NONE;
         return;
     }
