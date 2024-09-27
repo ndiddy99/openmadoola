@@ -262,8 +262,8 @@ int Platform_SetVideoScale(int requested) {
                                          scaledWidth, scaledHeight);
         DB_Set("scale", &scale, 1);
         DB_Save();
-        return scale;
     }
+    return scale;
 }
 
 int Platform_SetFullscreen(int requested) {
