@@ -10,5 +10,5 @@ I4 C0 R0:df R1:87 ; instrument 4: apu channel 0 (pulse 1)
 t1 ; 16th note takes 1 frame
 l4..
 
-I5 o3 gd<gd R0:6f R1:91 d8r4.d8
-I4 o3 gd<gd R0:af R1:f1 d8r4.d8
+I5 o3 gd<gd R0:6f R1:91 e8r4^16e8
+I4 o3 gd<gd R0:af R1:f1 e8r4^16e8
