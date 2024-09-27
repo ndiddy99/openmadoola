@@ -200,7 +200,6 @@ void Platform_EndFrame(void) {
             srcOffset += (TILE_WIDTH * 2);
         }
     }
-
     SDL_UnlockTexture(drawTexture);
     SDL_SetRenderTarget(renderer, scaleTexture);
     // stretch framebuffer horizontally w/ bilinear so the pixel aspect ratio is correct
@@ -261,35 +260,39 @@ int Platform_SetVideoScale(int requested) {
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_TARGET,
                                          scaledWidth, scaledHeight);
+        DB_Set("scale", &scale, 1);
+        DB_Save();
+        return scale;
     }
-
-    DB_Set("scale", &scale, 1);
-    DB_Save();
-    return scale;
 }
 
 int Platform_SetFullscreen(int requested) {
     if (requested) {
-        fullscreen = 1;
+        fullscreen = requested;
         // get desktop display resolution
         SDL_DisplayMode displayMode;
-        SDL_GetDesktopDisplayMode(SDL_GetWindowDisplayIndex(window), &displayMode);
+        SDL_GetDesktopDisplayMode(0, &displayMode);
+
         // make window fullscreen at native res
         SDL_SetWindowSize(window, displayMode.w, displayMode.h);
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         SDL_ShowCursor(SDL_DISABLE);
+
         // resize scale framebuffer to fit screen
-        SDL_DestroyTexture(scaleTexture);
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
         int fullscreenScale = displayMode.h / SCREEN_HEIGHT;
         int scaledWidth = SCREEN_WIDTH * fullscreenScale;
         int scaledHeight = SCREEN_HEIGHT * fullscreenScale;
+        SDL_DestroyTexture(scaleTexture);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
         scaleTexture = SDL_CreateTexture(renderer,
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_TARGET,
                                          scaledWidth, scaledHeight);
-        // set up destination area
-        fullscreenRect.w = (int) ((float) scaledWidth * PIXEL_ASPECT_RATIO);
+
+        float fillScale = (float)displayMode.h / SCREEN_HEIGHT;
+        scaledWidth = (int)(SCREEN_WIDTH * fillScale);
+        scaledHeight = (int)(SCREEN_HEIGHT * fillScale);
+        fullscreenRect.w = (int)((float)scaledWidth * PIXEL_ASPECT_RATIO);
         fullscreenRect.h = scaledHeight;
         fullscreenRect.x = (displayMode.w / 2) - (fullscreenRect.w / 2);
         fullscreenRect.y = (displayMode.h / 2) - (fullscreenRect.h / 2);
