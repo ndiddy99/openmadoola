@@ -20,6 +20,9 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
+// 9/28/2024 - Nathan Misner modified generate and adjust_impulse to avoid
+// implicit cast compiler warning
+
 int const buffer_extra = blip_widest_impulse_ + 2;
 
 Blip_Buffer::Blip_Buffer()
@@ -222,7 +225,7 @@ void blip_eq_t::generate( float* out, int count ) const
 	// apply (half of) hamming window
 	double to_fraction = pi / (count - 1);
 	for ( int i = count; i--; )
-		out [i] *= 0.54 - 0.46 * cos( i * to_fraction );
+		out [i] *= (float)(0.54 - 0.46 * cos( i * to_fraction ));
 }
 
 void Blip_Synth_::adjust_impulse()
@@ -240,7 +243,7 @@ void Blip_Synth_::adjust_impulse()
 		}
 		if ( p == p2 )
 			error /= 2; // phase = 0.5 impulse uses same half for both sides
-		impulses [size - blip_res + p] += error;
+		impulses [size - blip_res + p] += (short)error;
 		//printf( "error: %ld\n", error );
 	}
 	
