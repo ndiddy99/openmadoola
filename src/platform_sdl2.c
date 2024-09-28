@@ -87,22 +87,31 @@ static SDL_GameController *controller;
 static void Platform_PumpEvents(void);
 
 static int Platform_InitVideo(void) {
+    SDL_DisplayMode displayMode;
+    SDL_GetDesktopDisplayMode(0, &displayMode);
+
     // set up window
-    int windowWidth = ((int)(SCREEN_WIDTH * scale * PIXEL_ASPECT_RATIO));
-    int windowHeight = SCREEN_HEIGHT * scale;
+    int windowWidth, windowHeight;
+    if (fullscreen) {
+        windowWidth = displayMode.w;
+        windowHeight = displayMode.h;
+    }
+    else {
+        windowWidth = ((int)(SCREEN_WIDTH * scale * PIXEL_ASPECT_RATIO));
+        windowHeight = SCREEN_HEIGHT * scale;
+    }
     window = SDL_CreateWindow(
         "OpenMadoola",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         windowWidth, windowHeight,
-        SDL_WINDOW_SHOWN);
+        fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN);
     if (!window) {
         Platform_ShowError("Error creating window: %s", SDL_GetError());
         return 0;
     }
+    SDL_ShowCursor(fullscreen ? SDL_DISABLE : SDL_ENABLE);
 
     // set up renderer
-    SDL_DisplayMode displayMode;
-    SDL_GetWindowDisplayMode(window, &displayMode);
     int refreshRate = displayMode.refresh_rate;
     // round up if refresh rate is 59 or something
     if (refreshRate && (((refreshRate + 1) % 60) == 0)) {
@@ -120,6 +129,7 @@ static int Platform_InitVideo(void) {
         return 0;
     }
     nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
+
     // set up textures
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     int drawWidth;
@@ -138,8 +148,21 @@ static int Platform_InitVideo(void) {
         return 0;
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-    int scaledWidth = SCREEN_WIDTH * scale;
-    int scaledHeight = SCREEN_HEIGHT * scale;
+    int scaledWidth, scaledHeight;
+    if (fullscreen) {
+        int fullscreenScale = displayMode.h / SCREEN_HEIGHT;
+        float fractionalScale = (float)displayMode.h / SCREEN_HEIGHT;
+        scaledWidth = fullscreenScale * SCREEN_WIDTH;
+        scaledHeight = fullscreenScale * SCREEN_HEIGHT;
+        fullscreenRect.w = (int)(fractionalScale * SCREEN_WIDTH * PIXEL_ASPECT_RATIO);
+        fullscreenRect.h = (int)(fractionalScale * SCREEN_HEIGHT);
+        fullscreenRect.x = (displayMode.w / 2) - (fullscreenRect.w / 2);
+        fullscreenRect.y = (displayMode.h / 2) - (fullscreenRect.h / 2);
+    }
+    else {
+        scaledWidth = scale * SCREEN_WIDTH;
+        scaledHeight = scale * SCREEN_HEIGHT;
+    }
     scaleTexture = SDL_CreateTexture(renderer,
                                      SDL_PIXELFORMAT_ARGB8888,
                                      SDL_TEXTUREACCESS_TARGET,
@@ -267,46 +290,13 @@ int Platform_SetVideoScale(int requested) {
 }
 
 int Platform_SetFullscreen(int requested) {
-    if (requested) {
+    if (requested != fullscreen) {
         fullscreen = requested;
-        // get desktop display resolution
-        SDL_DisplayMode displayMode;
-        SDL_GetDesktopDisplayMode(0, &displayMode);
-
-        // make window fullscreen at native res
-        SDL_SetWindowSize(window, displayMode.w, displayMode.h);
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-        SDL_ShowCursor(SDL_DISABLE);
-
-        // resize scale framebuffer to fit screen
-        int fullscreenScale = displayMode.h / SCREEN_HEIGHT;
-        int scaledWidth = SCREEN_WIDTH * fullscreenScale;
-        int scaledHeight = SCREEN_HEIGHT * fullscreenScale;
-        SDL_DestroyTexture(scaleTexture);
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-        scaleTexture = SDL_CreateTexture(renderer,
-                                         SDL_PIXELFORMAT_ARGB8888,
-                                         SDL_TEXTUREACCESS_TARGET,
-                                         scaledWidth, scaledHeight);
-
-        float fillScale = (float)displayMode.h / SCREEN_HEIGHT;
-        scaledWidth = (int)(SCREEN_WIDTH * fillScale);
-        scaledHeight = (int)(SCREEN_HEIGHT * fillScale);
-        fullscreenRect.w = (int)((float)scaledWidth * PIXEL_ASPECT_RATIO);
-        fullscreenRect.h = scaledHeight;
-        fullscreenRect.x = (displayMode.w / 2) - (fullscreenRect.w / 2);
-        fullscreenRect.y = (displayMode.h / 2) - (fullscreenRect.h / 2);
+        Platform_DestroyVideo();
+        Platform_InitVideo();
+        DB_Set("fullscreen", &fullscreen, 1);
+        DB_Save();
     }
-    else {
-        fullscreen = 0;
-        SDL_ShowCursor(SDL_ENABLE);
-        // make window windowed at last scale
-        SDL_SetWindowFullscreen(window, 0);
-        Platform_SetVideoScale(scale);
-    }
-
-    DB_Set("fullscreen", &fullscreen, 1);
-    DB_Save();
     return fullscreen;
 }
 
@@ -436,15 +426,15 @@ int Platform_Init(void) {
     if (entry) { scale = entry->data[0]; }
     entry = DB_Find("ntsc");
     if (entry) { ntscEnabled = entry->data[0]; }
+    entry = DB_Find("fullscreen");
+    if (entry) { Platform_SetFullscreen(entry->data[0]); }
     paletteType = (gameType == GAME_TYPE_ARCADE) ? PALETTE_TYPE_2C04 : PALETTE_TYPE_NES;
+
     if (!Platform_InitPalettes()) { return 0; }
     Platform_InitNTSC();
     if (!Platform_InitVideo()) { return 0; }
     if (!Platform_InitAudio()) { return 0; }
     controller = Platform_FindController();
-    entry = DB_Find("fullscreen");
-    if (entry) { Platform_SetFullscreen(entry->data[0]); }
-
     return 1;
 }
 
