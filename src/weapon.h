@@ -37,7 +37,7 @@ typedef struct {
     Uint8 collided;
     Sint16 x;
     Sint16 y;
-} WEAPON_COORDS_T;
+} WeaponCoords;
 
 // maximum number of weapon objects
 #define MAX_WEAPONS (8)
@@ -45,7 +45,7 @@ typedef struct {
 extern Uint8 weaponLevels[NUM_WEAPONS];
 extern Uint8 currentWeapon;
 extern Uint8 weaponDamage;
-extern WEAPON_COORDS_T weaponCoords[MAX_WEAPONS];
+extern WeaponCoords weaponCoords[MAX_WEAPONS];
 
 /**
  * @brief Clears all weapon objects and collision coordinates

@@ -52,7 +52,7 @@ static Uint16 weaponMagicTbl[] = {
     500,    // flash
 };
 
-WEAPON_COORDS_T weaponCoords[MAX_WEAPONS];
+WeaponCoords weaponCoords[MAX_WEAPONS];
 
 static void Weapon_InitSword(void);
 static void Weapon_InitFlameSword(void);
