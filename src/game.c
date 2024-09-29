@@ -62,6 +62,7 @@ Uint8 numBossObjs;
 Uint8 bossDefeated[16];
 Uint8 gameFrames;
 Sint8 keywordDisplay;
+Uint8 fountainUsed;
 // arcade stuff
 Uint32 score;
 
@@ -196,7 +197,12 @@ static void Game_InitRoomVars(Object *lucia) {
         }
     }
 
-    else if (info.type == SPAWN_TYPE_FOUNTAIN) {
+    // Arcade mode only allows using a fountain once per life per stage.
+    // Otherwise, Lucia can stay in a stage indefinitely and rack up a really
+    // high score which breaks the scoring system.
+    else if ((info.type == SPAWN_TYPE_FOUNTAIN) &&
+             ((gameType != GAME_TYPE_ARCADE) || !fountainUsed))
+    {
         Game_SpawnFountain(&info);
     }
 
@@ -334,6 +340,7 @@ static int Game_RunStage(void) {
 
     Object_ListInit();
     magic = maxMagic;
+    fountainUsed = 0;
 
     Sound_Reset();
     Sound_Play(MUS_START);

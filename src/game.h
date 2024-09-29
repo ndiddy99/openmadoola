@@ -35,6 +35,7 @@ extern Uint8 numBossObjs;
 extern Sint8 keywordDisplay;
 extern Uint8 bossDefeated[16];
 extern Uint8 gameFrames;
+extern Uint8 fountainUsed;
 
 /**
  * @brief Loads game-specific settings from disk.

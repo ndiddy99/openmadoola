@@ -76,6 +76,7 @@ For a list of the all the changes I'm aware of between the console and arcade ve
 - The high score entry screen is made up because there's no public footage of it.
 - There's no option for increased enemy damage.
 - The game over screen doesn't play after you beat the game.
+- Lucia can only use the fountain once per life, per stage (otherwise you can get a high score by staying in a stage indefinitely).
 
 ## Build Instructions
 
