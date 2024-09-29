@@ -74,9 +74,10 @@ For a list of the all the changes I'm aware of between the console and arcade ve
 - I didn't add the Stage 4 change because it seems like a mistake.
 - I didn't add the camera change because I like the camera from the console version (which centers Lucia when she's on solid ground) more than the arcade version (which only moves up/down when Lucia is at the edge of the screen).
 - The high score entry screen is made up because there's no public footage of it.
-- There's no option for increased enemy damage.
+- There's no "hard mode" option for increased enemy damage.
 - The game over screen doesn't play after you beat the game.
-- Lucia can only use the fountain once per life, per stage (otherwise you can get a high score by staying in a stage indefinitely).
+- Lucia can only use the fountain once per life, per stage. Otherwise you can get stay in a stage indefinitely and kill enemies over and over, which breaks the scoring system.
+- All the default high scores are now 10x lower. In my opinion, the default high scores should be relatively easy to beat.
 
 ## Build Instructions
 

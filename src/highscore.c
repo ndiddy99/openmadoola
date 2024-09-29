@@ -37,7 +37,6 @@ typedef struct {
     Uint32 score;
 } HighScore;
 
-#define NUM_SCORES 8
 // Kenji Sada (main programmer of The Wing of Madoola and sole programmer of the
 // arcade port) put credits in the high score table if you read the names
 // vertically.
@@ -46,15 +45,20 @@ typedef struct {
 // SYUGIURA: Kazuyuki Sugiura (BG graphics & map design)
 // ATSUSHII: Atsushi Sakai (sub-programmer)
 // NAKAGAWA: Sub-programmer
+
+// NOTE: Originally these scores were all 10x higher, which made it difficult
+// to beat them. My POV is that it should be easy to beat the default high
+// scores.
+#define NUM_SCORES 8
 static HighScore defaultScores[NUM_SCORES] = {
-    {.name = "MSSAN", .score = 400000},
-    {.name = "OIYTA", .score = 350000},
-    {.name = "RMUSK", .score = 300000},
-    {.name = "OOGUA", .score = 250000},
-    {.name = "TMISG", .score = 200000},
-    {.name = "TUUHA", .score = 150000},
-    {.name = "ARRIW", .score = 100000},
-    {.name = "RAAIA", .score =  50000},
+    {.name = "MSSAN", .score = 40000},
+    {.name = "OIYTA", .score = 35000},
+    {.name = "RMUSK", .score = 30000},
+    {.name = "OOGUA", .score = 25000},
+    {.name = "TMISG", .score = 20000},
+    {.name = "TUUHA", .score = 15000},
+    {.name = "ARRIW", .score = 10000},
+    {.name = "RAAIA", .score =  5000},
 };
 static HighScore scores[NUM_SCORES];
 static Uint32 lastScore;
@@ -151,7 +155,7 @@ void HighScore_NameEntry(Uint32 score) {
         BG_Display();
         Task_Yield();
     }
-    BG_Print(6, 3, 0, "CONGRATULATIONS, YOU\n\nGOT A HIGH SCORE.");
+    BG_Print(6, 3, 1, "CONGRATULATIONS, YOU\n\nGOT A HIGH SCORE.");
     int scoreTableY = 8;
     HighScore_Print(6, scoreTableY);
     Sound_Reset();
