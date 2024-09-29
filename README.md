@@ -60,6 +60,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Music doesn't restart when pausing/unpausing the game
 - The selected weapon is visible during gameplay, and you can change weapons without pausing
 - Darutos gets drawn even when he's only partially visible, making him easier to see
+- You can kill multiple enemies at once when they're on top of each other (makes dealing with Nyurus much less annoying)
 - Fixed a bug where the orb you get at the end of a level wasn't animated correctly
 - Fixed a bug where Nipata would get stuck if it spawned in a narrow gap
 

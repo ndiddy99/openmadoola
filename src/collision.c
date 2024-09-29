@@ -70,7 +70,9 @@ int Collision_Handle(Object *o, Sprite *s, int size, Uint8 attackPower) {
     }
 
     for (int i = (MAX_WEAPONS - 1); i >= 0; i--) {
-        if (!weaponCoords[i].spawned || weaponCoords[i].collided) {
+        if (!weaponCoords[i].spawned || 
+            ((gameType == GAME_TYPE_ORIGINAL) && weaponCoords[i].collided))
+        {
             continue;
         }
 
