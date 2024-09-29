@@ -232,6 +232,7 @@ static void Game_SpawnFountain(SpawnInfo *info) {
     objects[9].x.f.h = fountainXTbl[offset];
     objects[9].y.f.h = fountainYTbl[offset];
     objects[9].type = OBJ_FOUNTAIN;
+    objects[9].stunnedTimer = 0;
     Sprite_SetPalette(2, fountainPalette);
 }
 
