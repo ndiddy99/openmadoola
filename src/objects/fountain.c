@@ -29,6 +29,7 @@ void Fountain_Obj(Object *o) {
     o->y.f.l = 0x80;
     // animate water by mirroring the middle and bottom sprites
     o->direction = (gameFrames << 4) & 0x80;
+    o->stunnedTimer = 0;
     
     Sprite spr = { 0 };
     // draw middle of the water sprite
