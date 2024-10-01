@@ -44,7 +44,7 @@ You can change the controls in the options menu. Pressing A+B+Select+Start while
 
 Also in the options menu, you'll find a "game type" setting. The "Original" game type tries to simulate the original NES game but with important bugfixes, while the "Plus" game type (the default) includes additional fixes for more minor bugs as well as tweaks that I think improve the game. The "Arcade" game type is a recreation of the VS. System port.
 
-#### Changes for both game types
+#### Changes for all game types
 - Game runs without NES hardware limitations (no slowdown, no sprite flicker, no garbage on the edge of the screen)
 - Game progress is saved to disk
 - Fixed a bug where collecting the Wing of Madoola and then entering a door would make Darutos not spawn
