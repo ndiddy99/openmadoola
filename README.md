@@ -58,6 +58,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 - Added a second emulated sound chip just for music (meaning that channels won't cut out to play sound effects)
 - Music doesn't restart when warping within the same stage
 - Music doesn't restart when pausing/unpausing the game
+- The arcade version of the boss music is used instead of the console version
 - The selected weapon is visible during gameplay, and you can change weapons without pausing
 - Darutos gets drawn even when he's only partially visible, making him easier to see
 - You can kill multiple enemies at once when they're on top of each other (makes dealing with Nyurus much less annoying)

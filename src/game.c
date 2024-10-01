@@ -468,11 +468,11 @@ void Game_PlayRoomSong(void) {
         }
         // otherwise play the boss room theme
         else {
-            if (gameType == GAME_TYPE_ARCADE) {
-                Sound_Play(MUS_BOSS_ARCADE);
+            if (gameType == GAME_TYPE_ORIGINAL) {
+                Sound_Play(MUS_BOSS);
             }
             else {
-                Sound_Play(MUS_BOSS);
+                Sound_Play(MUS_BOSS_ARCADE);
             }
         }
     }
@@ -480,11 +480,11 @@ void Game_PlayRoomSong(void) {
     // killed, and the item room music if it has been
     else if (song == MUS_BOSS) {
         if (bossActive) {
-            if (gameType == GAME_TYPE_ARCADE) {
-                Sound_Play(MUS_BOSS_ARCADE);
+            if (gameType == GAME_TYPE_ORIGINAL) {
+                Sound_Play(MUS_BOSS);
             }
             else {
-                Sound_Play(MUS_BOSS);
+                Sound_Play(MUS_BOSS_ARCADE);
             }
         }
         else {
