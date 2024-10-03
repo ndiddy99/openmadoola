@@ -47,6 +47,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 #### Changes for all game types
 - Game runs without NES hardware limitations (no slowdown, no sprite flicker, no garbage on the edge of the screen)
 - Game progress is saved to disk
+- The status/stage screens can be skipped by pressing the Start button.
 - Fixed a bug where collecting the Wing of Madoola and then entering a door would make Darutos not spawn
 - Fixed a bug where killing Darutos and then dying to one of his fireballs would let you skip fighting him after continuing
 - Fixed a bug where sound effects would sometimes get stuck on, glitch out, etc.
@@ -69,6 +70,7 @@ Also in the options menu, you'll find a "game type" setting. The "Original" game
 For a list of the all the changes I'm aware of between the console and arcade versions, see [here](https://www.infochunk.com/madoola/arcade.html). Here's a list of the changes between the real arcade version and the OpenMadoola version:
 - The Plus changes (see above) are included
 - Anything related to inserting coins isn't here. The continue system is the same as the other game types.
+- The "Press Start" text on the title screen blinks slower than the original because I think it looks nicer.
 - There's enemy collision in the attract mode. I added a couple other stages besides Stage 1 to the attract mode to add some variety.
 - Lucia starts with 3 lives instead of 2. This may have originally been a DIP switch though.
 - Because OpenMadoola has start/select buttons, none of the control changes have been ported over.
