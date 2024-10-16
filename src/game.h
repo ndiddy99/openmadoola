@@ -27,13 +27,9 @@ extern Uint8 gameType;
 
 extern Uint8 spritePalettes[16];
 extern Uint8 stage;
-extern Uint8 highestReachedStage;
-extern Uint8 orbCollected;
 extern Uint8 roomChangeTimer;
 extern Uint8 bossActive;
 extern Uint8 numBossObjs;
-extern Sint8 keywordDisplay;
-extern Uint8 bossDefeated[16];
 extern Uint8 gameFrames;
 extern Uint8 fountainUsed;
 

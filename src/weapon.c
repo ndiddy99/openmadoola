@@ -1,5 +1,5 @@
 /* weapon.c: Weapon variables and object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -25,10 +25,10 @@
 #include "lucia.h"
 #include "map.h"
 #include "palette.h"
+#include "save.h"
 #include "sound.h"
 #include "weapon.h"
 
-Uint8 weaponLevels[NUM_WEAPONS];
 Uint8 currentWeapon;
 Uint8 weaponDamage;
 
@@ -83,7 +83,7 @@ void Weapon_Process(void) {
 
     // check if B is pressed
     if (joyEdge & JOY_B) {
-        Uint8 damageOffset = (currentWeapon * 3) + (weaponLevels[currentWeapon] - 1);
+        Uint8 damageOffset = (currentWeapon * 3) + (sd->weaponLevels[currentWeapon] - 1);
         weaponDamage = weaponDamageTbl[damageOffset];
 
         switch (currentWeapon) {
@@ -250,7 +250,7 @@ static Uint8 shieldBallTimerTbl[] = {
 };
 
 static void Weapon_InitShieldBall(void) {
-    Uint8 timerVal = shieldBallTimerTbl[weaponLevels[WEAPON_SHIELD_BALL] - 1];
+    Uint8 timerVal = shieldBallTimerTbl[sd->weaponLevels[WEAPON_SHIELD_BALL] - 1];
 
     for (int i = 8; i >= 1; i--) {
         objects[i].type = OBJ_SHIELD_BALL;

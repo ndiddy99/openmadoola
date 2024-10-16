@@ -25,13 +25,13 @@
 #include "map.h"
 #include "object.h"
 #include "rng.h"
+#include "save.h"
 #include "sound.h"
 #include "sprite.h"
 #include "weapon.h"
 
 #define WING_MP (1000)
 
-Uint8 bootsLevel;
 Uint8 attackTimer;
 Uint8 hasWing;
 Uint8 usingWing;
@@ -39,9 +39,7 @@ Uint8 luciaDoorFlag = 0;
 Uint8 luciaHurtPoints;
 
 Sint16 health;
-Sint16 maxHealth;
 Sint16 magic;
-Sint16 maxMagic;
 Sint8 lives;
 
 Fixed16 luciaXPos;
@@ -84,8 +82,8 @@ static Uint8 luciaTiles[] = {
 static void Lucia_Draw(Object *o, int frame);
 
 void Lucia_NormalObj(Object *o) {
-    o->xSpeed = xSpeeds[bootsLevel * 9 + joyDir];
-    o->ySpeed = ySpeeds[bootsLevel * 9 + joyDir];
+    o->xSpeed = xSpeeds[sd->bootsLevel * 9 + joyDir];
+    o->ySpeed = ySpeeds[sd->bootsLevel * 9 + joyDir];
     // lucia can't move when she's attacking
     if (attackTimer) {
         o->xSpeed = 0;
@@ -103,10 +101,10 @@ void Lucia_NormalObj(Object *o) {
 
     if (joyEdge & JOY_A) {
         Sound_Play(SFX_JUMP);
-        o->ySpeed = jumpSpeeds[bootsLevel];
+        o->ySpeed = jumpSpeeds[sd->bootsLevel];
         // if the boots level is at least 2, the player can control Lucia's
         // movement when she's jumping
-        if (bootsLevel >= 2) {
+        if (sd->bootsLevel >= 2) {
             o->type = OBJ_LUCIA_AIR;
         }
         else {
@@ -223,8 +221,8 @@ void Lucia_ClimbObj(Object *o) {
         return;
     }
 
-    o->xSpeed = xSpeeds[bootsLevel * 9 + joyDir];
-    o->ySpeed = ySpeeds[bootsLevel * 9 + joyDir];
+    o->xSpeed = xSpeeds[sd->bootsLevel * 9 + joyDir];
+    o->ySpeed = ySpeeds[sd->bootsLevel * 9 + joyDir];
     Object_SetDirection(o);
 
     // handle walking off the ladder
@@ -294,7 +292,7 @@ void Lucia_AirObj(Object *o) {
     // this function gets used for both Lucia's air and air locked movement
     // objects, so this is the code that's unique to the air object
     if (o->type == OBJ_LUCIA_AIR) {
-        o->xSpeed = xSpeeds[bootsLevel * 9 + joyDir];
+        o->xSpeed = xSpeeds[sd->bootsLevel * 9 + joyDir];
         if (usingWing) {
             o->ySpeed = 0xe0;
             if (!(joy & JOY_A)) {
@@ -371,7 +369,7 @@ static void Lucia_AddHPMP(Uint8 val) {
         break;
 
     case 1:
-        maxHealth += increase;
+        sd->maxHealth += increase;
         break;
 
     case 2:
@@ -379,25 +377,25 @@ static void Lucia_AddHPMP(Uint8 val) {
         break;
 
     case 3:
-        maxMagic += increase;
+        sd->maxMagic += increase;
         break;
     }
 
     // make sure the new values fall within their limits
-    if (maxHealth > 5000) {
-        maxHealth = 5000;
+    if (sd->maxHealth > 5000) {
+        sd->maxHealth = 5000;
     }
 
-    if (maxMagic > 5000) {
-        maxMagic = 5000;
+    if (sd->maxMagic > 5000) {
+        sd->maxMagic = 5000;
     }
 
-    if (health > maxHealth) {
-        health = maxHealth;
+    if (health > sd->maxHealth) {
+        health = sd->maxHealth;
     }
 
-    if (magic > maxMagic) {
-        magic = maxMagic;
+    if (magic > sd->maxMagic) {
+        magic = sd->maxMagic;
     }
 }
 
@@ -460,7 +458,7 @@ onDoorMetatile:
     else {
         // don't go through end of level door if we haven't beaten this stage
         // yet and lucia didn't collect the orb
-        if ((stage >= highestReachedStage) && !orbCollected) {
+        if ((stage >= sd->highestReachedStage) && !sd->orbCollected) {
             goto checkDamage;
         }
         else {
@@ -487,8 +485,8 @@ checkDamage:
                 Sound_Play(SFX_ITEM);
             }
             // display the keyword if we haven't already
-            else if (!keywordDisplay) {
-                    keywordDisplay++;
+            else if (!sd->keywordDisplay) {
+                sd->keywordDisplay++;
             }
         }
         // lucia collected an item
@@ -497,20 +495,20 @@ checkDamage:
             Uint8 itemType = luciaHurtPoints - ITEM_FLAG;
             // 0 - 6: power up the corresponding weapon
             if (itemType < 7) {
-                weaponLevels[itemType]++;
-                // clamp weapon level
-                if (weaponLevels[itemType] >= 4) {
-                    weaponLevels[itemType] = 3;
+                sd->weaponLevels[itemType]++;
+                // limit weapon level
+                if (sd->weaponLevels[itemType] > 3) {
+                    sd->weaponLevels[itemType] = 3;
                 }
             }
             else if (itemType == ITEM_BOOTS) {
-                bootsLevel++;
-                if (bootsLevel >= 4) {
-                    bootsLevel = 3;
+                sd->bootsLevel++;
+                if (sd->bootsLevel > 3) {
+                    sd->bootsLevel = 3;
                 }
             }
             else if (itemType == ITEM_ORB) {
-                orbCollected = 0xff;
+                sd->orbCollected = 0xff;
                 // orb restores 500 hp
                 Lucia_AddHPMP(0);
             }

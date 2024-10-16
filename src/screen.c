@@ -27,6 +27,7 @@
 #include "joy.h"
 #include "lucia.h"
 #include "palette.h"
+#include "save.h"
 #include "screen.h"
 #include "sound.h"
 #include "sprite.h"
@@ -97,8 +98,8 @@ void Screen_Status(void) {
 
     // print the text
     BG_Print(13,  3, 0, "STATUS");
-    BG_Print(11,  6, 0, "HITS  %04d/%04d", health, maxHealth);
-    BG_Print( 9,  8, 0, "MAGICS  %04d/%04d", magic, maxMagic);
+    BG_Print(11,  6, 0, "HITS  %04d/%04d", health, sd->maxHealth);
+    BG_Print( 9,  8, 0, "MAGICS  %04d/%04d", magic, sd->maxMagic);
     BG_Print(10, 11, 0, "SWORD");
     BG_Print( 4, 13, 0, "FLAME SWORD");
     BG_Print( 5, 15, 0, "MAGIC BOMB");
@@ -112,7 +113,7 @@ void Screen_Status(void) {
     Sprite_ClearList();
     Uint16 iconY = 85;
     for (int i = 0; i < 8; i++) {
-        Uint8 level = (i < 7) ? weaponLevels[i] : bootsLevel;
+        Uint8 level = (i < 7) ? sd->weaponLevels[i] : sd->bootsLevel;
         Screen_StatusIcon(144 - BG_CENTERED_X, iconY, statusItemTiles[i], statusItemPalettes[i], level);
         iconY += 16;
     }

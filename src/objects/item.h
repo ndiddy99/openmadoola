@@ -1,5 +1,5 @@
 /* item.h: Item pickup object code
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -43,8 +43,6 @@ typedef enum {
 
 // the flag added to the "object damage" variable to tell Lucia's code she's touching an item
 #define ITEM_FLAG (0xA0)
-
-extern Uint8 itemsCollected[8];
 
 /**e
  * @brief item object code

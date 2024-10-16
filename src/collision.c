@@ -25,6 +25,7 @@
 #include "lucia.h"
 #include "object.h"
 #include "palette.h"
+#include "save.h"
 #include "sound.h"
 #include "sprite.h"
 #include "weapon.h"
@@ -122,7 +123,7 @@ enemyDamaged:
             numBossObjs--;
             if (numBossObjs == 0) {
                 bossActive = 0;
-                bossDefeated[stage] = 0xff;
+                sd->bossDefeated[stage] = 0xff;
                 // delete all enemy objects
                 Object_DeleteRange(9);
                 // change music to "boss defeated"
