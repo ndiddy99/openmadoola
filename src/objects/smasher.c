@@ -21,7 +21,6 @@
 #include "game.h"
 #include "object.h"
 #include "rng.h"
-#include "save.h"
 #include "sound.h"
 #include "sprite.h"
 #include "weapon.h"
@@ -60,7 +59,7 @@ void Smasher_Obj(Object *o) {
     o->timer--;
     if (o->timer == 0) {
         // higher smasher level = shorter delay
-        o->timer = smasherDelays[sd->weaponLevels[WEAPON_SMASHER] & 3];
+        o->timer = smasherDelays[weaponLevels[WEAPON_SMASHER] & 3];
         o->hp--;
         if (o->hp < 0) { return; }
     }

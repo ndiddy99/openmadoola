@@ -22,14 +22,13 @@
 #include "map.h"
 #include "object.h"
 #include "rng.h"
-#include "save.h"
 #include "sound.h"
 #include "sprite.h"
 #include "yokkochan.h"
 
 void YokkoChan_InitObj(Object *o) {
     // don't spawn if keyword has already been displayed
-    if ((gameType != GAME_TYPE_ARCADE) && sd->keywordDisplay) {
+    if ((gameType != GAME_TYPE_ARCADE) && keywordDisplay) {
         o->type = OBJ_NONE;
         return;
     }
@@ -95,6 +94,6 @@ void YokkoChan_Obj(Object *o) {
     }
     // disable keyword if lucia kills yokko-chan
     if (!Collision_Handle(o, &spr, COLLISION_SIZE_16X16, 255)) {
-        sd->keywordDisplay = -1;
+        keywordDisplay = -1;
     }
 }

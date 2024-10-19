@@ -59,7 +59,9 @@ Uint8 orbCollected;
 Uint8 roomChangeTimer;
 Uint8 bossActive;
 Uint8 numBossObjs;
+Uint8 bossDefeated[16];
 Uint8 gameFrames;
+Sint8 keywordDisplay;
 Uint8 fountainUsed;
 // arcade stuff
 Uint32 score;
@@ -120,19 +122,19 @@ void Game_LoadGame(void) {
 
 static void Game_InitNewGame(void) {
     health = 1000;
-    sd->maxHealth = 1000;
-    sd->maxMagic = 1000;
+    maxHealth = 1000;
+    maxMagic = 1000;
     highestReachedStage = 0;
 
     // initialize boots and weapon levels
-    sd->bootsLevel = 0;
-    memset(sd->weaponLevels, 0, NUM_WEAPONS);
-    sd->weaponLevels[WEAPON_SWORD] = 1;
+    bootsLevel = 0;
+    memset(weaponLevels, 0, NUM_WEAPONS);
+    weaponLevels[WEAPON_SWORD] = 1;
     Item_InitCollected();
-    memset(sd->bossDefeated, 0, sizeof(sd->bossDefeated));
-    sd->keywordDisplay = 0;
+    memset(bossDefeated, 0, sizeof(bossDefeated));
     stage = 0;
     orbCollected = 0;
+    keywordDisplay = 0;
 }
 
 static void Game_InitCommon(void) {
@@ -189,7 +191,7 @@ static void Game_InitRoomVars(Object *lucia) {
     // if we're in the boss room and the boss hasn't been defeated, set up the
     // number of boss objects
     else if (currRoom == 6) {
-        if (!sd->bossDefeated[stage]) {
+        if (!bossDefeated[stage]) {
             bossActive = 1;
             numBossObjs = mapData->stages[stage].bossObjCount;
         }
@@ -325,11 +327,11 @@ static void Game_InitDemo(DemoData *data) {
     gameType = data->gameType;
     stage = data->stage;
     health = data->health;
-    sd->maxHealth = data->health;
+    maxHealth = data->health;
     magic = data->magic;
-    sd->maxMagic = data->magic;
-    sd->bootsLevel = data->bootsLevel;
-    memcpy(sd->weaponLevels, data->weaponLevels, sizeof(sd->weaponLevels));
+    maxMagic = data->magic;
+    bootsLevel = data->bootsLevel;
+    memcpy(weaponLevels, data->weaponLevels, sizeof(weaponLevels));
 }
 
 static int Game_RunStage(void) {
@@ -337,7 +339,7 @@ static int Game_RunStage(void) {
     Uint16 lastRoom = 0xffff;
 
     Object_ListInit();
-    magic = sd->maxMagic;
+    magic = maxMagic;
     fountainUsed = 0;
 
     Sound_Reset();
@@ -408,10 +410,10 @@ initRoom:
         }
 
         // --- handle keyword screen ---
-        if (sd->keywordDisplay > 0) {
+        if (keywordDisplay > 0) {
             Screen_Keyword();
             // mark keyword as shown
-            sd->keywordDisplay = -1;
+            keywordDisplay = -1;
             // despawn yokko-chan
             Object_DeleteRange(9);
             // force music to play
@@ -507,10 +509,10 @@ static void Game_HandleWeaponSwitch(void) {
         do {
             currentWeapon++;
             if (currentWeapon >= NUM_WEAPONS) { currentWeapon = 0; }
-        } while ((sd->weaponLevels[currentWeapon] == 0) || (Weapon_MagicAfterUse() < 0));
-        // cap weapon level
-        if (sd->weaponLevels[currentWeapon] > MAX_WEAPON_LEVEL) {
-            sd->weaponLevels[currentWeapon] = MAX_WEAPON_LEVEL;
+        } while ((weaponLevels[currentWeapon] == 0) || (Weapon_MagicAfterUse() < 0));
+        // clamp weapon level to 3
+        if (weaponLevels[currentWeapon] > 3) {
+            weaponLevels[currentWeapon] = 3;
         }
     }
 }

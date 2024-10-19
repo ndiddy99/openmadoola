@@ -17,12 +17,10 @@
  * along with OpenMadoola. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "alloc.h"
 #include "bg.h"
 #include "buffer.h"
 #include "constants.h"
@@ -54,68 +52,61 @@ static Uint8 savePalette[] = {
 };
 
 #define NUM_FILES 3
-static SaveData *saves[NUM_FILES];
+static Buffer *files[NUM_FILES];
 static int currFile;
-SaveData *sd;
 
 void Save_Serialize(Buffer *buf) {
-    assert(sd);
-    Buffer_AddSint16(buf, sd->maxHealth);
-    Buffer_AddSint16(buf, sd->maxMagic);
-    Buffer_Add(buf, sd->highestReachedStage);
-    Buffer_Add(buf, sd->keywordDisplay);
-    Buffer_Add(buf, sd->orbCollected);
+    Buffer_AddSint16(buf, maxHealth);
+    Buffer_AddSint16(buf, maxMagic);
+    Buffer_Add(buf, highestReachedStage);
+    Buffer_Add(buf, keywordDisplay);
+    Buffer_Add(buf, orbCollected);
     for (int i = 0; i < NUM_WEAPONS; i++) {
-        Buffer_Add(buf, sd->weaponLevels[i]);
+        Buffer_Add(buf, weaponLevels[i]);
     }
-    Buffer_Add(buf, sd->bootsLevel);
-    for (int i = 0; i < ARRAY_LEN(sd->itemsCollected); i++) {
-        Buffer_Add(buf, sd->itemsCollected[i]);
+    Buffer_Add(buf, bootsLevel);
+    for (int i = 0; i < ARRAY_LEN(itemsCollected); i++) {
+        Buffer_Add(buf, itemsCollected[i]);
     }
-    for (int i = 0; i < ARRAY_LEN(sd->bossDefeated); i++) {
-        Buffer_Add(buf, sd->bossDefeated[i]);
+    for (int i = 0; i < ARRAY_LEN(bossDefeated); i++) {
+        Buffer_Add(buf, bossDefeated[i]);
     }
-}
-
-static int Save_DeserializeToPtr(Uint8 *data, SaveData *out) {
-    int cursor = 0;
-    out->maxHealth = Util_LoadSint16(data + cursor);
-    cursor += 2;
-    out->maxMagic = Util_LoadSint16(data + cursor);
-    cursor += 2;
-    out->highestReachedStage = data[cursor++];
-    out->keywordDisplay = data[cursor++];
-    out->orbCollected = data[cursor++];
-    memcpy(out->weaponLevels, data + cursor, sizeof(out->weaponLevels));
-    cursor += sizeof(out->weaponLevels);
-    out->bootsLevel = data[cursor++];
-    memcpy(out->itemsCollected, data + cursor, sizeof(out->itemsCollected));
-    cursor += sizeof(out->itemsCollected);
-    memcpy(out->bossDefeated, data + cursor, sizeof(out->bossDefeated));
-    cursor += sizeof(out->bossDefeated);
-    return cursor;
 }
 
 int Save_Deserialize(Uint8 *data) {
-    return Save_DeserializeToPtr(data, sd);
+    int cursor = 0;
+    maxHealth = Util_LoadSint16(data + cursor);
+    cursor += 2;
+    maxMagic = Util_LoadSint16(data + cursor);
+    cursor += 2;
+    highestReachedStage = data[cursor++];
+    keywordDisplay = data[cursor++];
+    orbCollected = data[cursor++];
+    memcpy(weaponLevels, data + cursor, sizeof(weaponLevels));
+    cursor += sizeof(weaponLevels);
+    bootsLevel = data[cursor++];
+    memcpy(itemsCollected, data + cursor, sizeof(itemsCollected));
+    cursor += sizeof(itemsCollected);
+    memcpy(bossDefeated, data + cursor, sizeof(bossDefeated));
+    cursor += sizeof(bossDefeated);
+    return cursor;
 }
 
 void Save_SaveFile(void) {
-    static Buffer *buf = NULL;
     char filename[20];
 
-    if (!buf) {
-        buf = Buffer_Init(sizeof(SaveData));
+    if (!files[currFile]) {
+        files[currFile] = Buffer_Init(64);
     }
-    buf->dataSize = 0;
-    Save_Serialize(buf);
+    files[currFile]->dataSize = 0;
+    Save_Serialize(files[currFile]);
     snprintf(filename, sizeof(filename), "file%d.sav", currFile + 1);
-    Buffer_WriteToFile(buf, filename);
+    Buffer_WriteToFile(files[currFile], filename);
 }
 
 void Save_EraseFile(int num) {
-    free(saves[num]);
-    saves[num] = NULL;
+    Buffer_Destroy(files[num]);
+    files[num] = NULL;
     char filename[20];
     snprintf(filename, sizeof(filename), "file%d.sav", num + 1);
     remove(filename);
@@ -123,25 +114,17 @@ void Save_EraseFile(int num) {
 
 void Save_Init(void) {
     char filename[20];
-    Buffer *buf = Buffer_Init(sizeof(SaveData));
     for (int i = 0; i < NUM_FILES; i++) {
         snprintf(filename, sizeof(filename), "file%d.sav", i + 1);
         FILE *fp = File_Open(filename, "rb");
         if (fp) {
-            // load file into the buffer
-            buf->dataSize = 0;
-            Buffer_AddFile(buf, fp);
-            // load data from the buffer
-            assert(!saves[i]);
-            saves[i] = ommalloc(sizeof(SaveData));
-            Save_DeserializeToPtr(buf->data, saves[i]);
+            files[i] = Buffer_InitFromFile(fp);
             fclose(fp);
         }
         else {
-            saves[i] = NULL;
+            files[i] = NULL;
         }
     }
-    Buffer_Destroy(buf);
 }
 
 static void Save_DrawLucia(Sint16 x, Sint16 y, Uint16 tile) {
@@ -201,8 +184,9 @@ void Save_Screen(void) {
     BG_SetAllPalettes(savePalette);
     Sprite_SetAllPalettes(savePalette + 16);
     for (int i = 0; i < NUM_FILES; i++) {
-        if (saves[i]) {
-            stages[i] = saves[i]->highestReachedStage;
+        if (files[i]) {
+            Save_Deserialize(files[i]->data);
+            stages[i] = highestReachedStage;
             highestStages[i] = stages[i];
         }
     }
@@ -236,7 +220,7 @@ void Save_Screen(void) {
         }
         // first 3 positions = save files, last = "erase game" text
         if (cursor < NUM_FILES) {
-            if (saves[cursor] && !erase) {
+            if (files[cursor] && !erase) {
                 if (joyEdge & JOY_LEFT) {
                     stages[cursor]--;
                     stages[cursor] = MAX(stages[cursor], 0);
@@ -249,7 +233,7 @@ void Save_Screen(void) {
                 }
             }
             // move the cursor over if there's a file
-            cursorSpr.x = (saves[cursor] ? 30 : 80) - BG_CENTERED_X;
+            cursorSpr.x = (files[cursor] ? 30 : 80) - BG_CENTERED_X;
             cursorSpr.y = (SAVE_Y_PX - 5) + (cursor * SAVE_SPACING_PX);
         }
         else {
@@ -272,7 +256,7 @@ void Save_Screen(void) {
 
         // draw save file text
         for (int i = 0; i < NUM_FILES; i++) {
-            if (saves[i]) {
+            if (files[i]) {
                 BG_Print(SAVE_X, (i * SAVE_SPACING) + SAVE_Y, 0, "File %d   Stage - %2u -", i + 1, stages[i] + 1);
                 // if the save file exists, draw a Lucia sprite for it
                 Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
@@ -308,7 +292,7 @@ void Save_Screen(void) {
     }
 
     currFile = cursor;
-    if (saves[cursor]) {
+    if (files[cursor]) {
         // lucia running offscreen animation
         Sint16 luciaX = LUCIA_X_PX;
         int frames = 0;
@@ -320,7 +304,7 @@ void Save_Screen(void) {
                 if (i == currFile) {
                     Save_DrawLucia(luciaX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, luciaRunTiles[(frames >> 3) & 3]);
                 }
-                else if (saves[i]) {
+                else if (files[i]) {
                     Save_DrawLucia(LUCIA_X_PX, (i * SAVE_SPACING_PX) + LUCIA_Y_PX, 0);
                 }
             }
@@ -331,7 +315,7 @@ void Save_Screen(void) {
             if (joyEdge & JOY_START) { break; }
         }
 
-        sd = saves[cursor];
+        Save_Deserialize(files[cursor]->data);
         stage = stages[cursor];
         Task_Switch(Game_LoadGame);
     }

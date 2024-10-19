@@ -1,5 +1,5 @@
 /* item.c: Item pickup object code
- * Copyright (c) 2023, 2024 Nathan Misner
+ * Copyright (c) 2023 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -25,8 +25,9 @@
 #include "item.h"
 #include "map.h"
 #include "object.h"
-#include "save.h"
 #include "sprite.h"
+
+Uint8 itemsCollected[8];
 
 Uint16 itemTiles[] = {
     0x60,   // regular sword
@@ -134,7 +135,7 @@ eraseItem:
 }
 
 void Item_InitCollected(void) {
-    memset(sd->itemsCollected, 0, sizeof(sd->itemsCollected));
+    memset(itemsCollected, 0, sizeof(itemsCollected));
 }
 
 static void Item_GetScreenCoords(Object *o, Uint8 *xScreen, Uint8 *yScreen) {
@@ -146,11 +147,11 @@ static void Item_GetScreenCoords(Object *o, Uint8 *xScreen, Uint8 *yScreen) {
 static void Item_SetCollected(Object *o) {
     Uint8 xScreen, yScreen;
     Item_GetScreenCoords(o, &xScreen, &yScreen);
-    sd->itemsCollected[yScreen] |= (1 << xScreen);
+    itemsCollected[yScreen] |= (1 << xScreen);
 }
 
 Uint8 Item_Collected(Object *o) {
     Uint8 xScreen, yScreen;
     Item_GetScreenCoords(o, &xScreen, &yScreen);
-    return sd->itemsCollected[yScreen] & (1 << xScreen);
+    return itemsCollected[yScreen] & (1 << xScreen);
 }

@@ -20,21 +20,6 @@
 #pragma once
 #include "buffer.h"
 #include "constants.h"
-#include "weapon.h"
-
-typedef struct {
-    Sint16 maxHealth;
-    Sint16 maxMagic;
-    Uint8 highestReachedStage;
-    Sint8 keywordDisplay;
-    Uint8 orbCollected;
-    Uint8 weaponLevels[NUM_WEAPONS];
-    Uint8 bootsLevel;
-    Uint8 itemsCollected[8];
-    Uint8 bossDefeated[16];
-} SaveData;
-
-extern SaveData *sd;
 
 /**
  * @brief Loads any save files from disk. Should be run at startup.
@@ -58,6 +43,10 @@ void Save_Serialize(Buffer *buf);
  * @returns number of bytes deserialized
  */
 int Save_Deserialize(Uint8 *data);
+
+#define SAVE_SCREEN_BACK 0
+#define SAVE_SCREEN_NEWGAME 1
+#define SAVE_SCREEN_LOADGAME 2
 
 /**
  * @brief Displays the save file screen.

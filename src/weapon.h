@@ -1,5 +1,5 @@
 /* weapon.h: Weapon variables and object code
- * Copyright (c) 2023, 2024 Nathan Misner
+ * Copyright (c) 2023 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -39,12 +39,12 @@ typedef struct {
     Sint16 y;
 } WeaponCoords;
 
-
-#define MAX_WEAPON_LEVEL (3)
-extern Uint8 currentWeapon;
-extern Uint8 weaponDamage;
 // maximum number of weapon objects
 #define MAX_WEAPONS (8)
+
+extern Uint8 weaponLevels[NUM_WEAPONS];
+extern Uint8 currentWeapon;
+extern Uint8 weaponDamage;
 extern WeaponCoords weaponCoords[MAX_WEAPONS];
 
 /**
