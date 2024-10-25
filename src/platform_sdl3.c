@@ -23,16 +23,14 @@
 
 #include "constants.h"
 #include "db.h"
+#include "file.h"
+#include "game.h"
 #include "graphics.h"
 #include "input.h"
 #include "nanotime.h"
 #include "nes_ntsc.h"
 #include "palette.h"
 #include "platform.h"
-
-// SDL stopped publishing test versions of SDL3 so I can't test with this until
-// SDL3 comes out.
-#error Not currently supported, please use SDL2 for now.
 
 // --- video stuff ---
 static Uint8 frameStarted = 0;
@@ -51,10 +49,20 @@ static SDL_Texture *scaleTexture;
 static int vsync;
 static nanotime_step_data stepData;
 static nes_ntsc_t ntsc;
+static nes_ntsc_setup_t ntscSetup;
 static Uint8 ntscEnabled = 0;
 
 // --- audio stuff ---
 static SDL_AudioStream *audioStream;
+
+// --- palette stuff ---
+#define NUM_COLORS 64
+// these are in ARGB 32bpp format that SDL likes
+static Uint32 nesPalette[NUM_COLORS];
+static Uint32 arcadePalette[NUM_COLORS];
+// this is in RGB format that nes_ntsc likes
+static Uint8 arcadePaletteNTSC[NUM_COLORS * 3];
+static Uint8 paletteType;
 
 // --- controller stuff ---
 static const int gamepadMap[] = {
@@ -73,7 +81,7 @@ static const int gamepadMap[] = {
     [SDL_GAMEPAD_BUTTON_DPAD_DOWN] = INPUT_GAMEPAD_DPAD_DOWN,
     [SDL_GAMEPAD_BUTTON_DPAD_LEFT] = INPUT_GAMEPAD_DPAD_LEFT,
     [SDL_GAMEPAD_BUTTON_DPAD_RIGHT] = INPUT_GAMEPAD_DPAD_RIGHT,
-    [SDL_GAMEPAD_BUTTON_MAX] = INPUT_INVALID,
+    [SDL_GAMEPAD_BUTTON_COUNT] = INPUT_INVALID,
 };
 static SDL_Gamepad *gamepad;
 
@@ -81,24 +89,29 @@ static SDL_Gamepad *gamepad;
 static void Platform_PumpEvents(void);
 
 static int Platform_InitVideo(void) {
+    const SDL_DisplayMode *displayMode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
     // set up window
-    int windowWidth = ((int)(SCREEN_WIDTH * scale * PIXEL_ASPECT_RATIO));
-    int windowHeight = SCREEN_HEIGHT * scale;
+    int windowWidth, windowHeight;
+    if (fullscreen) {
+        windowWidth = displayMode->w;
+        windowHeight = displayMode->h;
+        SDL_HideCursor();
+    }
+    else {
+        windowWidth = ((int)(SCREEN_WIDTH * scale * PIXEL_ASPECT_RATIO));
+        windowHeight = SCREEN_HEIGHT * scale;
+        SDL_ShowCursor();
+    }
     window = SDL_CreateWindow(
         "OpenMadoola",
         windowWidth, windowHeight,
-        0);
+        fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
     if (!window) {
         Platform_ShowError("Error creating window: %s", SDL_GetError());
         return 0;
     }
 
     // set up renderer
-    const SDL_DisplayMode *displayMode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(window));
-    if (!displayMode) {
-        Platform_ShowError("Error getting display mode: %s", SDL_GetError());
-        return 0;
-    }
     int refreshRate = (int)(displayMode->refresh_rate);
     // round up if refresh rate is 59 or something
     if (refreshRate && (((refreshRate + 1) % 60) == 0)) {
@@ -110,19 +123,20 @@ static int Platform_InitVideo(void) {
     else {
         vsync = 0;
     }
-    renderer = SDL_CreateRenderer(window, NULL, vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
+    renderer = SDL_CreateRenderer(window, NULL);
     if (!renderer) {
         Platform_ShowError("Error creating renderer: %s", SDL_GetError());
         return 0;
     }
+    if (vsync) {
+        if (!SDL_SetRenderVSync(renderer, 1)) {
+            // failed to enable vsync so fall back to software delay
+            vsync = 0;
+        }
+    }
     nanotime_step_init(&stepData, (uint64_t)(NANOTIME_NSEC_PER_SEC / 60), nanotime_now_max(), nanotime_now, nanotime_sleep);
-    nes_ntsc_setup_t setup = nes_ntsc_composite;
-    setup.saturation = -0.1;
-    // Sony CXA2025AS decoder matrix
-    float matrix[6] = { 1.630f, 0.317f, -0.378f, -0.466f, -1.089f, 1.677f };
-    setup.decoder_matrix = matrix;
-    nes_ntsc_init(&ntsc, &setup);
 
+    // set up textures
     int drawWidth;
     if (ntscEnabled) {
         drawWidth = NES_NTSC_OUT_WIDTH(SCREEN_WIDTH);
@@ -139,8 +153,22 @@ static int Platform_InitVideo(void) {
         return 0;
     }
     SDL_SetTextureScaleMode(drawTexture, SDL_SCALEMODE_NEAREST);
-    int scaledWidth = SCREEN_WIDTH * scale;
-    int scaledHeight = SCREEN_HEIGHT * scale;
+    int scaledWidth, scaledHeight;
+    if (fullscreen) {
+        int fullscreenScale = displayMode->h / SCREEN_HEIGHT;
+        scaledWidth = fullscreenScale * SCREEN_WIDTH;
+        scaledHeight = fullscreenScale * SCREEN_HEIGHT;
+
+        float fractionalScale = (float)displayMode->h / SCREEN_HEIGHT;
+        fullscreenRect.w = (fractionalScale * SCREEN_WIDTH * PIXEL_ASPECT_RATIO);
+        fullscreenRect.h = (float)displayMode->h;
+        fullscreenRect.x = (displayMode->w / 2) - (fullscreenRect.w / 2);
+        fullscreenRect.y = 0;
+    }
+    else {
+        scaledWidth = scale * SCREEN_WIDTH;
+        scaledHeight = scale * SCREEN_HEIGHT;
+    }
     scaleTexture = SDL_CreateTexture(renderer,
                                      SDL_PIXELFORMAT_ARGB8888,
                                      SDL_TEXTUREACCESS_TARGET,
@@ -175,7 +203,7 @@ void Platform_EndFrame(void) {
     }
     frameStarted = 0;
     // convert framebuffer from nes colors to rgb
-    Uint32 *rgbFramebuffer;
+    Uint32 *rgbFramebuffer = NULL;
     int pitch;
     SDL_LockTexture(drawTexture, NULL, (void **)&rgbFramebuffer, &pitch);
     if (ntscEnabled) {
@@ -193,9 +221,10 @@ void Platform_EndFrame(void) {
         // skip past buffer around framebuffer
         int srcOffset = (TILE_HEIGHT * FRAMEBUFFER_WIDTH) + TILE_WIDTH;
         int dstOffset = 0;
+        Uint32 *rgbPalette = (paletteType == PALETTE_TYPE_NES) ? nesPalette : arcadePalette;
         for (int y = 0; y < SCREEN_HEIGHT; y++) {
             for (int x = 0; x < SCREEN_WIDTH; x++) {
-                rgbFramebuffer[dstOffset++] = nesToRGB[framebuffer[srcOffset++]];
+                rgbFramebuffer[dstOffset++] = rgbPalette[framebuffer[srcOffset++]];
             }
             srcOffset += (TILE_WIDTH * 2);
         }
@@ -259,56 +288,35 @@ int Platform_SetVideoScale(int requested) {
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_TARGET,
                                          scaledWidth, scaledHeight);
+        DB_Set("scale", &scale, 1);
+        DB_Save();
     }
-
-    DB_Set("scale", &scale, 1);
-    DB_Save();
     return scale;
 }
 
 int Platform_SetFullscreen(int requested) {
-    if (requested) {
-        fullscreen = 1;
-        // get desktop display resolution
-        const SDL_DisplayMode *displayMode = SDL_GetDesktopDisplayMode(SDL_GetDisplayForWindow(window));
-        if (!displayMode) {
-            Platform_ShowError("Error getting display mode: %s", SDL_GetError());
-            return 0;
-        }
-        // make window fullscreen at native res
-        SDL_SetWindowSize(window, displayMode->w, displayMode->h);
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-        SDL_HideCursor();
-        // resize scale framebuffer to fit screen
-        SDL_DestroyTexture(scaleTexture);
-        int fullscreenScale = displayMode->h / SCREEN_HEIGHT;
-        int scaledWidth = SCREEN_WIDTH * fullscreenScale;
-        int scaledHeight = SCREEN_HEIGHT * fullscreenScale;
-        scaleTexture = SDL_CreateTexture(renderer,
-                                         SDL_PIXELFORMAT_ARGB8888,
-                                         SDL_TEXTUREACCESS_TARGET,
-                                         scaledWidth, scaledHeight);
-        // set up destination area
-        fullscreenRect.w = scaledWidth * PIXEL_ASPECT_RATIO;
-        fullscreenRect.h = (float)scaledHeight;
-        fullscreenRect.x = (float)((displayMode->w / 2) - (fullscreenRect.w / 2));
-        fullscreenRect.y = (float)((displayMode->h / 2) - (fullscreenRect.h / 2));
+    if (requested != fullscreen) {
+        fullscreen = requested;
+        Platform_DestroyVideo();
+        Platform_InitVideo();
+        DB_Set("fullscreen", &fullscreen, 1);
+        DB_Save();
     }
-    else {
-        fullscreen = 0;
-        SDL_ShowCursor();
-        // make window windowed at last scale
-        SDL_SetWindowFullscreen(window, 0);
-        Platform_SetVideoScale(scale);
-    }
-
-    DB_Set("fullscreen", &fullscreen, 1);
-    DB_Save();
     return fullscreen;
 }
 
 int Platform_GetFullscreen(void) {
     return fullscreen;
+}
+
+static void Platform_InitNTSC(void) {
+    ntscSetup = nes_ntsc_composite;
+    ntscSetup.saturation = -0.1;
+    // Sony CXA2025AS decoder matrix
+    float matrix[6] = { 1.630f, 0.317f, -0.378f, -0.466f, -1.089f, 1.677f };
+    ntscSetup.decoder_matrix = matrix;
+    ntscSetup.base_palette = (paletteType == PALETTE_TYPE_2C04) ? arcadePaletteNTSC : NULL;
+    nes_ntsc_init(&ntsc, &ntscSetup);
 }
 
 int Platform_SetNTSC(int requested) {
@@ -342,12 +350,19 @@ int Platform_GetNTSC(void) {
     return ntscEnabled;
 }
 
+void Platform_SetPaletteType(Uint8 type) {
+    if (paletteType != type) {
+        paletteType = type;
+        Platform_InitNTSC();
+    }
+}
+
 static int Platform_InitAudio(void) {
     SDL_AudioSpec spec = { 0 };
     spec.freq = 44100;
     spec.format = SDL_AUDIO_S16;
     spec.channels = 1;
-    audioStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_OUTPUT, &spec, NULL, NULL);
+    audioStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
     if (!audioStream) {
         Platform_ShowError("Error creating audioStream: %s", SDL_GetError());
         return 0;
@@ -366,6 +381,35 @@ void Platform_QueueSamples(Sint16 *samples, int count) {
 
 int Platform_GetQueuedSamples(void) {
     return (int)SDL_GetAudioStreamQueued(audioStream) / sizeof(Sint16);
+}
+
+static int Platform_LoadPalette(char *filename, Uint32 *out, Uint8 *outNtsc) {
+    FILE *fp = File_OpenResource(filename, "rb");
+    if (!fp) {
+        Platform_ShowError("Couldn't open %s", filename);
+        return 0;
+    }
+
+    for (int i = 0; i < NUM_COLORS; i++) {
+        Uint8 r = fgetc(fp);
+        Uint8 g = fgetc(fp);
+        Uint8 b = fgetc(fp);
+
+        out[i] = ((Uint32)0xFF << 24) | ((Uint32)r << 16) | ((Uint32)g << 8) | (Uint32)b;
+        if (outNtsc) {
+            outNtsc[(i * 3) + 0] = r;
+            outNtsc[(i * 3) + 1] = g;
+            outNtsc[(i * 3) + 2] = b;
+        }
+    }
+    fclose(fp);
+    return 1;
+}
+
+static int Platform_InitPalettes(void) {
+    if (!Platform_LoadPalette("nes.pal", nesPalette, NULL)) { return 0; }
+    if (!Platform_LoadPalette("2c04.pal", arcadePalette, arcadePaletteNTSC)) { return 0; }
+    return 1;
 }
 
 static SDL_Gamepad *Platform_FindGamepad(void) {
@@ -388,12 +432,15 @@ int Platform_Init(void) {
     if (entry) { scale = entry->data[0]; }
     entry = DB_Find("ntsc");
     if (entry) { ntscEnabled = entry->data[0]; }
+    entry = DB_Find("fullscreen");
+    if (entry) { Platform_SetFullscreen(entry->data[0]); }
+    paletteType = (gameType == GAME_TYPE_ARCADE) ? PALETTE_TYPE_2C04 : PALETTE_TYPE_NES;
+
+    if (!Platform_InitPalettes()) { return 0; }
+    Platform_InitNTSC();
     if (!Platform_InitVideo()) { return 0; }
     if (!Platform_InitAudio()) { return 0; }
     gamepad = Platform_FindGamepad();
-    entry = DB_Find("fullscreen");
-    if (entry) { Platform_SetFullscreen(entry->data[0]); }
-
     return 1;
 }
 
@@ -415,13 +462,13 @@ static void Platform_PumpEvents(void) {
         case SDL_EVENT_KEY_UP:
             // alt+enter = toggle fullscreen
             if ((event.type == SDL_EVENT_KEY_DOWN) &&
-                (event.key.keysym.scancode == SDL_SCANCODE_RETURN) &&
-                (event.key.keysym.mod & SDL_KMOD_ALT)) {
+                (event.key.scancode == SDL_SCANCODE_RETURN) &&
+                (event.key.mod & SDL_KMOD_ALT)) {
                 Platform_SetFullscreen(!Platform_GetFullscreen());
                 break;
             }
 
-            button = event.key.keysym.scancode;
+            button = event.key.scancode;
             // these are discontiguous with the rest of the scancodes so we make them
             // match the button enum in input.h
             if ((button >= SDL_SCANCODE_LCTRL) && (button <= SDL_SCANCODE_RGUI)) {
