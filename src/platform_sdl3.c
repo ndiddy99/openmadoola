@@ -18,6 +18,7 @@
  */
 
 #include <SDL3/SDL.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -160,9 +161,9 @@ static int Platform_InitVideo(void) {
         scaledHeight = fullscreenScale * SCREEN_HEIGHT;
 
         float fractionalScale = (float)displayMode->h / SCREEN_HEIGHT;
-        fullscreenRect.w = (fractionalScale * SCREEN_WIDTH * PIXEL_ASPECT_RATIO);
+        fullscreenRect.w = floorf((fractionalScale * SCREEN_WIDTH * PIXEL_ASPECT_RATIO));
         fullscreenRect.h = (float)displayMode->h;
-        fullscreenRect.x = (displayMode->w / 2) - (fullscreenRect.w / 2);
+        fullscreenRect.x = floorf((displayMode->w / 2) - (fullscreenRect.w / 2));
         fullscreenRect.y = 0;
     }
     else {
