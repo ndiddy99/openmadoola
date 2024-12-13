@@ -434,7 +434,7 @@ int Platform_Init(void) {
     entry = DB_Find("ntsc");
     if (entry) { ntscEnabled = entry->data[0]; }
     entry = DB_Find("fullscreen");
-    if (entry) { Platform_SetFullscreen(entry->data[0]); }
+    if (entry) { fullscreen = entry->data[0]; }
     paletteType = (gameType == GAME_TYPE_ARCADE) ? PALETTE_TYPE_2C04 : PALETTE_TYPE_NES;
 
     if (!Platform_InitPalettes()) { return 0; }
