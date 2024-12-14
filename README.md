@@ -6,7 +6,7 @@ Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
 
 ## Usage
 
-In order to function, OpenMadoola requires the font.bin, 2c04.pal, and nes.pal data files as well as the demo and mml directories from this repository. It also requires a Wing of Madoola ROM image. The ROM image can either be a standard NES ROM file named "madoola.nes" or the "sharedassets0.assets" file from [Sunsoft is Back! Retro Game Selection](https://store.steampowered.com/app/2821290/SUNSOFT_is_Back/) on Steam. OpenMadoola reads all the graphics and level data from the ROM image, and will refuse to start if it is not present.
+In order to function, OpenMadoola requires the font.bin, 2c04.pal, and nes.pal data files as well as the demo and mml directories from this repository. These are included with the pre-built Windows binaries on the Releases page. OpenMadoola also requires a Wing of Madoola ROM image. The ROM image can either be a standard NES ROM file named "madoola.nes" or the "sharedassets0.assets" file from [Sunsoft is Back! Retro Game Selection](https://store.steampowered.com/app/2821290/SUNSOFT_is_Back/) on Steam. OpenMadoola reads all the graphics and level data from the ROM image, and will refuse to start if it is not present.
 
 If you don't have an original cartridge or don't want to deal with dumping it, I would recommend buying the collection on Steam rather than downloading a ROM off the internet. It's only $13 and has a nice interface with high-quality scans of the manual as well as some concept art. It also shows Sunsoft that there's interest in their legacy IP. To retrieve the "sharedassets0.assets" file, go to your Steam library, right click the Sunsoft collection, and click "Manage->Browse local files". It will be in the "SUNSOFT is Back! Retro Game Selection_Data" directory.
 
@@ -42,29 +42,29 @@ You can change the controls in the options menu. Pressing A+B+Select+Start while
 
 ### Game types
 
-Also in the options menu, you'll find a "game type" setting. The "Original" game type tries to simulate the original NES game but with important bugfixes, while the "Plus" game type (the default) includes additional fixes for more minor bugs as well as tweaks that I think improve the game. The "Arcade" game type is a recreation of the VS. System port.
+Also in the options menu, you'll find a "game type" setting. The "Original" game type tries to simulate the original NES game but with important bugfixes. The "Plus" game type (the default) includes additional fixes for more minor bugs as well as tweaks that I think improve the game. The "Arcade" game type is a recreation of the VS. System port.
 
 #### Changes for all game types
-- Game runs without NES hardware limitations (no slowdown, no sprite flicker, no garbage on the edge of the screen)
-- Game progress is saved to disk
+- Game runs without NES hardware limitations (no slowdown, no sprite flicker, no garbage on the edge of the screen).
+- Game progress is saved to disk.
 - The status/stage screens can be skipped by pressing the Start button.
-- Fixed a bug where collecting the Wing of Madoola and then entering a door would make Darutos not spawn
-- Fixed a bug where killing Darutos and then dying to one of his fireballs would let you skip fighting him after continuing
+- Fixed a bug where collecting the Wing of Madoola and then entering a door would make Darutos not spawn.
+- Fixed a bug where killing Darutos and then dying to one of his fireballs would let you skip fighting him after continuing.
 - Fixed a bug where sound effects would sometimes get stuck on, glitch out, etc.
-- Fixed a bug where pausing and then unpausing on a castle level would cause the noise channel to drop out of the music
-- Fixed a bug where the mirroring on the fireball that some enemies throw wasn't initialized
+- Fixed a bug where pausing and then unpausing on a castle level would cause the noise channel to drop out of the music.
+- Fixed a bug where the mirroring on the fireball that some enemies throw wasn't initialized.
 
 #### Plus-exclusive changes
-- Added the opening/ending text from the arcade version of the game
-- Added a second emulated sound chip just for music (meaning that channels won't cut out to play sound effects)
-- Music doesn't restart when warping within the same stage
-- Music doesn't restart when pausing/unpausing the game
-- The arcade version of the boss music is used instead of the console version
-- The selected weapon is visible during gameplay, and you can change weapons without pausing
-- Darutos gets drawn even when he's only partially visible, making him easier to see
-- You can kill multiple enemies at once when they're on top of each other (makes dealing with Nyurus much less annoying)
-- Fixed a bug where the orb you get at the end of a level wasn't animated correctly
-- Fixed a bug where Nipata would get stuck if it spawned in a narrow gap
+- Added the opening/ending text from the arcade version of the game.
+- Added a second emulated sound chip just for music (meaning that channels won't cut out to play sound effects).
+- Music doesn't restart when warping within the same stage.
+- Music doesn't restart when pausing/unpausing the game.
+- The arcade version of the boss music is used instead of the console version.
+- The selected weapon is visible during gameplay, and you can change weapons without pausing.
+- Darutos gets drawn even when he's only partially visible, making him easier to see.
+- You can kill multiple enemies at once when they're on top of each other (makes dealing with Nyurus much less annoying).
+- Fixed a bug where the orb you get at the end of a level wasn't animated correctly.
+- Fixed a bug where Nipata would get stuck if it spawned in a narrow gap.
 
 #### Arcade-exclusive changes
 For a list of the all the changes I'm aware of between the console and arcade versions, see [here](https://www.infochunk.com/madoola/arcade.html). Here's a list of the changes between the real arcade version and the OpenMadoola version:
