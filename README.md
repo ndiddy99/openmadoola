@@ -1,6 +1,6 @@
 # OpenMadoola
 
-Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola"
+Free software (GPL v2.0 or later) reimplementation of "The Wing of Madoola" with bug fixes and optional gameplay enhancements. OpenMadoola was developed so people who own "The Wing of Madoola" on cartridge or on Steam can have more fun with their game. OpenMadoola is not a standalone game and will not function without externally supplied game data. This project is not licensed or endorsed by Sunsoft.
 
 ![OpenMadoola screenshot](screenshot.png)
 
