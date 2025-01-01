@@ -1,5 +1,5 @@
 /* object.c: object handler & utility functions
- * Copyright (c) 2023 Nathan Misner
+ * Copyright (c) 2023, 2024 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -458,30 +458,26 @@ int Object_HandleJump(Object *o) {
 }
 
 void Object_LimitDistance(Object *o) {
-    Sint8 difference = o->x.f.h - luciaXPos.f.h;
+    Sint16 difference = o->x.v - luciaXPos.v;
     // object to the left of lucia
     if (difference < 0) {
         difference = -difference;
-        if (difference < 6) { return; }
-        // handle rounding
-        if ((difference == 6) && (luciaXPos.f.l < o->x.f.l)) { return; }
         // limit distance to just under 6 metatiles
-        o->x.v = luciaXPos.v - 0x5ff;
+        if (difference >= 0x600) {
+            o->x.v = luciaXPos.v - 0x5ff;
+        }
     }
     // object to the right of lucia
     else {
-        if (difference < 6) { return; }
-        // handle rounding
-        if ((difference == 6) && (o->x.f.l < luciaXPos.f.l)) { return; }
         // limit distance to just under 6 metatiles
-        o->x.v = luciaXPos.v + 0x5ff;
+        if (difference >= 0x600) {
+            o->x.v = luciaXPos.v + 0x5ff;
+        }
     }
 }
 
 void Object_JumpIfHitWall(Object *o) {
-    if (!Object_UpdateXPos(o)) {
-        return;
+    if (Object_UpdateXPos(o)) {
+        o->ySpeed = 0x80;
     }
-
-    o->ySpeed = 0x80;
 }
