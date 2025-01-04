@@ -28,13 +28,7 @@ void Kikura_InitObj(Object *o) {
     o->hp = 8;
     o->type += 0x20;
     o->timer = 0;
-    // set x speed so the kikura moves towards lucia
-    if (o->direction) {
-        o->xSpeed = 0xE0;
-    }
-    else {
-        o->xSpeed = 0x20;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x20 : -0x20;
 }
 
 void Kikura_Obj(Object *o) {

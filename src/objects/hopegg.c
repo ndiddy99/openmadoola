@@ -28,12 +28,7 @@ void Hopegg_InitObj(Object *o) {
     o->hp = 30;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 0x20;
-    }
-    else {
-        o->xSpeed = 0xE0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x20 : -0x20;
 }
 
 void Hopegg_Obj(Object *o) {
@@ -89,10 +84,10 @@ void Hopegg_Obj(Object *o) {
     if (o->timer < 0xA0) {
         // looking left and right animation
         if ((o->timer & 0x20) == 0) {
-            o->direction = 0x80;
+            o->direction = DIR_LEFT;
         }
         else {
-            o->direction = 0;
+            o->direction = DIR_RIGHT;
         }
         spr.tile = 0x1ea;
         Sprite_Draw(&spr, o);
@@ -101,11 +96,11 @@ void Hopegg_Obj(Object *o) {
         // don't show eyes when hopping
         spr.size = SPRITE_8X16;
         spr.x -= 4;
-        o->direction = 0;
+        o->direction = DIR_RIGHT;
         spr.tile = 0x1fa;
         Sprite_DrawDir(&spr, o);
         spr.x += 8;
-        o->direction = 0x80;
+        o->direction = DIR_LEFT;
         Sprite_DrawDir(&spr, o);
         spr.x -= 4;
     }

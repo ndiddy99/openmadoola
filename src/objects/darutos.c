@@ -72,7 +72,7 @@ void Darutos_InitObj(Object *o) {
     o->hp = 255;
     o->type += 0x20;
     o->timer = 0x2f;
-    o->direction = 0x80;
+    o->direction = DIR_LEFT;
     o->xSpeed = 0xe0;
     o->ySpeed = 0x38;
 }
@@ -132,7 +132,7 @@ void Darutos_Obj(Object *o) {
     spr.palette = 2;
     // --- draw darutos's legs ---
     if (!(o->timer & 0x40)) {
-        dispOffsetX = (!o->direction) ? -0x10 : 0x10;
+        dispOffsetX = (o->direction == DIR_RIGHT) ? -0x10 : 0x10;
         frame = darutos2;
     }
     else {
@@ -146,7 +146,7 @@ void Darutos_Obj(Object *o) {
     if (gameType != GAME_TYPE_ORIGINAL) {
         spr.x = ((o->x.v - cameraX.v) >> 4) + dispOffsetX;
         spr.y = ((o->y.v - cameraY.v) >> 4) - 9;
-        spr.mirror = o->direction ? 0 : H_MIRROR;
+        spr.mirror = (o->direction == DIR_LEFT) ? 0 : H_MIRROR;
         Sprite_SetDrawLargeAbs(&spr, o, frame, darutosOffsets1);
     }
     else {
@@ -160,7 +160,7 @@ void Darutos_Obj(Object *o) {
     spr.tile = frame[5];
     if (o->timer & 0x40) {
         spr.y += 0x10;
-        spr.x += (!o->direction) ? -4 : 4;
+        spr.x += (o->direction == DIR_RIGHT) ? -4 : 4;
         spr.size = SPRITE_16X16;
         Sprite_Draw(&spr, o);
         spr.y -= 0x10;
@@ -172,7 +172,7 @@ void Darutos_Obj(Object *o) {
     // --- draw darutos's head and wing ---
     spr.y -= 0x20;
     Sint16 xOffset = (o->timer & 0x40) ? -0x18 : -0x1c;
-    if (!o->direction) { xOffset = -xOffset; }
+    if (o->direction == DIR_RIGHT) { xOffset = -xOffset; }
     spr.x += xOffset;
     frame = (!(o->timer & 0x80)) ? darutos3 : darutos4;
     spr.size = SPRITE_16X16;
@@ -187,7 +187,7 @@ void Darutos_Obj(Object *o) {
     Sprite_Draw(&spr, o);
     // --- draw darutos's mouth ---
     spr.tile = (!(o->x.f.h & 1)) ? 0x380 : 0x388;
-    spr.x += (!o->direction) ? 0x28 : -0x28;
+    spr.x += (o->direction == DIR_RIGHT) ? 0x28 : -0x28;
     Sprite_Draw(&spr, o);
     // --- draw darutos's hand ---
     spr.y += 0x10;
@@ -195,7 +195,7 @@ void Darutos_Obj(Object *o) {
     Sprite_Draw(&spr, o);
     // draw darutos's chest and other hand ---
     spr.tile += 0x10;
-    spr.x += (!o->direction) ? -0xc : 0xc;
+    spr.x += (o->direction == DIR_RIGHT) ? -0xc : 0xc;
     spr.size = SPRITE_16X16;
     Sprite_Draw(&spr, o);
     spr.y -= 0x10;

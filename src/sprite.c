@@ -143,7 +143,7 @@ void Sprite_Draw(Sprite *s, Object *o) {
 }
 
 void Sprite_DrawDir(Sprite *s, Object *o) {
-    if (!o->direction) { s->mirror |= H_MIRROR; }
+    if (o->direction == DIR_RIGHT) { s->mirror |= H_MIRROR; }
     else { s->mirror &= ~H_MIRROR; }
     Sprite_Draw(s, o);
 }
@@ -176,7 +176,7 @@ static void Sprite_SetDrawLargeCommon(Sprite *s, Object *o, Uint16 *tiles, Sint8
 
     while (1) {
         // add the x offset if object is facing left
-        if (o->direction) {
+        if (o->direction == DIR_LEFT) {
             s->x += offsets[cursor * 2];
         }
         // subtract the x offset if object is facing right

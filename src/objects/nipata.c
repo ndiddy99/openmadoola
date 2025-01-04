@@ -38,12 +38,7 @@ void Nipata_InitObj(Object *o) {
     o->hp = 5;
     o->type += 0x20;
     o->timer = 0x5e;
-    if (!o->direction) {
-        o->xSpeed = 0x20;
-    }
-    else {
-        o->xSpeed = 0xe0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x20 : -0x20;
     o->ySpeed = 0;
 }
 
@@ -122,15 +117,10 @@ void Nipata_Obj(Object *o) {
         o->type = OBJ_NONE;
         return;
     }
-    o->direction = 0;
+    o->direction = DIR_RIGHT;
     spr.x += 8;
     Sprite_DrawDir(&spr, o);
-    if (o->xSpeed >= 0) {
-        o->direction = 0;
-    }
-    else {
-        o->direction = 0x80;
-    }
+    o->direction = (o->xSpeed >= 0) ? DIR_RIGHT : DIR_LEFT;
     spr.x -= 8;
     Collision_Handle(o, &spr, COLLISION_SIZE_16X16, 8);
 }

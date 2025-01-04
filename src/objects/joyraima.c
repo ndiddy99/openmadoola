@@ -30,12 +30,7 @@ void Joyraima_InitObj(Object *o) {
     o->hp = 192;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 0x4;
-    }
-    else {
-        o->xSpeed = -0x4;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x4 : -0x4;
     o->ySpeed = 0;
 }
 
@@ -48,7 +43,7 @@ void Joyraima_Obj(Object *o) {
         o->stunnedTimer--;
     }
     o->timer++;
-    if (!o->direction) {
+    if (o->direction == DIR_RIGHT) {
         o->xSpeed += 0x1;
         o->xSpeed = MIN(o->xSpeed, 0x38);
     }
@@ -83,7 +78,7 @@ void Joyraima_Obj(Object *o) {
     spr.y -= 0x10;
     spr.tile -= 2;
     Sprite_Draw(&spr, o);
-    Uint8 xCursor = (!o->direction) ? 2 : 0;
+    Uint8 xCursor = (o->direction == DIR_RIGHT) ? 2 : 0;
     spr.x += joyraimaXOffsets[xCursor];
     xCursor++;
     spr.tile += 0x20;

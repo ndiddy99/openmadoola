@@ -1,5 +1,5 @@
-/* objects.h: object handler & utility functions
- * Copyright (c) 2023 Nathan Misner
+/* object.h: object handler & utility functions
+ * Copyright (c) 2023, 2025 Nathan Misner
  *
  * This file is part of OpenMadoola.
  *
@@ -99,6 +99,9 @@
 #define OBJ_WING_OF_MADOOLA	    (0x5C)
 #define OBJ_FIREBALL		    (0x5D)
 #define NUM_OBJECTS             (0x5E)
+
+#define DIR_LEFT 0x80
+#define DIR_RIGHT 0
 
 typedef struct {
     Uint8 direction; // nonzero = facing left, zero = facing right

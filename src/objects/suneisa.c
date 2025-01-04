@@ -43,12 +43,7 @@ void Suneisa_InitObj(Object *o) {
     o->hp = 128;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 0x20;
-    }
-    else {
-        o->xSpeed = 0xe0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x20 : -0x20;
     o->ySpeed = 0;
 }
 

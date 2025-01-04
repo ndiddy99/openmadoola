@@ -201,7 +201,7 @@ void Lucia_DyingObj(Object *o) {
         spr.size = SPRITE_16X16;
         spr.tile = 0x3E0;
         Sprite_SetDraw(&spr, o, 0, 0);
-        if (o->direction) {
+        if (o->direction == DIR_LEFT) {
             spr.x -= 16;
         }
         else {
@@ -575,7 +575,7 @@ updatePos:
     Uint8 directionBak = o->direction;
     if (o->type == OBJ_LUCIA_CLIMB) {
         // this does the climbing animation
-        o->direction = o->y.f.h & 1;
+        o->direction = (o->y.f.h & 1) ? DIR_LEFT : DIR_RIGHT;
     }
 
     // draw lower body sprite

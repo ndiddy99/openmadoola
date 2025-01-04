@@ -32,12 +32,12 @@ static int Enemy_InitLocation(Object *o) {
     o->x.v = cameraX.v + 0x80;
     // spawn on right side of screen
     if (RNG_Get() < 0x80) {
-        o->direction = 0x80;
+        o->direction = DIR_LEFT;
         o->x.f.h += (SCREEN_WIDTH / 16) - 1;
     }
     // spawn on left side of screen
     else {
-        o->direction = 0;
+        o->direction = DIR_RIGHT;
     }
     o->stunnedTimer = 0;
     // "randomly" pick a y value

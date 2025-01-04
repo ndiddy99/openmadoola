@@ -36,12 +36,7 @@ void YokkoChan_InitObj(Object *o) {
     o->hp = 1;
     o->type += 0x20;
     o->timer = 2;
-    if (!o->direction) {
-        o->xSpeed = 0xc;
-    }
-    else {
-        o->xSpeed = 0xf4;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0xc : -0xc;
     o->ySpeed = 0xb0;
 }
 

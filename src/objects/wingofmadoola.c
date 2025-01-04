@@ -29,7 +29,7 @@ void WingOfMadoola_Obj(Object *o) {
     Sprite spr = { 0 };
     spr.size = SPRITE_8X16;
 
-    o->direction = 0;
+    o->direction = DIR_RIGHT;
     o->stunnedTimer = 0;
     o->x.v = 0x3800;
     o->y.v = 0x3d80;

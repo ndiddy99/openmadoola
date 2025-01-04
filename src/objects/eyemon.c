@@ -28,12 +28,7 @@ void Eyemon_InitObj(Object *o) {
     OBJECT_CHECK_SPAWN(o);
     o->hp = 10;
     o->type += 0x20;
-    if (!o->direction) {
-        o->xSpeed = 0x10;
-    }
-    else {
-        o->xSpeed = 0xf0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x10 : -0x10;
     o->ySpeed = 0x10;
     o->timer = 0;
 }
@@ -42,12 +37,7 @@ void HyperEyemon_InitObj(Object *o) {
     OBJECT_CHECK_SPAWN(o);
     o->hp = 18;
     o->type = OBJ_EYEMON;
-    if (!o->direction) {
-        o->xSpeed = 0x20;
-    }
-    else {
-        o->xSpeed = 0xe0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x20 : -0x20;
     o->ySpeed = 0x20;
     o->timer = 0;
 }

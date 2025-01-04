@@ -29,13 +29,7 @@ void Dopipu_InitObj(Object *o) {
     o->type += 0x20;
     o->timer = 0;
     o->stunnedTimer = 0;
-    if (o->direction == 0) {
-        o->xSpeed = 0x10;
-    }
-    else {
-        o->xSpeed = 0xF0;
-    }
-
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x10 : -0x10;
     o->ySpeed = 0;
 }
 

@@ -231,10 +231,10 @@ void Object_IncCollisionY(Object *o) {
 
 void Object_SetDirection(Object *o) {
     if (o->xSpeed > 0) {
-        o->direction = 0;
+        o->direction = DIR_RIGHT;
     }
     else if (o->xSpeed < 0) {
-        o->direction = 0x80;
+        o->direction = DIR_LEFT;
     }
 }
 
@@ -383,11 +383,11 @@ void Object_ApplyGravity(Object *o) {
 void Object_FaceLucia(Object *o) {
     // face right if the object is behind lucia
     if (o->x.v < objects[0].x.v) {
-        o->direction = 0;
+        o->direction = DIR_RIGHT;
     }
     // face left if the object is in front of lucia
     else {
-        o->direction = 0x80;
+        o->direction = DIR_LEFT;
     }
 }
 

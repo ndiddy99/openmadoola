@@ -45,7 +45,7 @@ void Bospido_InitObj(Object *o) {
     o->hp = 255;
     o->type += 0x20;
     o->timer = 0;
-    o->xSpeed = (!o->direction) ? 0x30 : -0x30;
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x30 : -0x30;
     o->ySpeed = 0;
 }
 
@@ -101,7 +101,7 @@ void Bospido_Obj(Object *o) {
     spr.tile -= 2;
     Sprite_Draw(&spr, o);
 
-    if (!o->direction) { spr.x += 0x1c; }
+    if (o->direction == DIR_RIGHT) { spr.x += 0x1c; }
     else { spr.x -= 0x1c; }
     if (o->timer & 8) { spr.y += 0x10; }
     Collision_Handle(o, &spr, COLLISION_SIZE_16X16, 80);

@@ -72,7 +72,7 @@ Uint8 itemPalettes[] = {
 static void Item_SetCollected(Object *o);
 
 void Item_Obj(Object *o) {
-    o->direction = 0x80;
+    o->direction = DIR_LEFT;
     o->stunnedTimer = 0;
     // hp variable indicates the powerup type
     Sprite spr = { 0 };

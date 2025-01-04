@@ -33,12 +33,7 @@ void Biforce_InitObj(Object *o) {
     o->hp = 255;
     o->type += 0x20;
     o->timer = 0x54;
-    if (!o->direction) {
-        o->xSpeed = 0x10;
-    }
-    else {
-        o->xSpeed = -0x10;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x10 : -0x10;
     o->ySpeed = 0;
 }
 
@@ -79,10 +74,10 @@ static void Biforce_StandingObj(Object *o) {
             if (!(o->timer & 0x3f)) {
                 Object_MoveTowardsLucia(o);
                 o->timer = 0x3f;
-                o->xSpeed = (!o->direction) ? -0x10 : 0x10;
+                o->xSpeed = (o->direction == DIR_RIGHT) ? -0x10 : 0x10;
             }
             else {
-                o->xSpeed += (!o->direction) ? 0x4 : -0x4;
+                o->xSpeed += (o->direction == DIR_RIGHT) ? 0x4 : -0x4;
             }
         }
         else {
@@ -122,7 +117,7 @@ static void Biforce_StandingObj(Object *o) {
     spr.y += 0x10;
     Sprite_Draw(&spr, o);
     spr.y += 0x10;
-    spr.x += (!o->direction) ? -0x18 : 0x18;
+    spr.x += (o->direction == DIR_RIGHT) ? -0x18 : 0x18;
     if (!(o->timer & 0x4)) {
         spr.tile = 0x2b4;
     }
@@ -131,7 +126,7 @@ static void Biforce_StandingObj(Object *o) {
     }
     Sprite_Draw(&spr, o);
     spr.y -= 0x20;
-    spr.x += (!o->direction) ? 0xc : -0x1c;
+    spr.x += (o->direction == DIR_RIGHT) ? 0xc : -0x1c;
     Collision_Handle(o, &spr, COLLISION_SIZE_16X32, 80);
 }
 
@@ -164,14 +159,14 @@ static void Biforce_CrawlingObj(Object *o) {
             o->ySpeed = Biforce_CrawlingSpeed(o->y, luciaYPos);
             if (o->y.f.h >= luciaYPos.f.h) { o->ySpeed = -o->ySpeed; }
             o->xSpeed = Biforce_CrawlingSpeed(o->x, luciaXPos);
-            if (o->direction) { o->xSpeed = -o->xSpeed; }
+            if (o->direction == DIR_LEFT) { o->xSpeed = -o->xSpeed; }
             o->timer--;
             if (!o->timer) { o->timer = 0x68; }
             Object_MoveTowardsLucia(o);
             Object_CalcXYPos(o);
         }
         else {
-            o->xSpeed = (!o->direction) ? -0x20 : 0x20;
+            o->xSpeed = (o->direction == DIR_RIGHT) ? -0x20 : 0x20;
             o->ySpeed = -0x18;
             o->timer--;
             if (!(o->timer & 0x3f)) {
@@ -205,6 +200,6 @@ static void Biforce_CrawlingObj(Object *o) {
     spr.y -= 0x10;
     Sprite_Draw(&spr, o);
 
-    spr.x += (!o->direction) ? -0xc : 0xc;
+    spr.x += (o->direction == DIR_RIGHT) ? -0xc : 0xc;
     Collision_Handle(o, &spr, COLLISION_SIZE_16X32, 80);
 }

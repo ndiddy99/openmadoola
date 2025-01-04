@@ -44,12 +44,7 @@ void Bunyon_InitObj(Object *o) {
     OBJECT_CHECK_SPAWN(o);
     o->hp = 160;
     o->type++;
-    if (!o->direction) {
-        o->xSpeed = 0x14;
-    }
-    else {
-        o->xSpeed = 0xec;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x14 : -0x14;
     o->ySpeed = 0;
     o->timer = 0;
 }
@@ -81,7 +76,7 @@ void Bunyon_Obj(Object *o) {
     }
     Sprite spr = { 0 };
     spr.palette = 2;
-    if (!Sprite_SetDrawLarge(&spr, o, bunyonTiles, bunyonOffsets, o->direction ? 0 : -16, 0)) {
+    if (!Sprite_SetDrawLarge(&spr, o, bunyonTiles, bunyonOffsets, (o->direction == DIR_LEFT) ? 0 : -16, 0)) {
         goto eraseObj;
     }
 
@@ -143,7 +138,7 @@ void Bunyon_SplitObj(Object *o) {
         return;
     }
 
-    o->direction = 0x80;
+    o->direction = DIR_LEFT;
     Sprite spr = { 0 };
     spr.size = SPRITE_16X16;
     spr.palette = 2;
@@ -152,7 +147,7 @@ void Bunyon_SplitObj(Object *o) {
         o->type = OBJ_NONE;
         return;
     }
-    o->direction = 0;
+    o->direction = DIR_RIGHT;
     spr.x += 0x10;
     Sprite_DrawDir(&spr, o);
     spr.y += 0x10;
@@ -196,14 +191,14 @@ typedef struct {
 } BUNYON_SPLIT_T;
 
 BUNYON_SPLIT_T bunyonSplits[] = {
-    {0xff00, 0xff00, 0x80, 0xe8},
-    {0xff00, 0x0000, 0x80, 0xe8},
-    {0x0000, 0xff00, 0x00, 0x18},
-    {0x0000, 0x0000, 0x00, 0x18},
-    {0xffbf, 0xffbf, 0x80, 0xe4},
-    {0xffbf, 0x0000, 0x80, 0xe4},
-    {0x0000, 0xffbf, 0x00, 0x1c},
-    {0x0000, 0x0000, 0x00, 0x1c},
+    {0xff00, 0xff00, DIR_LEFT,  0xe8},
+    {0xff00, 0x0000, DIR_LEFT,  0xe8},
+    {0x0000, 0xff00, DIR_RIGHT, 0x18},
+    {0x0000, 0x0000, DIR_RIGHT, 0x18},
+    {0xffbf, 0xffbf, DIR_LEFT,  0xe4},
+    {0xffbf, 0x0000, DIR_LEFT,  0xe4},
+    {0x0000, 0xffbf, DIR_RIGHT, 0x1c},
+    {0x0000, 0x0000, DIR_RIGHT, 0x1c},
 };
 
 static void Bunyon_HandleSplit(Object *parent, int index, int count) {

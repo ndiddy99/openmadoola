@@ -29,17 +29,12 @@ void Gaguzul_InitObj(Object *o) {
     o->hp = 192;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 0x18;
-    }
-    else {
-        o->xSpeed = 0xe8;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x18 : -0x18;
     o->ySpeed = 0;
 }
 
 static Sint8 xOffsets[] = {
-    0x10, 0xf0, 0xf0, 0x10,
+    0x10, -0x10, -0x10, 0x10,
 };
 
 void Gaguzul_Obj(Object *o) {
@@ -94,7 +89,7 @@ void Gaguzul_Obj(Object *o) {
     Sprite_Draw(&spr, o);
     Uint8 offsetCursor = 0;
     // upper right tile
-    if (!o->direction) {
+    if (o->direction == DIR_RIGHT) {
         offsetCursor = 2;
     }
     spr.x += xOffsets[offsetCursor];

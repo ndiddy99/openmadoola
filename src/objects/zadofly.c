@@ -31,12 +31,7 @@ void Zadofly_InitObj(Object *o) {
     o->hp = 128;
     o->type += 0x20;
     o->timer = 1;
-    if (!o->direction) {
-        o->xSpeed = 0x26;
-    }
-    else {
-        o->xSpeed = 0xda;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x26 : -0x26;
     o->ySpeed = 0;
 }
 
@@ -137,7 +132,7 @@ doneSetPos:
     else {
         spr.tile = 0xf8;
     }
-    if (!o->direction) {
+    if (o->direction == DIR_RIGHT) {
         spr.x -= 0xc;
         Sprite_Draw(&spr, o);
         spr.x += 0xc;

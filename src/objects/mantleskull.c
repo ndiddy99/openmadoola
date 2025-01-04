@@ -29,12 +29,7 @@ void MantleSkull_InitObj(Object *o) {
     o->hp = 80;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 0x18;
-    }
-    else {
-        o->xSpeed = 0xe8;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x18 : -0x18;
     o->ySpeed = 0;
 }
 

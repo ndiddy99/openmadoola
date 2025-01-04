@@ -37,12 +37,7 @@ void Peraskull_InitObj(Object *o) {
     o->hp = 25;
     o->type += 0x20;
     o->timer = 0x4c;
-    if (!o->direction) {
-        o->xSpeed = 0x10;
-    }
-    else {
-        o->xSpeed = 0xf0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x10 : -0x10;
     o->ySpeed = 0;
 }
 

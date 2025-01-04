@@ -29,12 +29,7 @@ void Spajyan_InitObj(Object *o) {
     o->hp = 3;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 8;
-    }
-    else {
-        o->xSpeed = 0xf8;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x8 : -0x8;
     o->ySpeed = 0x80;
 }
 

@@ -28,12 +28,7 @@ void Nishiga_InitObj(Object *o) {
     o->hp = 8;
     o->type += 0x20;
     o->timer = 0;
-    if (!o->direction) {
-        o->xSpeed = 0x20;
-    }
-    else {
-        o->xSpeed = 0xE0;
-    }
+    o->xSpeed = (o->direction == DIR_RIGHT) ? 0x20 : -0x20;
     o->ySpeed = 0;
 }
 
